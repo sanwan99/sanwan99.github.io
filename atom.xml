@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="/"/>
-  <updated>2020-07-24T01:15:48.079Z</updated>
+  <updated>2020-07-24T03:19:58.847Z</updated>
   <id>/</id>
   
   <author>
@@ -17,11 +17,11 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>Jquery01</title>
-    <link href="/Jquery/"/>
-    <id>/Jquery/</id>
-    <published>2020-07-24T00:49:00.000Z</published>
-    <updated>2020-07-24T01:15:48.079Z</updated>
+    <title>关于git提交方面的报错</title>
+    <link href="/%E5%85%B3%E4%BA%8Egit%E6%8F%90%E4%BA%A4%E6%96%B9%E9%9D%A2%E7%9A%84%E6%8A%A5%E9%94%99/"/>
+    <id>/关于git提交方面的报错/</id>
+    <published>2020-07-24T03:12:00.000Z</published>
+    <updated>2020-07-24T03:19:58.847Z</updated>
     
     <summary type="html">
     
@@ -29,7 +29,33 @@
       
         
         
-          &lt;h2 id=&quot;1-1-jQuery-介绍&quot;&gt;&lt;a href=&quot;#1-1-jQuery-介绍&quot; class=&quot;headerlink&quot; title=&quot;1.1. jQuery 介绍&quot;&gt;&lt;/a&gt;1.1. jQuery 介绍&lt;/h2&gt;&lt;h3
+          &lt;p&gt;今天在公司搭hexo环境，发现了hexo d的时候一直报错，差了很多相关的资料发现是公钥的问题，以下是解决方案&lt;/p&gt;
+&lt;h1 id=&quot;只适用于只有一个git环境&quot;&gt;&lt;a href=&quot;#只适用于只有一个git环境&quot; class=&quot;headerlink&quot;
+        
+      
+    
+    </summary>
+    
+      <category term="技术" scheme="/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>Jquery01</title>
+    <link href="/Jquery/"/>
+    <id>/Jquery/</id>
+    <published>2020-07-24T00:49:00.000Z</published>
+    <updated>2020-07-24T03:21:26.749Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;p&gt;来公司实习摸鱼了一周了，最近组长给我分配了个任务让我写h5的页面，前段相关的内容没怎么深入了解，最近在看jquery的视频，记录下相关笔记。&lt;/p&gt;
+&lt;h2 id=&quot;1-1-jQuery-介绍&quot;&gt;&lt;a href=&quot;#1-1-jQuery-介绍&quot;
         
       
     
@@ -482,31 +508,6 @@
     </summary>
     
       <category term="Java" scheme="/categories/Java/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>测试背景图</title>
-    <link href="/%E6%B5%8B%E8%AF%95%E8%83%8C%E6%99%AF%E5%9B%BE/"/>
-    <id>/测试背景图/</id>
-    <published>2020-05-11T05:34:59.000Z</published>
-    <updated>2020-05-11T12:46:20.000Z</updated>
-    
-    <summary type="html">
-    
-      
-      
-        
-        
-          &lt;p&gt;真让人无语呀&lt;/p&gt;
-
-        
-      
-    
-    </summary>
-    
-      <category term="技术" scheme="/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
   </entry>

@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  
+  <title itemprop="name">http小结 | Sanwan</title>
+  
+    <link rel="shortcut icon" href="/images/favicon.ico">
+  
+  <meta http-equiv="x-dns-prefetch-control" content="on">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+SerifMerriweather|Merriweather+Sans|Source+Code+Pro|Ubuntu:400,700|Noto+Serif+SC" media="all">
+  <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
+  <link rel="stylesheet" id="saukra_css-css" href="/css/style.css" type="text/css" media="all">
+  <link rel="stylesheet" href="/css/lib.min.css" media="all">
+  <link rel="stylesheet" href="/css/font.css" media="all">
+  <link rel="stylesheet" href="/css/insight.css" media="all">
+  <link rel="stylesheet" href="/css/jquery.fancybox.min.css" media="all">
+  <link rel="stylesheet" href="/css/zoom.css" media="all">
+  <link rel="stylesheet" type="text/css" href="/css/sharejs.css">
+<!--   <link rel="stylesheet" id="saukra_css-css" href="https://2heng.xin/wp-content/cache/autoptimize/css/autoptimize_ad42a61f4c7d4bdd9f91afcff6b5dda5.css
+" type="text/css" media="all"> -->
+  <script>
+  /*Initial Variables*/
+  var mashiro_option = new Object();
+  var mashiro_global = new Object();
+  mashiro_option.NProgressON = true;
+  /* 
+   * 邮箱信息之类的东西可以填在这里，这些js变量基本都作用于sakura-app.js
+   * 这样的设置仅是为了方便在基于PHP开发的主题中设置js变量，既然移植到了Node上，我想或许可以精简这一逻辑吧
+   */
+  mashiro_option.email_domain = "";
+  mashiro_option.email_name = "";
+  mashiro_option.cookie_version_control = "";
+  mashiro_option.qzone_autocomplete = false;
+  mashiro_option.site_name = "帅气的三万";
+  mashiro_option.author_name = "三万";
+  mashiro_option.site_url = "https://sakura.sanwan99.cn";
+  mashiro_option.v_appId = "YNsapdWTGuiurNqoV8eJHlsI-gzGzoHsz";
+  mashiro_option.v_appKey = "JDannM5I5JMu49IKfVkscmIe";
+  mashiro_option.mathjax = "0";
+  mashiro_option.qq_api_url = "https://api.mashiro.top/qqinfo/"; 
+  mashiro_option.qq_avatar_api_url = "https://api.mashiro.top/qqinfo/";
+
+  // mashiro_option.jsdelivr_css_src = "https://cdn.jsdelivr.net/gh/moezx/cdn@3.4.5/css/lib.min.css";
+  // mashiro_option.float_player_on = true;
+
+  /*End of Initial Variables*/
+  </script>
+  <script type="text/javascript">
+  var bg = "https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/1.jpg,https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/2.jpg,https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/3.jpg,https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/4.jpg,https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/5.jpg,https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/6.jpg,https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/7.jpg,https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/8.jpg,https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/9.jpg,https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/10.jpg,https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/11.jpg,https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/12.jpg,https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/13.jpg,https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/14.jpg,https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/15.jpg,https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/16.jpg,https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/17.jpg,https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/18.jpg,https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/19.jpg,https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/20.jpg,https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/21.jpg,https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/22.jpg,https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/23.jpg,https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/24.jpg,https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/25.jpg,https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/26.jpg,https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/27.jpg,https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/28.jpg,https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/1.png,https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/2.png,https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/3.png,https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/4.png,https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/5.png,https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/6.png,https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/7.png,https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/8.png,https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/9.png,https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/10.png,https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/11.png,https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/12.png,https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/13.png".split(",");
+  var bgindex = Math.floor(Math.random()*bg.length);
+  if (!!window.ActiveXObject || "ActiveXObject" in window) { //is IE?
+    alert('朋友，IE浏览器未适配哦~');
+  }
+  </script>
+  <style type="text/css">
+  .hljs-ln{border-collapse:collapse}.hljs-ln td{padding:0}.hljs-ln-n:before{content:attr(data-line-number)}
+  </style>
+  <style type="text/css">.site-top .lower nav{display:block !important;}.author-profile i,.post-like a,.post-share .show-share,.sub-text,.we-info a,span.sitename,.post-more i:hover,#pagination a:hover,.post-content a:hover,.float-content i:hover{color:#FE9600}.feature i,.download,.navigator i:hover,.links ul li:before,.ar-time i,span.ar-circle,.object,.comment .comment-reply-link,.siren-checkbox-radio:checked + .siren-checkbox-radioInput:after{background:#FE9600}::-webkit-scrollbar-thumb{background:#FE9600}.download,.navigator i:hover,.link-title,.links ul li:hover,#pagination a:hover,.comment-respond input[type='submit']:hover{border-color:#FE9600}.entry-content a:hover,.site-info a:hover,.comment h4 a,#comments-navi a.prev,#comments-navi a.next,.comment h4 a:hover,.site-top ul li a:hover,.entry-title a:hover,#archives-temp h3,span.page-numbers.current,.sorry li a:hover,.site-title a:hover,i.iconfont.js-toggle-search.iconsearch:hover,.comment-respond input[type='submit']:hover{color:#FE9600}.comments .comments-main{display:block !important;}.comments .comments-hidden{display:none !important;}background-position:center center;background-attachment:inherit;}
+  </style>
+</head>
+</html>
+<body class="page-template page-template-user page-template-page-analytics page-template-userpage-analytics-php page page-id-1297 chinese-font serif isWebKit">
+  <div class="scrollbar" id="bar">
+  </div>
+  <a href="#" class="cd-top faa-float animated"></a>
+  <section id="main-container">
+    <div class="headertop ">
+  <div id="banner_wave_1"></div>
+  <div id="banner_wave_2"></div>
+  <figure id="centerbg" class="centerbg">
+    <div class="focusinfo no-select">
+      <div class="header-tou">
+        <a href="https://sakura.sanwan99.cn">
+          <img src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.1/img/custom/touxiang.jpg">
+        </a>
+      </div>
+      <div class="header-info">
+        <p>在虚幻世界中寻找真实感的人脑子一定有问题</p>
+        <div class="top-social_v2">
+          <li id="bg-pre">
+            <img class="flipx" src="https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/other/next-b.svg">
+          </li>
+          
+            
+              
+                <li>
+                  <a href="http://github.com/sanwan99" target="_blank" class="social-github" title="github">
+                    <img src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.1/img/social/github.png">
+                  </a>
+                </li>
+              
+            
+          
+          <li id="bg-next">
+            <img src="https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/other/next-b.svg">
+          </li>
+        </div>
+      </div>
+    </div>
+  </figure>
+  <div id="video-container" style="">
+    <video style="object-fit: fill" id="bgvideo" class="video" video-name="" src="" width="auto" preload="auto">
+    </video>
+    <div id="video-btn" class="loadvideo videolive">
+    </div>
+    <div id="video-add">
+    </div>
+    <div class="video-stu">
+    </div>
+  </div>
+  <div class="headertop-down faa-float animated" onclick="headertop_down()">
+    <span>
+      <i class="fa fa-chevron-down" aria-hidden="true">
+      </i>
+    </span>
+  </div>
+</div>
+    <div id="page" class="site wrapper">
+      <header class="site-header no-select gizle sabit" role="banner">
+  <div class="site-top">
+    <div class="site-branding">
+      <span class="site-title">
+        <span class="logolink moe-mashiro">
+          <a href="/">
+            <span class="sakurasono">帅气的</span>
+            <span class="shironeko">三万</span>
+          </a>
+        </span>
+      </span>
+    </div>
+    <div class="searchbox search-form-submit">
+      <i class="iconfont js-toggle-search iconsearch icon-search">
+      </i>
+    </div>
+    <div id="show-nav" class="showNav mobile-fit">
+      <div class="line line1">
+      </div>
+      <div class="line line2">
+      </div>
+      <div class="line line3">
+      </div>
+    </div>
+    <div class="lower-cantiner">
+      <div class="lower">
+        <nav class="mobile-fit-control hide">
+          <ul id="menu-new" class="menu">
+            
+              <li>
+                <a href="/">
+                  <span class="faa-parent animated-hover">
+                    <i class="fa  fa-fort-awesome faa-shake" aria-hidden="true"></i>
+                    首页
+                  </span>
+                </a>
+                
+              </li>
+            
+              <li>
+                <a href="/archives">
+                  <span class="faa-parent animated-hover">
+                    <i class="fa  fa-archive faa-shake" aria-hidden="true"></i>
+                    归档
+                  </span>
+                </a>
+                
+                  <ul class="sub-menu">
+                    
+                      <li>
+                        <a href="/categories/技术/">
+                          <i class="fa fa-code" aria-hidden="true"></i>
+                          技术
+                        </a>
+                      </li>
+                    
+                      <li>
+                        <a href="/categories/Java/">
+                          <i class="fa fa-file-text-o" aria-hidden="true"></i>
+                          Java
+                        </a>
+                      </li>
+                    
+                      <li>
+                        <a href="/categories/数据库/">
+                          <i class="fa fa-cloud-download" aria-hidden="true"></i>
+                          数据库
+                        </a>
+                      </li>
+                    
+                      <li>
+                        <a href="/categories/数据结构/">
+                          <i class="fa fa-commenting-o" aria-hidden="true"></i>
+                          数据结构
+                        </a>
+                      </li>
+                    
+                      <li>
+                        <a href="/categories/配置/">
+                          <i class="fa fa-book" aria-hidden="true"></i>
+                          配置
+                        </a>
+                      </li>
+                    
+                  </ul>
+                
+              </li>
+            
+              <li>
+                <a href="javascript:;">
+                  <span class="faa-parent animated-hover">
+                    <i class="fa  fa-list-ul faa-vertical" aria-hidden="true"></i>
+                    清单
+                  </span>
+                </a>
+                
+                  <ul class="sub-menu">
+                    
+                      <li>
+                        <a href="/bangumi/">
+                          <i class="fa fa-film faa-vertical" aria-hidden="true"></i>
+                          番组
+                        </a>
+                      </li>
+                    
+                      <li>
+                        <a href="/music/">
+                          <i class="fa fa-headphones" aria-hidden="true"></i>
+                          歌单
+                        </a>
+                      </li>
+                    
+                  </ul>
+                
+              </li>
+            
+              <li>
+                <a href="/comment/">
+                  <span class="faa-parent animated-hover">
+                    <i class="fa  fa-pencil-square-o faa-tada" aria-hidden="true"></i>
+                    留言板
+                  </span>
+                </a>
+                
+              </li>
+            
+              <li>
+                <a href="/">
+                  <span class="faa-parent animated-hover">
+                    <i class="fa  fa-leaf faa-wrench" aria-hidden="true"></i>
+                    关于
+                  </span>
+                </a>
+                
+                  <ul class="sub-menu">
+                    
+                      <li>
+                        <a href="/about/">
+                          <i class="fa fa-meetup" aria-hidden="true"></i>
+                          我？
+                        </a>
+                      </li>
+                    
+                  </ul>
+                
+              </li>
+            
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <link rel="stylesheet" type="text/css" href="/css/sharejs.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css">
+<div class="pattern-center-blank"></div>
+
+  <div class="pattern-center single-center">
+    <!-- 有配图默认渲染第一张 -->
+    <div class="pattern-attachment-img lazyload" style="background-image: url(https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/26.jpg);" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.1/img/loader/orange.progress-bar-stripe-loader.svg" data-src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/26.jpg">
+    </div>
+    <header class="pattern-header single-header">
+      <h1 class="entry-title">
+      http小结</h1>
+      <p class="entry-census">
+        <span>
+          <a href="sanwan99.cn">
+            <img src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.2/img/custom/touxiang.jpg">
+          </a>
+        </span>
+        <span>
+          <a href="sanwan99.cn">三万</a>
+        </span>
+        <span class="bull">
+        ·</span>
+        2020-5-19<span class="bull">
+        ·</span>
+      <span id="busuanzi_value_page_pv"></span>次阅读</p>
+    </header>
+  </div>
+
+<div id="content" class="site-content">
+  <div id="primary" class="content-area">
+    <main id="main" class="site-main" role="main">
+      <article id="post-1" class="post-1 post type-post status-publish format-standard has-post-thumbnail hentry category-uncategorized">
+        <div class="toc"></div>
+        <!--<div class="toc-entry-content"><!-- 套嵌目录使用（主要为了支援评论）-->
+        
+        <div class="entry-content">
+          <h2 id="http-1-0"><a href="#http-1-0" class="headerlink" title="http 1.0"></a>http 1.0</h2><ul>
+<li><p><strong>HTTP 1.0中，每一个请求都要开一个连接，请求结束，断开连接。这样的协议有两个问题</strong></p>
+<p> （1）性能问题：每次请求都打开一个新的连接，因为连接数有限，而且连接的建立和断开都很耗时（可能一个页面就会有几十个请求）。<br> （2）服务器推送问题：服务器无法主动向客户端推送消息。</p>
+</li>
+<li><p><strong>Keep-Alive机制</strong></p>
+<p>为了解决一个请求完成后连接立即断开的问题，引入了Keep-Alive（保持心跳）机制。客户端在HTTP请求头部加上一个字段Connection：Keep-Alive。服务器端收到带有这样的字段的请求后，会维护一个Keep-Alive timeout参数，服务器在处理完请求后，不会立即断开连接，而是会保持连接，如果在timeout时间内都没有新的请求，那么服务器才会关闭这个连接。</p>
+</li>
+</ul>
+<h2 id="http-1-1"><a href="#http-1-1" class="headerlink" title="http 1.1"></a>http 1.1</h2><ul>
+<li><p><strong>连接复用机制</strong></p>
+<p>HTTP 1.1将连接复用变成了默认的了，就算不设置字段Connection：Keep-Alive，请求完后也不会立即关闭连接。要想连接不复用，需要设置字段Connection：Close。</p>
+</li>
+<li><p><strong>Pipeline和Head-of-line Blocking（队头阻塞）问题 </strong></p>
+<p>为了让请求变为并发，引入了Pipeline机制，使得一个请求发出之后，在未收到响应之前，可以立即发送第二个请求。但是这里有个致命的问题，也就是Head-of-line Blocking（队头阻塞）问题。虽然Pipeline机制可以让请求并发，但是为了让请求和响应能配对，响应并不能并发。返回的响应需要按照先进先出的（类似队列）的顺序，所以如果第一个响应由于某些原因，会导致后面的响应会被阻塞。</p>
+</li>
+<li><p><strong>服务器推送</strong></p>
+<p>客户端定期轮询：客户端每隔一段时间向服务器发送一个请求，如果服务器有消息就返回（效率较低，不建议）。<br>WebSocket：这是一种基于TCP的可全双工通信的协议，可实现服务器主动推送。<br>HTTP长轮询：保持一个HTTP长连接，如果服务器有新消息，就返回。如果在约定的时间还没有消息，服务器就返回一个空消息，然后客户端关闭该连接，再发起一个新的连接。</p>
+</li>
+</ul>
+<h2 id="http-2"><a href="#http-2" class="headerlink" title="http 2"></a>http 2</h2><ul>
+<li><p><strong>与HTTP 1.1兼容</strong></p>
+<p>由于HTTP 1.1的应用已成主流，所以想要替代它几乎不可能，所以只能向它兼容。其实HTTP/2与HTTP1.1并不是平级的，HTTP/2是介于HTTP1.1与TCP之间的一个转换层。</p>
+</li>
+<li><p><strong>二进制分帧</strong></p>
+<p>为了解决队头阻塞的问题，HTTP/2将一个请求的报文转换成二进制并分成多个帧来进行传输。由于请求和响应都可以乱序的发送，所以需要给每个请求或响应带上一个ID，好让他们匹配。二进制分帧其实并没有完全解决队头阻塞的问题，它只是把这个问题转移到了TCP层面（只要使用TCP协议，为了保证可靠性，采用先进先出，就一定会有队头阻塞的问题）。如果想要彻底解决队头阻塞的问题，只能不使用TCP协议，那就是Google提出的QUIC协议。</p>
+</li>
+</ul>
+<h2 id="请求和响应报文"><a href="#请求和响应报文" class="headerlink" title="请求和响应报文"></a>请求和响应报文</h2><p><strong>请求报文</strong></p>
+<p><img src="\images/pasted-15.png" alt="upload successful"></p>
+<p><strong>响应报文</strong></p>
+<p><img src="\images/pasted-18.png" alt="upload successful"></p>
+<p><strong>请求行</strong></p>
+<p><img src="\images/pasted-17.png" alt="upload successful"><br><strong>响应状态行</strong></p>
+<p><strong>响应行</strong>：    HTTP协议    状态码    状态码描述</p>
+<p><strong>头部</strong></p>
+<ul>
+<li>Host：Host 表示的是对象所在的主机</li>
+<li>User-agent: 这是请求头用来告诉 Web 服务器，浏览器使用的类型是 Mozilla/4.0</li>
+<li>Accept-language 告诉 Web 服务器，浏览器想要得到对象的语法版本，前提是服务器需要支持法语类型，否则将会发送服务器的默认版本</li>
+<li>Date：Date 是一个通用标头，它可以出现在请求标头和响应标头中，表示的是格林威治标准时间，这个时间要比北京时间慢八个小时</li>
+<li>Content-Length：实体报头指示实体主体的大小，以字节为单位，发送到接收方。</li>
+<li>Content-Encoding：个实体报头用来压缩媒体类型。Content-Encoding 指示对实体应用了何种编码。常见的内容编码有这几种： gzip、compress、deflate、identity ，这个属性可以应用在请求报文和响应报文中</li>
+</ul>
+<h2 id="HTTP-请求-URL"><a href="#HTTP-请求-URL" class="headerlink" title="HTTP 请求 URL"></a>HTTP 请求 URL</h2><p> HTTP 协议使用 URI 定位互联网上的资源。正是因为 URI 的特定功能，在互联网上任意位置的资源都能访问到。URL 带有请求对象的标识符。在上面的例子中，浏览器正在请求对象 /somedir/page.html 的资源。<br>  比如<a href="http://www.example.com:80/path/to/myfile.htmlkey1=value1&amp;key2=value2#SomewhereInTheDocument" target="_blank" rel="noopener">http://www.example.com:80/path/to/myfile.htmlkey1=value1&amp;key2=value2#SomewhereInTheDocument</a> 这个 URL </p>
+<p><img src="/images/pasted-19.png" alt="upload successful"><br>http://告诉浏览器使用何种协议。对于大部分 Web 资源，通常使用 HTTP 协议或其安全版本，HTTPS 协议。另外，浏览器也知道如何处理其他协议。</p>
+<p><img src="/images/pasted-20.png" alt="upload successful"><br><a href="http://www.example.com" target="_blank" rel="noopener">www.example.com</a> 既是一个域名，也代表管理该域名的机构。它指示了需要向网络上的哪一台主机发起请求。当然，也可以直接向主机的 IP address 地址发起请求。但直接使用 IP 地址的场景并不常见。</p>
+<p><img src="\images/pasted-21.png" alt="upload successful"><br>我们前面说到，两个主机之间要发起 TCP 连接需要两个条件，主机 + 端口。它表示用于访问 Web 服务器上资源的入口。如果访问的该 Web 服务器使用HTTP协议的标准端口（HTTP为80，HTTPS为443）授予对其资源的访问权限，则通常省略此部分。否则端口就是 URI 必须的部分。</p>
+<p><img src="\images/pasted-26.png" alt="upload successful"><br>/path/to/myfile.html 是 Web 服务器上资源的路径。以端口后面的第一个 / 开始，到 ? 号之前结束，中间的 每一个/ 都代表了层级（上下级）关系。这个 URL 的请求资源是一个 html 页面。</p>
+<p><img src="\images/pasted-27.png" alt="upload successful"><br>?key1=value1&amp;key2=value2 是提供给 Web 服务器的额外参数。如果是 GET 请求，一般带有请求 URL 参数，如果是 POST 请求，则不会在路径后面直接加参数。这些参数是用 &amp; 符号分隔的键/值对列表。key1 = value1 是第一对，key2 = value2 是第二对参数</p>
+<p><img src="\images/pasted-28.png" alt="upload successful"></p>
+<p>#SomewhereInTheDocument 是资源本身的某一部分的一个锚点。锚点代表资源内的一种“书签”，它给予浏览器显示位于该“加书签”点的内容的指示。 例如，在HTML文档上，浏览器将滚动到定义锚点的那个点上；在视频或音频文档上，浏览器将转到锚点代表的那个时间。值得注意的是 # 号后面的部分，也称为片段标识符，永远不会与请求一起发送到服务器。</p>
+<h1 id="HTTP-优缺点"><a href="#HTTP-优缺点" class="headerlink" title="HTTP 优缺点"></a>HTTP 优缺点</h1><h2 id="HTTP-的优点"><a href="#HTTP-的优点" class="headerlink" title="HTTP 的优点"></a>HTTP 的优点</h2><ul>
+<li><p><strong>简单灵活易扩展</strong><br>HTTP 最重要也是最突出的优点是 简单、灵活、易于扩展。</p>
+<p>HTTP 的协议比较简单，它的主要组成就是 header + body，头部信息也是简单的文本格式，而且 HTTP 的请求报文根据英文也能猜出来个大概的意思，降低学习门槛，能够让更多的人研究和开发 HTTP 应用。</p>
+<p>所以，在简单的基础上，HTTP 协议又多了灵活 和 易扩展 的优点。</p>
+<p>HTTP 协议里的请求方法、URI、状态码、原因短语、头字段等每一个核心组成要素都没有被制定死，允许开发者任意定制、扩充或解释，给予了浏览器和服务器最大程度的信任和自由。</p>
+</li>
+<li><p><strong>应用广泛、环境成熟</strong><br>因为过于简单，普及，因此应用很广泛。因为 HTTP 协议本身不属于一种语言，它并不限定某种编程语言或者操作系统，所以天然具有跨语言、跨平台的优越性。而且，因为本身的简单特性很容易实现，所以几乎所有的编程语言都有 HTTP 调用库和外围的开发测试工具。</p>
+<p>随着移动互联网的发展， HTTP 的触角已经延伸到了世界的每一个角落，从简单的 Web 页面到复杂的 JSON、XML 数据，从台式机上的浏览器到手机上的各种 APP、新闻、论坛、购物、手机游戏，你很难找到一个没有使用 HTTP 的地方。</p>
+</li>
+<li><p><strong>无状态</strong><br>无状态其实既是优点又是缺点。因为服务器没有记忆能力，所以就不需要额外的资源来记录状态信息，不仅实现上会简单一些，而且还能减轻服务器的负担，能够把更多的 CPU 和内存用来对外提供服务。</p>
+</li>
+</ul>
+<h2 id="HTTP-的缺点"><a href="#HTTP-的缺点" class="headerlink" title="HTTP 的缺点"></a>HTTP 的缺点</h2><ul>
+<li><p><strong>无状态</strong><br>既然服务器没有记忆能力，它就无法支持需要连续多个步骤的事务操作。每次都得问一遍身份信息，不仅麻烦，而且还增加了不必要的数据传输量。由此出现了 Cookie 技术。</p>
+</li>
+<li><p><strong>明文</strong><br>HTTP 协议里还有一把优缺点一体的双刃剑，就是明文传输。明文意思就是协议里的报文（准确地说是 header 部分）不使用二进制数据，而是用简单可阅读的文本形式。</p>
+<p>对比 TCP、UDP 这样的二进制协议，它的优点显而易见，不需要借助任何外部工具，用浏览器、Wireshark 或者 tcpdump 抓包后，直接用肉眼就可以很容易地查看或者修改，为我们的开发调试工作带来极大的便利。</p>
+<p>当然缺点也是显而易见的，就是不安全，可以被监听和被窥探。因为无法判断通信双方的身份，不能判断报文是否被更改过。</p>
+</li>
+<li><p><strong>性能</strong><br>HTTP 的性能不算差，但不完全适应现在的互联网，还有很大的提升空间。</p>
+</li>
+</ul>
+
+        </div>
+        <!-- .entry-content -->
+        <div class="single-reward">
+          <div class="reward-open">赏
+            <div class="reward-main">
+              <ul class="reward-row">
+                <li class="alipay-code"><img src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.1/img/custom/donate/AliPayQR1.jpg"></li>
+                <li class="wechat-code"><img src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.1/img/custom/donate/WeChanQR1.jpg"></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div style="text-align:center; width: 100%" class="social-share share-mobile" data-disabled="diandian, tencent"></div>
+        <footer class="post-footer">
+          <div class="post-lincenses"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="nofollow"><i class="fa fa-creative-commons" aria-hidden="true"></i> 知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议</a></div>
+          <div class="post-tags">
+          </div>
+          <div class="post-share">
+            <div class="social-share sharehidden share-component"></div>
+            <i class="iconfont show-share icon-forward"></i>
+          </div>
+        </footer><!-- .entry-footer -->
+      </article>
+      <!-- #post-## -->
+      <div class="toc" style="background: none;"></div>
+      <section class="post-squares nextprev">
+        
+          
+            <div class="post-nepre half previous">
+          
+            <a href="/排序/" rel="prev">
+              <div class="background">
+                <img class="lazyload" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.1/img/loader/orange.progress-bar-stripe-loader.svg" data-src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/25.jpg" style="width: 100%; height: 100%; object-fit: cover; pointer-events: none;" onerror="imgError(this,3)" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/25.jpg">
+              </div>
+              <span class="label">
+              Previous Post</span>
+              <div class="info">
+                <h3>
+                排序</h3>
+                <hr>
+              </div>
+            </a>
+          </div>
+        
+        
+          
+            <div class="post-nepre half next">
+          
+            <a href="/String-trim-理解/" rel="next">
+              <div class="background">
+                <img class="lazyload" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.1/img/loader/orange.progress-bar-stripe-loader.svg" data-src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/27.jpg" style="width: 100%; height: 100%; object-fit: cover; pointer-events: none;" onerror="imgError(this,3)" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/27.jpg">
+              </div>
+              <span class="label">
+              Next Post</span>
+              <div class="info">
+                <h3>
+                String.trim()理解</h3>
+                <hr>
+              </div>
+            </a>
+          </div>
+        
+      </section>
+      
+<div id="vcomments"></div>
+<script>
+  window.onload = function(){
+      var valine = new Valine();
+      valine.init({
+        el: '#vcomments',
+        appId: "YNsapdWTGuiurNqoV8eJHlsI-gzGzoHsz",
+        appKey: "JDannM5I5JMu49IKfVkscmIe",
+        path: window.location.pathname,
+        placeholder: "你是我一生只会遇见一次的惊喜 ..."
+      })
+  }
+</script>
+
+      <section class="author-profile">
+        <div class="info" itemprop="author" itemscope="" itemtype="https://schema.org/Person">
+          <a href="sanwan99.cn" class="profile gravatar"><img src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.2/img/custom/touxiang.jpg" itemprop="image" alt="三万" height="70" width="70"></a>
+          <div class="meta">
+            <span class="title">Author</span>
+            <h3 itemprop="name">
+            <a href="sanwan99.cn" itemprop="url" rel="author">三万</a>
+            </h3>
+          </div>
+        </div>
+        <hr>
+        <p><i class="iconfont icon-write"></i>爱搞事的三万</p>
+      </section>
+    </main><!-- #main -->
+  </div><!-- #primary -->
+</div>
+
+
+
+    </div>    
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="请输入关键词..."/>
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            // PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+    <!-- <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2020 三万<br>
+      powered_by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer> -->
+<footer id="colophon" class="site-footer" role="contentinfo">
+  <div class="site-info">
+    <div class="footertext">
+      <div class="img-preload">
+        <img src="https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/other/wordpress-rotating-ball-o.svg">
+        <img src="https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/other/disqus-preloader.svg">
+      </div>
+      <p style="color: #666666;">&copy 2018</p>
+    </div>
+    <div class="footer-device">
+    <p style="font-family: 'Ubuntu', sans-serif;">
+        <span style="color: #b9b9b9;">Theme <a href="https://github.com/honjun/hexo-theme-sakura" target="_blank" style="color: #b9b9b9;;text-decoration: underline dotted rgba(0, 0, 0, .1);">Sakura</a> <i class="iconfont icon-sakura rotating" style="color: #ffc0cb;display:inline-block"></i> by <a href="https://2heng.xin/" target="_blank" style="color: #b9b9b9;;text-decoration: underline dotted rgba(0, 0, 0, .1);">Mashiro</a>&<a href="https://www.hojun.cn/" target="_blank" style="color: #b9b9b9;;text-decoration: underline dotted rgba(0, 0, 0, .1);">Hojun</a>, Powered by Hexo, Hosted by Coding Pages</a>
+        </span>
+      </p>
+    </div>
+  </div><!-- .site-info -->
+</footer>
+
+
+
+<!-- <script src="/js/tocbot.js"></script> -->
+<script type="text/javascript" src="/js/lib.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script type="text/javascript" src="/js/InsightSearch.js"></script>
+<script type="text/javascript" src="/js/jquery.fancybox.min.js"></script>
+<script type="text/javascript" src="/js/zoom.min.js"></script>
+<script type="text/javascript" src="/js/sakura-app.js"></script>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src='//unpkg.com/valine@1.3.4/dist/Valine.min.js'></script>
+<script src="/js/botui.js"></script>
+<!-- 不蒜子 网页计数器 -->
+<script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js"></script> -->
+<script type="text/javascript">
+/* <![CDATA[ */
+if (/Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent)) {
+  var Poi = {"pjax":"1","movies":{"url": "https://cdn.jsdelivr.net/gh/sanwan99/cdn@4.4/movie/","name":"shangwuyu.mp4","live":"close"},"windowheight":"fixed","codelamp":"close","ajaxurl":"","order":"asc","formpostion":"bottom"};
+} else {
+  var Poi = {"pjax":"1","movies":{"url": "https://cdn.jsdelivr.net/gh/sanwan99/cdn@4.4/movie/","name":"shangwuyu.mp4","live":"open"},"windowheight":"auto","codelamp":"close","ajaxurl":"","order":"asc","formpostion":"bottom"};
+}
+/* ]]> */
+
+</script>
+<script>
+$(document).ready(function() {
+  if ($(".toc").length > 0 && document.body.clientWidth > 1200) {
+    if ($(".pattern-center").length > 0) { //有图的情况
+      tocbot.init({
+          // Where to render the table of contents.
+          tocSelector: '.toc', // 放置目录的容器
+          // Where to grab the headings to build the table of contents.
+          contentSelector: '.entry-content', // 正文内容所在
+          // Which headings to grab inside of the contentSelector element.
+          scrollSmooth: true,
+          headingSelector: 'h1, h2, h3, h4, h5', // 需要索引的标题级别
+          headingsOffset: -400,
+          scrollSmoothOffset: -85
+      });
+    } else {
+      tocbot.init({
+          // Where to render the table of contents.
+          tocSelector: '.toc', // 放置目录的容器
+          // Where to grab the headings to build the table of contents.
+          contentSelector: '.entry-content', // 正文内容所在
+          // Which headings to grab inside of the contentSelector element.
+          scrollSmooth: true,
+          headingSelector: 'h1, h2, h3, h4, h5', // 需要索引的标题级别
+          headingsOffset: -85,
+          scrollSmoothOffset: -85
+      });
+    }
+    var offsetTop = $('.toc').offset().top - 95;
+    window.onscroll = function() {
+      var scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
+      if (scrollTop >= offsetTop) {
+        $('.toc').addClass('toc-fixed');
+      } else {
+        $('.toc').removeClass('toc-fixed');
+      }
+    }
+  }
+});
+</script>
+
+    <div class="openNav no-select" style="height: 50px;">
+      <div class="iconflat no-select" style="width: 50px; height: 50px;">
+        <div class="icon"></div>
+      </div>
+      <div class="site-branding search-form-submit">
+        <i class="iconfont js-toggle-search iconsearch icon-search"></i>
+      </div>
+    </div>
+  </section>
+  <div id="mo-nav" class="">
+  <div class="m-avatar">
+    <img src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.1/img/custom/touxiang.jpg">
+  </div>
+  <p style="text-align: center; color: #333; font-weight: 900; font-family: 'Ubuntu', sans-serif; letter-spacing: 1.5px">帅气的三万</p>
+  <p style="text-align: center; word-spacing: 20px;">
+    
+      
+        <a href="http://github.com/sanwan99" class="fa fa-github" target="_blank" style="color: #333; margin-left:20px"></a>
+      
+    
+  </p>
+  <ul id="menu-new-1" class="menu">
+    
+      <li>
+        <a href="/">
+          <span class="faa-parent animated-hover">
+            <i class="fa  fa-fort-awesome faa-shake" aria-hidden="true"></i>
+            首页
+          </span>
+        </a>
+        
+      </li>
+    
+      <li>
+        <a href="/archives">
+          <span class="faa-parent animated-hover">
+            <i class="fa  fa-archive faa-shake" aria-hidden="true"></i>
+            归档
+          </span>
+        </a>
+        
+          <ul class="sub-menu">
+            
+              <li>
+                <a href="/categories/技术/">
+                  <i class="fa fa-code" aria-hidden="true"></i>
+                  技术
+                </a>
+              </li>
+            
+              <li>
+                <a href="/categories/Java/">
+                  <i class="fa fa-file-text-o" aria-hidden="true"></i>
+                  Java
+                </a>
+              </li>
+            
+              <li>
+                <a href="/categories/数据库/">
+                  <i class="fa fa-cloud-download" aria-hidden="true"></i>
+                  数据库
+                </a>
+              </li>
+            
+              <li>
+                <a href="/categories/数据结构/">
+                  <i class="fa fa-commenting-o" aria-hidden="true"></i>
+                  数据结构
+                </a>
+              </li>
+            
+              <li>
+                <a href="/categories/配置/">
+                  <i class="fa fa-book" aria-hidden="true"></i>
+                  配置
+                </a>
+              </li>
+            
+          </ul>
+        
+      </li>
+    
+      <li>
+        <a href="javascript:;">
+          <span class="faa-parent animated-hover">
+            <i class="fa  fa-list-ul faa-vertical" aria-hidden="true"></i>
+            清单
+          </span>
+        </a>
+        
+          <ul class="sub-menu">
+            
+              <li>
+                <a href="/bangumi/">
+                  <i class="fa fa-film faa-vertical" aria-hidden="true"></i>
+                  番组
+                </a>
+              </li>
+            
+              <li>
+                <a href="/music/">
+                  <i class="fa fa-headphones" aria-hidden="true"></i>
+                  歌单
+                </a>
+              </li>
+            
+          </ul>
+        
+      </li>
+    
+      <li>
+        <a href="/comment/">
+          <span class="faa-parent animated-hover">
+            <i class="fa  fa-pencil-square-o faa-tada" aria-hidden="true"></i>
+            留言板
+          </span>
+        </a>
+        
+      </li>
+    
+      <li>
+        <a href="/">
+          <span class="faa-parent animated-hover">
+            <i class="fa  fa-leaf faa-wrench" aria-hidden="true"></i>
+            关于
+          </span>
+        </a>
+        
+          <ul class="sub-menu">
+            
+              <li>
+                <a href="/about/">
+                  <i class="fa fa-meetup" aria-hidden="true"></i>
+                  我？
+                </a>
+              </li>
+            
+          </ul>
+        
+      </li>
+    
+  </ul>
+  <p style="text-align: center; font-size: 13px; color: #b9b9b9;">&copy 2019 hexo-sakura</p>
+</div>
+<button onclick="topFunction()" class="mobile-cd-top" id="moblieGoTop" title="Go to top" style="display: none;"><i class="fa fa-chevron-up" aria-hidden="true"></i></button>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css">
+<script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script>
+<!-- require MetingJS -->
+<script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script>
+<style>
+  .aplayer .aplayer-lrc {
+    height: 35px;
+  }
+  .aplayer .aplayer-lrc p{
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 18px !important;
+  }
+  .aplayer .aplayer-lrc p.aplayer-lrc-current{
+    color: #FF1493;
+  }
+  .aplayer.aplayer-narrow .aplayer-body{
+    left: -66px !important;
+  }
+  .aplayer.aplayer-fixed .aplayer-lrc {
+    display: none;
+  }
+  .aplayer .aplayer-lrc.aplayer-lrc-hide {
+      display:none !important;
+  }
+  .aplayer.aplayer-fixed .lrc-show {
+    display: block;
+    background: rgba(255, 255, 255, 0.8);
+  }
+</style>
+<meting-js
+
+    id="4934896062"
+
+    server="netease"
+
+    type="playlist"
+
+    fixed="true"
+
+    autoplay="false"
+
+    loop="all"
+
+    order="random"
+
+    preload="auto"
+
+    volume="0.7"
+
+    mutex="true"
+
+</meting-js>
+<script>
+  $(function(){
+    $('body').on('click', '.aplayer', function(){
+      if($('.aplayer-button').hasClass('aplayer-play')) {
+        $('.aplayer-lrc').removeClass('lrc-show');
+      } else {
+        $('.aplayer-lrc').addClass('lrc-show');
+      }
+    })
+  });
+</script>
+</body>
+</html>

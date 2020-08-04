@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
   
-  <title itemprop="name">配置 | Sanwan</title>
+  <title itemprop="name">Jquery02 | Sanwan</title>
   
     <link rel="shortcut icon" href="/images/favicon.ico">
   
@@ -278,11 +278,11 @@
 
   <div class="pattern-center single-center">
     <!-- 有配图默认渲染第一张 -->
-    <div class="pattern-attachment-img lazyload" style="background-image: url(https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/20.jpg);" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.1/img/loader/orange.progress-bar-stripe-loader.svg" data-src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/20.jpg">
+    <div class="pattern-attachment-img lazyload" style="background-image: url(https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/22.jpg);" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.1/img/loader/orange.progress-bar-stripe-loader.svg" data-src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/22.jpg">
     </div>
     <header class="pattern-header single-header">
       <h1 class="entry-title">
-      配置</h1>
+      Jquery02</h1>
       <p class="entry-census">
         <span>
           <a href="sanwan99.cn">
@@ -294,7 +294,7 @@
         </span>
         <span class="bull">
         ·</span>
-        2020-5-11<span class="bull">
+        2020-7-24<span class="bull">
         ·</span>
       <span id="busuanzi_value_page_pv"></span>次阅读</p>
     </header>
@@ -308,266 +308,241 @@
         <!--<div class="toc-entry-content"><!-- 套嵌目录使用（主要为了支援评论）-->
         
         <div class="entry-content">
-          <h2 id="mybatis-config-xml"><a href="#mybatis-config-xml" class="headerlink" title="mybatis-config.xml"></a>mybatis-config.xml</h2><pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
-
-&lt;!DOCTYPE configuration
-
-        PUBLIC &quot;-//mybatis.org//DTD Config 3.0//EN&quot;
-
-        &quot;http://mybatis.org/dtd/mybatis-3-config.dtd&quot;&gt;
-
-        &lt;package name=&quot;com.fhl.pojo&quot;/&gt;
-
-        &lt;mapper class=&quot;com.fhl.dao.BookMapper&quot;/&gt;
-
-&lt;/configuration
-
-</code></pre><h2 id="database-properties"><a href="#database-properties" class="headerlink" title="database.properties"></a>database.properties</h2><pre><code>jdbc.driver=com.mysql.jdbc.Driver
-
-jdbc.url=jdbc:mysql://localhost:3306/ssmbuild?useSSL=false&amp;useUnicode=true&amp;characterEncoding=utf8
-
-jdbc.username=root
-
-jdbc.password=123456
-
-</code></pre><h2 id="spring-dao-xml-整合mybatis以及连接数据库"><a href="#spring-dao-xml-整合mybatis以及连接数据库" class="headerlink" title="spring-dao.xml  整合mybatis以及连接数据库"></a>spring-dao.xml  整合mybatis以及连接数据库</h2><pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
-
-&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
-
-      xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
-
-      xmlns:context=&quot;http://www.springframework.org/schema/context&quot;
-
-      xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans
-
-http://www.springframework.org/schema/beans/spring-beans.xsd
-
-http://www.springframework.org/schema/context
-
-      https://www.springframework.org/schema/context/spring-context.xsd&quot;&gt;
-
-    &lt;!-- 配置整合mybatis --&gt;
-
-    &lt;!-- 1.关联数据库文件 --&gt;
-
-    &lt;context:property-placeholder location=&quot;classpath:database.properties&quot;/&gt;
-
-    &lt;!-- 2.数据库连接池 --&gt;
-
-    &lt;!--数据库连接池        dbcp 半自动化操作 不能自动连接        c3p0 自动化操作（自动的加载配置文件 并且设置到对象里面）
-
-    --&gt;
-
-    &lt;bean id=&quot;dataSource&quot; class=&quot;com.mchange.v2.c3p0.ComboPooledDataSource&quot;&gt;
-
-        &lt;!-- 配置连接池属性 --&gt;
-
-        &lt;property name=&quot;driverClass&quot; value=&quot;${jdbc.driver}&quot;/&gt;
-
-        &lt;property name=&quot;jdbcUrl&quot; value=&quot;${jdbc.url}&quot;/&gt;
-
-        &lt;property name=&quot;user&quot; value=&quot;${jdbc.username}&quot;/&gt;
-
-        &lt;property name=&quot;password&quot; value=&quot;${jdbc.password}&quot;/&gt;
-
-        &lt;!-- c3p0连接池的私有属性 --&gt;
-
-        &lt;property name=&quot;maxPoolSize&quot; value=&quot;30&quot;/&gt;
-
-        &lt;property name=&quot;minPoolSize&quot; value=&quot;10&quot;/&gt;
-
-        &lt;!-- 关闭连接后不自动commit --&gt;
-
-        &lt;property name=&quot;autoCommitOnClose&quot; value=&quot;false&quot;/&gt;
-
-        &lt;!-- 获取连接超时时间 --&gt;
-
-        &lt;property name=&quot;checkoutTimeout&quot; value=&quot;10000&quot;/&gt;
-
-        &lt;!-- 当获取连接失败重试次数 --&gt;
-
-        &lt;property name=&quot;acquireRetryAttempts&quot; value=&quot;2&quot;/&gt;
-
-    &lt;!-- 3.配置SqlSessionFactory对象 --&gt;
-
-    &lt;bean id=&quot;sqlSessionFactory&quot; class=&quot;org.mybatis.spring.SqlSessionFactoryBean&quot;&gt;
-
-        &lt;!-- 注入数据库连接池 --&gt;
-
-        &lt;property name=&quot;dataSource&quot; ref=&quot;dataSource&quot;/&gt;
-
-        &lt;!-- 配置MyBaties全局配置文件:mybatis-config.xml --&gt;
-
-        &lt;property name=&quot;configLocation&quot; value=&quot;classpath:mybatis-config.xml&quot;/&gt;
-
-    &lt;!-- 4.配置扫描Dao接口包，动态实现Dao接口注入到spring容器中 --&gt;
-
-    &lt;!--解释 ：https://www.cnblogs.com/jpfss/p/7799806.html--&gt;
-
-    &lt;bean class=&quot;org.mybatis.spring.mapper.MapperScannerConfigurer&quot;&gt;
-
-        &lt;!-- 注入sqlSessionFactory --&gt;
-
-        &lt;property name=&quot;sqlSessionFactoryBeanName&quot; value=&quot;sqlSessionFactory&quot;/&gt;
-
-        &lt;!-- 给出需要扫描Dao接口包 --&gt;
-
-        &lt;property name=&quot;basePackage&quot; value=&quot;com.fhl.dao&quot;/&gt;
-
-&lt;/beans&gt;
-</code></pre><h2 id="spring-service-xml-spring注入相关"><a href="#spring-service-xml-spring注入相关" class="headerlink" title="spring-service.xml    spring注入相关"></a>spring-service.xml    spring注入相关</h2><pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
-
-&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
-
-      xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
-
-      xmlns:context=&quot;http://www.springframework.org/schema/context&quot;
-
-      xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans
-
-http://www.springframework.org/schema/beans/spring-beans.xsd
-
-http://www.springframework.org/schema/context
-
-  http://www.springframework.org/schema/context/spring-context.xsd&quot;&gt;
-
-    &lt;!-- 扫描service相关的bean --&gt;
-
-    &lt;context:component-scan base-package=&quot;com.fhl.service&quot; /&gt;
-
-    &lt;!--BookServiceImpl注入到IOC容器中--&gt;
-
-    &lt;bean id=&quot;BookServiceImpl&quot; class=&quot;com.fhl.service.BookServiceImpl&quot;&gt;
-
-        &lt;property name=&quot;bookMapper&quot; ref=&quot;bookMapper&quot;/&gt;
-
-    &lt;!-- 配置事务管理器 --&gt;
-
-    &lt;bean id=&quot;transactionManager&quot; class=&quot;org.springframework.jdbc.datasource.DataSourceTransactionManager&quot;&gt;
-
-        &lt;!-- 注入数据库连接池 --&gt;
-
-        &lt;property name=&quot;dataSource&quot; ref=&quot;dataSource&quot; /&gt;
-
-&lt;/beans&gt;
-</code></pre><h2 id="web-xml"><a href="#web-xml" class="headerlink" title="web.xml"></a>web.xml</h2><pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
-
-&lt;web-app xmlns=&quot;http://xmlns.jcp.org/xml/ns/javaee&quot;
-
-        xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
-
-        xsi:schemaLocation=&quot;http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd&quot;
-
-        version=&quot;4.0&quot;&gt;
-
-
-
-
-
-        &lt;servlet-name&gt;DispatcherServlet
-
-        &lt;servlet-class&gt;org.springframework.web.servlet.DispatcherServlet
-
-            &lt;param-name&gt;contextConfigLocation
-
-            &lt;!--一定要注意:我们这里加载的是总的配置文件，之前被这里坑了！--&gt;
-
-            &lt;param-value&gt;classpath:applicationContext.xml
-
-        &lt;load-on-startup&gt;1
-
-        &lt;servlet-name&gt;DispatcherServlet
-
-        &lt;url-pattern&gt;/
-
-
-
-
-
-        &lt;filter-name&gt;encodingFilter
-
-            org.springframework.web.filter.CharacterEncodingFilter
-
-            &lt;param-name&gt;encoding
-
-            &lt;param-value&gt;utf-8
-
-        &lt;filter-name&gt;encodingFilter
-
-        &lt;url-pattern&gt;/*
-
-    &lt;!--Session过期时间--&gt;
-
-
-
-        &lt;session-timeout&gt;15
-
-&lt;/web-app&gt;
-</code></pre><h2 id="spring-mvc-xml："><a href="#spring-mvc-xml：" class="headerlink" title="spring-mvc.xml："></a>spring-mvc.xml：</h2><pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
-
-&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
-
-      xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
-
-      xmlns:context=&quot;http://www.springframework.org/schema/context&quot;
-
-      xmlns:mvc=&quot;http://www.springframework.org/schema/mvc&quot;
-
-      xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans
-
-http://www.springframework.org/schema/beans/spring-beans.xsd
-
-http://www.springframework.org/schema/context
-
-http://www.springframework.org/schema/context/spring-context.xsd
-
-http://www.springframework.org/schema/mvc
-
-  https://www.springframework.org/schema/mvc/spring-mvc.xsd&quot;&gt;
-
-    &lt;!-- 配置SpringMVC --&gt;
-
-    &lt;!-- 1.开启SpringMVC注解驱动 --&gt;
-
-    &lt;mvc:annotation-driven /&gt;
-
-    &lt;!-- 2.静态资源默认servlet配置--&gt;
-
-    &lt;mvc:default-servlet-handler/&gt;
-
-    &lt;!-- 3.配置jsp 显示ViewResolver视图解析器 --&gt;
-
-    &lt;bean class=&quot;org.springframework.web.servlet.view.InternalResourceViewResolver&quot;&gt;
-
-        &lt;property name=&quot;viewClass&quot; value=&quot;org.springframework.web.servlet.view.JstlView&quot; /&gt;
-
-        &lt;property name=&quot;prefix&quot; value=&quot;/WEB-INF/jsp/&quot; /&gt;
-
-        &lt;property name=&quot;suffix&quot; value=&quot;.jsp&quot; /&gt;
-
-    &lt;!-- 4.扫描web相关的bean --&gt;
-
-    &lt;context:component-scan base-package=&quot;com.fhl.controller&quot; /&gt;
-
-&lt;/beans&gt;
-</code></pre><h2 id="applicationContext-xml-最后把三个spring相关导入里面-整合到一起"><a href="#applicationContext-xml-最后把三个spring相关导入里面-整合到一起" class="headerlink" title="applicationContext.xml  最后把三个spring相关导入里面 整合到一起"></a>applicationContext.xml  最后把三个spring相关导入里面 整合到一起</h2><pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
-
-&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
-
-      xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
-
-      xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans
-
-      http://www.springframework.org/schema/beans/spring-beans.xsd&quot;&gt;
-
-    &lt;import resource=&quot;spring-dao.xml&quot;/&gt;
-
-    &lt;import resource=&quot;spring-service.xml&quot;/&gt;
-
-    &lt;import resource=&quot;spring-mvc.xml&quot;/&gt;
-
-&lt;/beans&gt;
+          <h2 id="1-1-jQuery-属性操作"><a href="#1-1-jQuery-属性操作" class="headerlink" title="1.1. jQuery 属性操作"></a>1.1. jQuery 属性操作</h2><p>​    jQuery 常用属性操作有三种：prop() / attr() / data() ;</p>
+<h3 id="1-1-1-元素固有属性值-prop"><a href="#1-1-1-元素固有属性值-prop" class="headerlink" title="1.1.1 元素固有属性值 prop()"></a>1.1.1 元素固有属性值 prop()</h3><p>​    所谓元素固有属性就是元素本身自带的属性，比如 <a> 元素里面的 href ，比如 <input> 元素里面的 type。 </a></p>
+<p><strong>语法</strong></p>
+<p><img src="images/prop.png" alt="prop"></p>
+<p>​    注意：prop() 除了普通属性操作，更适合操作表单属性：disabled / checked / selected 等。</p>
+<h3 id="1-1-2-元素自定义属性值-attr"><a href="#1-1-2-元素自定义属性值-attr" class="headerlink" title="1.1.2 元素自定义属性值 attr()"></a>1.1.2 元素自定义属性值 attr()</h3><p>​    用户自己给元素添加的属性，我们称为自定义属性。 比如给 div 添加 index =“1”。 </p>
+<p><strong>语法</strong></p>
+<p><img src="images/attr.png" alt="attr"></p>
+<p>​    注意：attr() 除了普通属性操作，更适合操作自定义属性。（该方法也可以获取 H5 自定义属性）</p>
+<h3 id="1-1-3-数据缓存-data"><a href="#1-1-3-数据缓存-data" class="headerlink" title="1.1.3 数据缓存 data()"></a>1.1.3 数据缓存 data()</h3><p>​    data() 方法可以在指定的元素上存取数据，并不会修改 DOM 元素结构。一旦页面刷新，之前存放的数据都将被移除。 </p>
+<p><strong>语法</strong></p>
+<p><img src="images/data.png" alt="data"></p>
+<p>​    注意：同时，还可以读取 HTML5 自定义属性  data-index ，得到的是数字型。</p>
+<p><strong>演示代码</strong></p>
+<pre><code class="javascript">&lt;body&gt;
+    &lt;a href=&quot;http://www.itcast.cn&quot; title=&quot;都挺好&quot;&gt;都挺好&lt;/a&gt;
+    &lt;input type=&quot;checkbox&quot; name=&quot;&quot; id=&quot;&quot; checked&gt;
+    &lt;div index=&quot;1&quot; data-index=&quot;2&quot;&gt;我是div&lt;/div&gt;
+    &lt;span&gt;123&lt;/span&gt;
+    &lt;script&gt;
+        $(function() {
+            //1. element.prop(&quot;属性名&quot;) 获取元素固有的属性值
+            console.log($(&quot;a&quot;).prop(&quot;href&quot;));
+            $(&quot;a&quot;).prop(&quot;title&quot;, &quot;我们都挺好&quot;);
+            $(&quot;input&quot;).change(function() {
+                console.log($(this).prop(&quot;checked&quot;));
+            });
+            // console.log($(&quot;div&quot;).prop(&quot;index&quot;));
+            // 2. 元素的自定义属性 我们通过 attr()
+            console.log($(&quot;div&quot;).attr(&quot;index&quot;));
+            $(&quot;div&quot;).attr(&quot;index&quot;, 4);
+            console.log($(&quot;div&quot;).attr(&quot;data-index&quot;));
+            // 3. 数据缓存 data() 这个里面的数据是存放在元素的内存里面
+            $(&quot;span&quot;).data(&quot;uname&quot;, &quot;andy&quot;);
+            console.log($(&quot;span&quot;).data(&quot;uname&quot;));
+            // 这个方法获取data-index h5自定义属性 第一个 不用写data-  而且返回的是数字型
+            console.log($(&quot;div&quot;).data(&quot;index&quot;));
+        })
+    &lt;/script&gt;
+&lt;/body&gt;
 </code></pre>
+<h2 id="1-2-jQuery-文本属性值"><a href="#1-2-jQuery-文本属性值" class="headerlink" title="1.2. jQuery 文本属性值"></a>1.2. jQuery 文本属性值</h2><p>​    jQuery的文本属性值常见操作有三种：html() / text() / val() ; 分别对应JS中的 innerHTML 、innerText 和 value 属性。</p>
+<h3 id="1-2-1-jQuery内容文本值"><a href="#1-2-1-jQuery内容文本值" class="headerlink" title="1.2.1 jQuery内容文本值"></a>1.2.1 jQuery内容文本值</h3><p>​    常见操作有三种：html() / text() / val() ; 分别对应JS中的 innerHTML 、innerText 和 value 属性，主要针对元素的内容还有表单的值操作。</p>
+<p><strong>语法</strong></p>
+<p><img src="images/html.png" alt="html"></p>
+<p>​    注意：html() 可识别标签，text() 不识别标签。</p>
+<p><strong>演示代码</strong></p>
+<pre><code class="javascript">&lt;body&gt;
+    &lt;div&gt;
+        &lt;span&gt;我是内容&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;input type=&quot;text&quot; value=&quot;请输入内容&quot;&gt;
+    &lt;script&gt;
+        // 1. 获取设置元素内容 html()
+        console.log($(&quot;div&quot;).html());
+        // $(&quot;div&quot;).html(&quot;123&quot;);
+        // 2. 获取设置元素文本内容 text()
+        console.log($(&quot;div&quot;).text());
+        $(&quot;div&quot;).text(&quot;123&quot;);
+        // 3. 获取设置表单值 val()
+        console.log($(&quot;input&quot;).val());
+        $(&quot;input&quot;).val(&quot;123&quot;);
+    &lt;/script&gt;
+&lt;/body&gt;
+</code></pre>
+<h2 id="1-3-jQuery-元素操作"><a href="#1-3-jQuery-元素操作" class="headerlink" title="1.3. jQuery 元素操作"></a>1.3. jQuery 元素操作</h2><p>​    jQuery 元素操作主要讲的是用jQuery方法，操作标签的遍历、创建、添加、删除等操作。</p>
+<h3 id="1-3-1-遍历元素"><a href="#1-3-1-遍历元素" class="headerlink" title="1.3.1. 遍历元素"></a>1.3.1. 遍历元素</h3><p>​    jQuery 隐式迭代是对同一类元素做了同样的操作。 如果想要给同一类元素做不同操作，就需要用到遍历。</p>
+<p><strong>语法1</strong></p>
+<p><img src="images/each1.png" alt="each1"></p>
+<p>​    注意：此方法用于遍历 jQuery 对象中的每一项，回调函数中元素为 DOM 对象，想要使用 jQuery 方法需要转换。</p>
+<p><strong>语法2</strong></p>
+<p><img src="images/each2.png" alt="each2"></p>
+<p>​    注意：此方法用于遍历 jQuery 对象中的每一项，回调函数中元素为 DOM 对象，想要使用 jQuery 方法需要转换。</p>
+<p><strong>演示代码</strong></p>
+<pre><code class="javascript">&lt;body&gt;
+    &lt;div&gt;1&lt;/div&gt;
+    &lt;div&gt;2&lt;/div&gt;
+    &lt;div&gt;3&lt;/div&gt;
+    &lt;script&gt;
+        $(function() {
+            // 如果针对于同一类元素做不同操作，需要用到遍历元素（类似for，但是比for强大）
+            var sum = 0;
+            var arr = [&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;];
+            // 1. each() 方法遍历元素 
+            $(&quot;div&quot;).each(function(i, domEle) {
+                // 回调函数第一个参数一定是索引号  可以自己指定索引号号名称
+                // console.log(i);
+                // 回调函数第二个参数一定是 dom 元素对象，也是自己命名
+                // console.log(domEle);  // 使用jQuery方法需要转换 $(domEle)
+                $(domEle).css(&quot;color&quot;, arr[i]);
+                sum += parseInt($(domEle).text());
+            })
+            console.log(sum);
+            // 2. $.each() 方法遍历元素 主要用于遍历数据，处理数据
+            // $.each($(&quot;div&quot;), function(i, ele) {
+            //     console.log(i);
+            //     console.log(ele);
+            // });
+            // $.each(arr, function(i, ele) {
+            //     console.log(i);
+            //     console.log(ele);
+            // })
+            $.each({
+                name: &quot;andy&quot;,
+                age: 18
+            }, function(i, ele) {
+                console.log(i); // 输出的是 name age 属性名
+                console.log(ele); // 输出的是 andy  18 属性值
+            })
+        })
+    &lt;/script&gt;
+&lt;/body&gt;
+</code></pre>
+<h3 id="1-3-3-创建、添加、删除"><a href="#1-3-3-创建、添加、删除" class="headerlink" title="1.3.3. 创建、添加、删除"></a>1.3.3. 创建、添加、删除</h3><p>​    jQuery方法操作元素的创建、添加、删除方法很多，则重点使用部分，如下：</p>
+<p><strong>语法总和</strong></p>
+<p><img src="images/create.png" alt="create"></p>
+<p><img src="images/append1.png" alt="append1"></p>
+<p><img src="images/append2.png" alt="append2"></p>
+<p><img src="images/remove.png" alt="remove"></p>
+<p>​    注意：以上只是元素的创建、添加、删除方法的常用方法，其他方法请参详API。</p>
+<p><strong>案例代码</strong></p>
+<pre><code class="js">&lt;body&gt;
+    &lt;ul&gt;
+        &lt;li&gt;原先的li&lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;div class=&quot;test&quot;&gt;我是原先的div&lt;/div&gt;
+    &lt;script&gt;
+        $(function() {
+            // 1. 创建元素
+            var li = $(&quot;&lt;li&gt;我是后来创建的li&lt;/li&gt;&quot;);
+
+            // 2. 添加元素
+            //     2.1 内部添加
+            // $(&quot;ul&quot;).append(li);  内部添加并且放到内容的最后面 
+            $(&quot;ul&quot;).prepend(li); // 内部添加并且放到内容的最前面
+            //  2.2 外部添加
+            var div = $(&quot;&lt;div&gt;我是后妈生的&lt;/div&gt;&quot;);
+            // $(&quot;.test&quot;).after(div);
+            $(&quot;.test&quot;).before(div);
+
+            // 3. 删除元素
+            // $(&quot;ul&quot;).remove(); 可以删除匹配的元素 自杀
+            // $(&quot;ul&quot;).empty(); // 可以删除匹配的元素里面的子节点 孩子
+            $(&quot;ul&quot;).html(&quot;&quot;); // 可以删除匹配的元素里面的子节点 孩子
+        })
+    &lt;/script&gt;
+&lt;/body&gt;
+</code></pre>
+<h2 id="1-4-jQuery-尺寸、位置操作"><a href="#1-4-jQuery-尺寸、位置操作" class="headerlink" title="1.4.  jQuery 尺寸、位置操作"></a>1.4.  jQuery 尺寸、位置操作</h2><p>​    jQuery中分别为我们提供了两套快速获取和设置元素尺寸和位置的API，方便易用，内容如下。</p>
+<h3 id="1-4-1-jQuery-尺寸操作"><a href="#1-4-1-jQuery-尺寸操作" class="headerlink" title="1.4.1.  jQuery 尺寸操作"></a>1.4.1.  jQuery 尺寸操作</h3><p>​     jQuery 尺寸操作包括元素宽高的获取和设置，且不一样的API对应不一样的盒子模型。</p>
+<p><strong>语法</strong></p>
+<p><img src="images/size.png" alt="size"></p>
+<p><strong>代码演示</strong></p>
+<pre><code class="javascript">&lt;body&gt;
+    &lt;div&gt;&lt;/div&gt;
+    &lt;script&gt;
+        $(function() {
+            // 1. width() / height() 获取设置元素 width和height大小 
+            console.log($(&quot;div&quot;).width());
+            // $(&quot;div&quot;).width(300);
+
+            // 2. innerWidth() / innerHeight()  获取设置元素 width和height + padding 大小 
+            console.log($(&quot;div&quot;).innerWidth());
+
+            // 3. outerWidth()  / outerHeight()  获取设置元素 width和height + padding + border 大小 
+            console.log($(&quot;div&quot;).outerWidth());
+
+            // 4. outerWidth(true) / outerHeight(true) 获取设置 width和height + padding + border + margin
+            console.log($(&quot;div&quot;).outerWidth(true));
+        })
+    &lt;/script&gt;
+&lt;/body&gt;
+</code></pre>
+<p>​    注意：有了这套 API 我们将可以快速获取和子的宽高，至于其他属性想要获取和设置，还要使用 css() 等方法配合。</p>
+<h3 id="1-4-2-jQuery-位置操作"><a href="#1-4-2-jQuery-位置操作" class="headerlink" title="1.4.2. jQuery 位置操作"></a>1.4.2. jQuery 位置操作</h3><p>​    jQuery的位置操作主要有三个： offset()、position()、scrollTop()/scrollLeft() , 具体介绍如下: </p>
+<p><strong>语法</strong></p>
+<p><img src="images/offset.png" alt="offset"></p>
+<p><img src="images/position.png" alt="position"></p>
+<p><img src="images/scroll.png" alt="scroll"></p>
+<p><strong>代码演示</strong></p>
+<pre><code class="javascript">&lt;body&gt;
+    &lt;div class=&quot;father&quot;&gt;
+        &lt;div class=&quot;son&quot;&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class=&quot;back&quot;&gt;返回顶部&lt;/div&gt;
+    &lt;div class=&quot;container&quot;&gt;&lt;/div&gt;
+
+    &lt;script&gt;
+        $(function() {
+            // 1. 获取设置距离文档的位置（偏移） offset
+            console.log($(&quot;.son&quot;).offset());
+            console.log($(&quot;.son&quot;).offset().top);
+            // $(&quot;.son&quot;).offset({
+            //     top: 200,
+            //     left: 200
+            // });
+
+            // 2. 获取距离带有定位父级位置（偏移） position   如果没有带有定位的父级，则以文档为准
+            // 这个方法只能获取不能设置偏移
+            console.log($(&quot;.son&quot;).position());
+            // $(&quot;.son&quot;).position({
+            //     top: 200,
+            //     left: 200
+            // });
+
+              // 3. 被卷去的头部
+              $(document).scrollTop(100);
+            // 被卷去的头部 scrollTop()  / 被卷去的左侧 scrollLeft()
+            // 页面滚动事件
+            var boxTop = $(&quot;.container&quot;).offset().top;
+            $(window).scroll(function() {
+                // console.log(11);
+                console.log($(document).scrollTop());
+                if ($(document).scrollTop() &gt;= boxTop) {
+                    $(&quot;.back&quot;).fadeIn();
+                } else {
+                    $(&quot;.back&quot;).fadeOut();
+                }
+            });
+            // 返回顶部
+            $(&quot;.back&quot;).click(function() {
+                // $(document).scrollTop(0);
+                $(&quot;body, html&quot;).stop().animate({
+                    scrollTop: 0
+                });
+                // $(document).stop().animate({
+                //     scrollTop: 0
+                // }); 不能是文档而是 html和body元素做动画
+            })
+        })
+    &lt;/script&gt;
+&lt;/body&gt;
+</code></pre>
+
         </div>
         <!-- .entry-content -->
         <div class="single-reward">
@@ -598,15 +573,15 @@ http://www.springframework.org/schema/mvc
           
             <div class="post-nepre half previous">
           
-            <a href="/内部类/" rel="prev">
+            <a href="/Jquery3/" rel="prev">
               <div class="background">
-                <img class="lazyload" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.1/img/loader/orange.progress-bar-stripe-loader.svg" data-src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/2.png" style="width: 100%; height: 100%; object-fit: cover; pointer-events: none;" onerror="imgError(this,3)" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/2.png">
+                <img class="lazyload" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.1/img/loader/orange.progress-bar-stripe-loader.svg" data-src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/21.jpg" style="width: 100%; height: 100%; object-fit: cover; pointer-events: none;" onerror="imgError(this,3)" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/21.jpg">
               </div>
               <span class="label">
               Previous Post</span>
               <div class="info">
                 <h3>
-                内部类</h3>
+                Jquery03</h3>
                 <hr>
               </div>
             </a>
@@ -616,15 +591,15 @@ http://www.springframework.org/schema/mvc
           
             <div class="post-nepre half next">
           
-            <a href="/数据结构/" rel="next">
+            <a href="/关于git提交方面的报错/" rel="next">
               <div class="background">
-                <img class="lazyload" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.1/img/loader/orange.progress-bar-stripe-loader.svg" data-src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/4.jpg" style="width: 100%; height: 100%; object-fit: cover; pointer-events: none;" onerror="imgError(this,3)" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/4.jpg">
+                <img class="lazyload" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.1/img/loader/orange.progress-bar-stripe-loader.svg" data-src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/23.jpg" style="width: 100%; height: 100%; object-fit: cover; pointer-events: none;" onerror="imgError(this,3)" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/23.jpg">
               </div>
               <span class="label">
               Next Post</span>
               <div class="info">
                 <h3>
-                数据结构</h3>
+                关于git提交方面的报错</h3>
                 <hr>
               </div>
             </a>

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
   
-  <title itemprop="name">配置 | Sanwan</title>
+  <title itemprop="name">letcode 65 不用加减乘除做加法 | Sanwan</title>
   
     <link rel="shortcut icon" href="/images/favicon.ico">
   
@@ -278,11 +278,11 @@
 
   <div class="pattern-center single-center">
     <!-- 有配图默认渲染第一张 -->
-    <div class="pattern-attachment-img lazyload" style="background-image: url(https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/20.jpg);" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.1/img/loader/orange.progress-bar-stripe-loader.svg" data-src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/20.jpg">
+    <div class="pattern-attachment-img lazyload" style="background-image: url(https://cdn.jsdelivr.net/gh/sanwan99/cdn@5.1/img/articleBg/29.jpg);" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.1/img/loader/orange.progress-bar-stripe-loader.svg" data-src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@5.1/img/articleBg/29.jpg">
     </div>
     <header class="pattern-header single-header">
       <h1 class="entry-title">
-      配置</h1>
+      letcode 65 不用加减乘除做加法</h1>
       <p class="entry-census">
         <span>
           <a href="sanwan99.cn">
@@ -294,7 +294,7 @@
         </span>
         <span class="bull">
         ·</span>
-        2020-5-11<span class="bull">
+        2020-7-24<span class="bull">
         ·</span>
       <span id="busuanzi_value_page_pv"></span>次阅读</p>
     </header>
@@ -308,266 +308,22 @@
         <!--<div class="toc-entry-content"><!-- 套嵌目录使用（主要为了支援评论）-->
         
         <div class="entry-content">
-          <h2 id="mybatis-config-xml"><a href="#mybatis-config-xml" class="headerlink" title="mybatis-config.xml"></a>mybatis-config.xml</h2><pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
+          <h3 id="题目描述"><a href="#题目描述" class="headerlink" title="题目描述"></a>题目描述</h3><p>写一个函数，求两个整数之和，要求在函数体内不得使用 “+”、“-”、“*”、“/” 四则运算符号。</p>
+<p>思路 通过a&amp;b之后左移一位算出进位<br>      即a&amp;b&lt;&lt;1<br>      可以得到进位<br>      通过a^b得到非进位的和</p>
+<pre><code>     class Solution {
+    public int add(int a, int b) {
+     while(b!=0){//进位为0停滞循环
+     int c=(a&amp;b)&lt;&lt;1;//进位
+     a^=b;//非进位和
+     b=c;
+    }
+    return a;
+    }
+
+}
+
+</code></pre><p>感觉跟以前学的微机原理很像！</p>
 
-&lt;!DOCTYPE configuration
-
-        PUBLIC &quot;-//mybatis.org//DTD Config 3.0//EN&quot;
-
-        &quot;http://mybatis.org/dtd/mybatis-3-config.dtd&quot;&gt;
-
-        &lt;package name=&quot;com.fhl.pojo&quot;/&gt;
-
-        &lt;mapper class=&quot;com.fhl.dao.BookMapper&quot;/&gt;
-
-&lt;/configuration
-
-</code></pre><h2 id="database-properties"><a href="#database-properties" class="headerlink" title="database.properties"></a>database.properties</h2><pre><code>jdbc.driver=com.mysql.jdbc.Driver
-
-jdbc.url=jdbc:mysql://localhost:3306/ssmbuild?useSSL=false&amp;useUnicode=true&amp;characterEncoding=utf8
-
-jdbc.username=root
-
-jdbc.password=123456
-
-</code></pre><h2 id="spring-dao-xml-整合mybatis以及连接数据库"><a href="#spring-dao-xml-整合mybatis以及连接数据库" class="headerlink" title="spring-dao.xml  整合mybatis以及连接数据库"></a>spring-dao.xml  整合mybatis以及连接数据库</h2><pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
-
-&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
-
-      xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
-
-      xmlns:context=&quot;http://www.springframework.org/schema/context&quot;
-
-      xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans
-
-http://www.springframework.org/schema/beans/spring-beans.xsd
-
-http://www.springframework.org/schema/context
-
-      https://www.springframework.org/schema/context/spring-context.xsd&quot;&gt;
-
-    &lt;!-- 配置整合mybatis --&gt;
-
-    &lt;!-- 1.关联数据库文件 --&gt;
-
-    &lt;context:property-placeholder location=&quot;classpath:database.properties&quot;/&gt;
-
-    &lt;!-- 2.数据库连接池 --&gt;
-
-    &lt;!--数据库连接池        dbcp 半自动化操作 不能自动连接        c3p0 自动化操作（自动的加载配置文件 并且设置到对象里面）
-
-    --&gt;
-
-    &lt;bean id=&quot;dataSource&quot; class=&quot;com.mchange.v2.c3p0.ComboPooledDataSource&quot;&gt;
-
-        &lt;!-- 配置连接池属性 --&gt;
-
-        &lt;property name=&quot;driverClass&quot; value=&quot;${jdbc.driver}&quot;/&gt;
-
-        &lt;property name=&quot;jdbcUrl&quot; value=&quot;${jdbc.url}&quot;/&gt;
-
-        &lt;property name=&quot;user&quot; value=&quot;${jdbc.username}&quot;/&gt;
-
-        &lt;property name=&quot;password&quot; value=&quot;${jdbc.password}&quot;/&gt;
-
-        &lt;!-- c3p0连接池的私有属性 --&gt;
-
-        &lt;property name=&quot;maxPoolSize&quot; value=&quot;30&quot;/&gt;
-
-        &lt;property name=&quot;minPoolSize&quot; value=&quot;10&quot;/&gt;
-
-        &lt;!-- 关闭连接后不自动commit --&gt;
-
-        &lt;property name=&quot;autoCommitOnClose&quot; value=&quot;false&quot;/&gt;
-
-        &lt;!-- 获取连接超时时间 --&gt;
-
-        &lt;property name=&quot;checkoutTimeout&quot; value=&quot;10000&quot;/&gt;
-
-        &lt;!-- 当获取连接失败重试次数 --&gt;
-
-        &lt;property name=&quot;acquireRetryAttempts&quot; value=&quot;2&quot;/&gt;
-
-    &lt;!-- 3.配置SqlSessionFactory对象 --&gt;
-
-    &lt;bean id=&quot;sqlSessionFactory&quot; class=&quot;org.mybatis.spring.SqlSessionFactoryBean&quot;&gt;
-
-        &lt;!-- 注入数据库连接池 --&gt;
-
-        &lt;property name=&quot;dataSource&quot; ref=&quot;dataSource&quot;/&gt;
-
-        &lt;!-- 配置MyBaties全局配置文件:mybatis-config.xml --&gt;
-
-        &lt;property name=&quot;configLocation&quot; value=&quot;classpath:mybatis-config.xml&quot;/&gt;
-
-    &lt;!-- 4.配置扫描Dao接口包，动态实现Dao接口注入到spring容器中 --&gt;
-
-    &lt;!--解释 ：https://www.cnblogs.com/jpfss/p/7799806.html--&gt;
-
-    &lt;bean class=&quot;org.mybatis.spring.mapper.MapperScannerConfigurer&quot;&gt;
-
-        &lt;!-- 注入sqlSessionFactory --&gt;
-
-        &lt;property name=&quot;sqlSessionFactoryBeanName&quot; value=&quot;sqlSessionFactory&quot;/&gt;
-
-        &lt;!-- 给出需要扫描Dao接口包 --&gt;
-
-        &lt;property name=&quot;basePackage&quot; value=&quot;com.fhl.dao&quot;/&gt;
-
-&lt;/beans&gt;
-</code></pre><h2 id="spring-service-xml-spring注入相关"><a href="#spring-service-xml-spring注入相关" class="headerlink" title="spring-service.xml    spring注入相关"></a>spring-service.xml    spring注入相关</h2><pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
-
-&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
-
-      xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
-
-      xmlns:context=&quot;http://www.springframework.org/schema/context&quot;
-
-      xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans
-
-http://www.springframework.org/schema/beans/spring-beans.xsd
-
-http://www.springframework.org/schema/context
-
-  http://www.springframework.org/schema/context/spring-context.xsd&quot;&gt;
-
-    &lt;!-- 扫描service相关的bean --&gt;
-
-    &lt;context:component-scan base-package=&quot;com.fhl.service&quot; /&gt;
-
-    &lt;!--BookServiceImpl注入到IOC容器中--&gt;
-
-    &lt;bean id=&quot;BookServiceImpl&quot; class=&quot;com.fhl.service.BookServiceImpl&quot;&gt;
-
-        &lt;property name=&quot;bookMapper&quot; ref=&quot;bookMapper&quot;/&gt;
-
-    &lt;!-- 配置事务管理器 --&gt;
-
-    &lt;bean id=&quot;transactionManager&quot; class=&quot;org.springframework.jdbc.datasource.DataSourceTransactionManager&quot;&gt;
-
-        &lt;!-- 注入数据库连接池 --&gt;
-
-        &lt;property name=&quot;dataSource&quot; ref=&quot;dataSource&quot; /&gt;
-
-&lt;/beans&gt;
-</code></pre><h2 id="web-xml"><a href="#web-xml" class="headerlink" title="web.xml"></a>web.xml</h2><pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
-
-&lt;web-app xmlns=&quot;http://xmlns.jcp.org/xml/ns/javaee&quot;
-
-        xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
-
-        xsi:schemaLocation=&quot;http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd&quot;
-
-        version=&quot;4.0&quot;&gt;
-
-
-
-
-
-        &lt;servlet-name&gt;DispatcherServlet
-
-        &lt;servlet-class&gt;org.springframework.web.servlet.DispatcherServlet
-
-            &lt;param-name&gt;contextConfigLocation
-
-            &lt;!--一定要注意:我们这里加载的是总的配置文件，之前被这里坑了！--&gt;
-
-            &lt;param-value&gt;classpath:applicationContext.xml
-
-        &lt;load-on-startup&gt;1
-
-        &lt;servlet-name&gt;DispatcherServlet
-
-        &lt;url-pattern&gt;/
-
-
-
-
-
-        &lt;filter-name&gt;encodingFilter
-
-            org.springframework.web.filter.CharacterEncodingFilter
-
-            &lt;param-name&gt;encoding
-
-            &lt;param-value&gt;utf-8
-
-        &lt;filter-name&gt;encodingFilter
-
-        &lt;url-pattern&gt;/*
-
-    &lt;!--Session过期时间--&gt;
-
-
-
-        &lt;session-timeout&gt;15
-
-&lt;/web-app&gt;
-</code></pre><h2 id="spring-mvc-xml："><a href="#spring-mvc-xml：" class="headerlink" title="spring-mvc.xml："></a>spring-mvc.xml：</h2><pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
-
-&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
-
-      xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
-
-      xmlns:context=&quot;http://www.springframework.org/schema/context&quot;
-
-      xmlns:mvc=&quot;http://www.springframework.org/schema/mvc&quot;
-
-      xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans
-
-http://www.springframework.org/schema/beans/spring-beans.xsd
-
-http://www.springframework.org/schema/context
-
-http://www.springframework.org/schema/context/spring-context.xsd
-
-http://www.springframework.org/schema/mvc
-
-  https://www.springframework.org/schema/mvc/spring-mvc.xsd&quot;&gt;
-
-    &lt;!-- 配置SpringMVC --&gt;
-
-    &lt;!-- 1.开启SpringMVC注解驱动 --&gt;
-
-    &lt;mvc:annotation-driven /&gt;
-
-    &lt;!-- 2.静态资源默认servlet配置--&gt;
-
-    &lt;mvc:default-servlet-handler/&gt;
-
-    &lt;!-- 3.配置jsp 显示ViewResolver视图解析器 --&gt;
-
-    &lt;bean class=&quot;org.springframework.web.servlet.view.InternalResourceViewResolver&quot;&gt;
-
-        &lt;property name=&quot;viewClass&quot; value=&quot;org.springframework.web.servlet.view.JstlView&quot; /&gt;
-
-        &lt;property name=&quot;prefix&quot; value=&quot;/WEB-INF/jsp/&quot; /&gt;
-
-        &lt;property name=&quot;suffix&quot; value=&quot;.jsp&quot; /&gt;
-
-    &lt;!-- 4.扫描web相关的bean --&gt;
-
-    &lt;context:component-scan base-package=&quot;com.fhl.controller&quot; /&gt;
-
-&lt;/beans&gt;
-</code></pre><h2 id="applicationContext-xml-最后把三个spring相关导入里面-整合到一起"><a href="#applicationContext-xml-最后把三个spring相关导入里面-整合到一起" class="headerlink" title="applicationContext.xml  最后把三个spring相关导入里面 整合到一起"></a>applicationContext.xml  最后把三个spring相关导入里面 整合到一起</h2><pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
-
-&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
-
-      xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
-
-      xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans
-
-      http://www.springframework.org/schema/beans/spring-beans.xsd&quot;&gt;
-
-    &lt;import resource=&quot;spring-dao.xml&quot;/&gt;
-
-    &lt;import resource=&quot;spring-service.xml&quot;/&gt;
-
-    &lt;import resource=&quot;spring-mvc.xml&quot;/&gt;
-
-&lt;/beans&gt;
-</code></pre>
         </div>
         <!-- .entry-content -->
         <div class="single-reward">
@@ -598,15 +354,15 @@ http://www.springframework.org/schema/mvc
           
             <div class="post-nepre half previous">
           
-            <a href="/内部类/" rel="prev">
+            <a href="/8-4/" rel="prev">
               <div class="background">
-                <img class="lazyload" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.1/img/loader/orange.progress-bar-stripe-loader.svg" data-src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/2.png" style="width: 100%; height: 100%; object-fit: cover; pointer-events: none;" onerror="imgError(this,3)" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/2.png">
+                <img class="lazyload" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.1/img/loader/orange.progress-bar-stripe-loader.svg" data-src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/20.jpg" style="width: 100%; height: 100%; object-fit: cover; pointer-events: none;" onerror="imgError(this,3)" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/20.jpg">
               </div>
               <span class="label">
               Previous Post</span>
               <div class="info">
                 <h3>
-                内部类</h3>
+                @Configuration与@Bean注解的原理</h3>
                 <hr>
               </div>
             </a>
@@ -616,15 +372,15 @@ http://www.springframework.org/schema/mvc
           
             <div class="post-nepre half next">
           
-            <a href="/数据结构/" rel="next">
+            <a href="/Jquery3/" rel="next">
               <div class="background">
-                <img class="lazyload" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.1/img/loader/orange.progress-bar-stripe-loader.svg" data-src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/4.jpg" style="width: 100%; height: 100%; object-fit: cover; pointer-events: none;" onerror="imgError(this,3)" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/4.jpg">
+                <img class="lazyload" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.1/img/loader/orange.progress-bar-stripe-loader.svg" data-src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/21.jpg" style="width: 100%; height: 100%; object-fit: cover; pointer-events: none;" onerror="imgError(this,3)" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/21.jpg">
               </div>
               <span class="label">
               Next Post</span>
               <div class="info">
                 <h3>
-                数据结构</h3>
+                Jquery03</h3>
                 <hr>
               </div>
             </a>

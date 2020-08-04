@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="/"/>
-  <updated>2020-07-24T03:19:58.847Z</updated>
+  <updated>2020-08-04T01:47:23.032Z</updated>
   <id>/</id>
   
   <author>
@@ -15,6 +15,127 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>letcode67二叉树的最近公共祖先</title>
+    <link href="/%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E6%9C%80%E8%BF%91%E5%85%AC%E5%85%B1%E7%A5%96%E5%85%88/"/>
+    <id>/二叉树的最近公共祖先/</id>
+    <published>2020-08-04T01:17:00.000Z</published>
+    <updated>2020-08-04T01:47:23.032Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h2 id=&quot;I-二叉搜索树的最近公共祖先&quot;&gt;&lt;a href=&quot;#I-二叉搜索树的最近公共祖先&quot; class=&quot;headerlink&quot; title=&quot;I. 二叉搜索树的最近公共祖先&quot;&gt;&lt;/a&gt;I. 二叉搜索树的最近公共祖先&lt;/h2&gt;&lt;p&gt;给定一个二叉搜索树,
+        
+      
+    
+    </summary>
+    
+    
+      <category term="数据结构" scheme="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>@Configuration与@Bean注解的原理</title>
+    <link href="/8-4/"/>
+    <id>/8-4/</id>
+    <published>2020-08-04T00:55:00.000Z</published>
+    <updated>2020-08-04T01:14:22.472Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h2 id=&quot;作用&quot;&gt;&lt;a href=&quot;#作用&quot; class=&quot;headerlink&quot;
+        
+      
+    
+    </summary>
+    
+      <category term="技术" scheme="/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>letcode 65 不用加减乘除做加法</title>
+    <link href="/letcode-65-%E4%B8%8D%E7%94%A8%E5%8A%A0%E5%87%8F%E4%B9%98%E9%99%A4%E5%81%9A%E5%8A%A0%E6%B3%95/"/>
+    <id>/letcode-65-不用加减乘除做加法/</id>
+    <published>2020-07-24T06:16:00.000Z</published>
+    <updated>2020-07-24T08:12:57.859Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h3 id=&quot;题目描述&quot;&gt;&lt;a href=&quot;#题目描述&quot; class=&quot;headerlink&quot; title=&quot;题目描述&quot;&gt;&lt;/a&gt;题目描述&lt;/h3&gt;&lt;p&gt;写一个函数，求两个整数之和，要求在函数体内不得使用 “+”、“-”、“*”、“/” 四则运算符号。&lt;/p&gt;
+&lt;p&gt;思路
+        
+      
+    
+    </summary>
+    
+      <category term="数据结构" scheme="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>Jquery03</title>
+    <link href="/Jquery3/"/>
+    <id>/Jquery3/</id>
+    <published>2020-07-24T05:49:00.000Z</published>
+    <updated>2020-07-24T05:56:15.145Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h2 id=&quot;1-1-jQuery-事件注册&quot;&gt;&lt;a href=&quot;#1-1-jQuery-事件注册&quot; class=&quot;headerlink&quot; title=&quot;1.1. jQuery 事件注册&quot;&gt;&lt;/a&gt;1.1. jQuery 事件注册&lt;/h2&gt;&lt;p&gt;​    jQuery
+        
+      
+    
+    </summary>
+    
+      <category term="Java" scheme="/categories/Java/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>Jquery02</title>
+    <link href="/Jquery2/"/>
+    <id>/Jquery2/</id>
+    <published>2020-07-24T05:41:00.000Z</published>
+    <updated>2020-07-24T05:46:47.330Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h2 id=&quot;1-1-jQuery-属性操作&quot;&gt;&lt;a href=&quot;#1-1-jQuery-属性操作&quot; class=&quot;headerlink&quot; title=&quot;1.1. jQuery 属性操作&quot;&gt;&lt;/a&gt;1.1. jQuery 属性操作&lt;/h2&gt;&lt;p&gt;​    jQuery
+        
+      
+    
+    </summary>
+    
+      <category term="技术" scheme="/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+  </entry>
   
   <entry>
     <title>关于git提交方面的报错</title>
@@ -46,7 +167,7 @@
     <link href="/Jquery/"/>
     <id>/Jquery/</id>
     <published>2020-07-24T00:49:00.000Z</published>
-    <updated>2020-07-24T03:21:26.749Z</updated>
+    <updated>2020-07-24T05:58:01.605Z</updated>
     
     <summary type="html">
     
@@ -386,128 +507,6 @@
     </summary>
     
       <category term="数据库" scheme="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>索引</title>
-    <link href="/%E7%B4%A2%E5%BC%95/"/>
-    <id>/索引/</id>
-    <published>2020-05-12T03:02:00.000Z</published>
-    <updated>2020-05-12T04:26:44.000Z</updated>
-    
-    <summary type="html">
-    
-      
-      
-        
-        
-          &lt;h2 id=&quot;索引是什么&quot;&gt;&lt;a href=&quot;#索引是什么&quot; class=&quot;headerlink&quot; title=&quot;索引是什么?&quot;&gt;&lt;/a&gt;索引是什么?&lt;/h2&gt;&lt;p&gt;   索引是一种帮助MySql高效获取数据的一种数据结构（B+Tree索引和Hash索引），一般默认是B+树 
-        
-      
-    
-    </summary>
-    
-      <category term="数据库" scheme="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>内部类</title>
-    <link href="/%E5%86%85%E9%83%A8%E7%B1%BB/"/>
-    <id>/内部类/</id>
-    <published>2020-05-12T02:45:00.000Z</published>
-    <updated>2020-05-12T02:58:58.000Z</updated>
-    
-    <summary type="html">
-    
-      
-      
-        
-        
-          &lt;h3 id=&quot;什么是内部类？&quot;&gt;&lt;a href=&quot;#什么是内部类？&quot; class=&quot;headerlink&quot;
-        
-      
-    
-    </summary>
-    
-      <category term="Java" scheme="/categories/Java/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>配置</title>
-    <link href="/%E9%85%8D%E7%BD%AE/"/>
-    <id>/配置/</id>
-    <published>2020-05-11T12:39:00.000Z</published>
-    <updated>2020-05-12T04:18:02.000Z</updated>
-    
-    <summary type="html">
-    
-      
-      
-        
-        
-          &lt;h2 id=&quot;mybatis-config-xml&quot;&gt;&lt;a href=&quot;#mybatis-config-xml&quot; class=&quot;headerlink&quot;
-        
-      
-    
-    </summary>
-    
-      <category term="配置" scheme="/categories/%E9%85%8D%E7%BD%AE/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>数据结构</title>
-    <link href="/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"/>
-    <id>/数据结构/</id>
-    <published>2020-05-11T12:38:43.000Z</published>
-    <updated>2020-05-11T12:44:44.000Z</updated>
-    
-    <summary type="html">
-    
-      
-      
-        
-        
-          &lt;p&gt;秃头的数据结构&lt;/p&gt;
-
-        
-      
-    
-    </summary>
-    
-      <category term="数据结构" scheme="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>java</title>
-    <link href="/java/"/>
-    <id>/java/</id>
-    <published>2020-05-11T12:37:25.000Z</published>
-    <updated>2020-05-11T12:38:00.000Z</updated>
-    
-    <summary type="html">
-    
-      
-      
-        
-        
-          &lt;p&gt;java是最好的语言&lt;/p&gt;
-
-        
-      
-    
-    </summary>
-    
-      <category term="Java" scheme="/categories/Java/"/>
     
     
   </entry>

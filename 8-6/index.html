@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
   
-  <title itemprop="name">Sanwan</title>
+  <title itemprop="name">iBator 数据库操作 | Sanwan</title>
   
     <link rel="shortcut icon" href="/images/favicon.ico">
   
@@ -272,449 +272,168 @@
   </div>
 </header>
 
-      <div class="blank" style="padding-top: 0px;"></div>
-<div id="content" class="site-content">
-  
-  <div class="notice" style="margin-top:60px">
-    <i class="iconfont icon-notification">
-    </i>
-    <div class="notice-content">我对普通的人类没有兴趣。你们之中要是有外星人、未来人、异世界 或者超能力者的话，就尽管来找我吧。</div>
-  </div>
-  
-  <div class="top-feature-row">
-  <h1 class="fes-title" style="font-family: 'Ubuntu', sans-serif;">
-  <i class="fa fa-anchor" aria-hidden="true">
-  </i>
-  START:DASH!!</h1>
-  
-  <div class="top-feature-v2">
-    <div class="the-feature square from_left_and_right">
-      <a href="/" target="_blank">
-        <div class="img">
-          <img src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.1/img/startdash/wangshiwu.jpg">
-        </div>
-        <div class="info">
-          <h3>三万的万事屋</h3>
-          <p>技术服务</p>
-        </div>
-      </a>
+      <link rel="stylesheet" type="text/css" href="/css/sharejs.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css">
+<div class="pattern-center-blank"></div>
+
+  <div class="pattern-center single-center">
+    <!-- 有配图默认渲染第一张 -->
+    <div class="pattern-attachment-img lazyload" style="background-image: url(https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/18.jpg);" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.1/img/loader/orange.progress-bar-stripe-loader.svg" data-src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/18.jpg">
     </div>
+    <header class="pattern-header single-header">
+      <h1 class="entry-title">
+      iBator 数据库操作</h1>
+      <p class="entry-census">
+        <span>
+          <a href="sanwan99.cn">
+            <img src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.2/img/custom/touxiang.jpg">
+          </a>
+        </span>
+        <span>
+          <a href="sanwan99.cn">三万</a>
+        </span>
+        <span class="bull">
+        ·</span>
+        2020-8-6<span class="bull">
+        ·</span>
+      <span id="busuanzi_value_page_pv"></span>次阅读</p>
+    </header>
   </div>
-  
-</div>
+
+<div id="content" class="site-content">
   <div id="primary" class="content-area">
     <main id="main" class="site-main" role="main">
-      <h1 class="main-title" style="font-family: 'Ubuntu', sans-serif;">
-      <i class="fa fa-envira" aria-hidden="true"></i>
-      Discovery</h1>
+      <article id="post-1" class="post-1 post type-post status-publish format-standard has-post-thumbnail hentry category-uncategorized">
+        <div class="toc"></div>
+        <!--<div class="toc-entry-content"><!-- 套嵌目录使用（主要为了支援评论）-->
+        
+        <div class="entry-content">
+          <p>实习公司有个比较老的项目，用的是ibatis的代码自动生成工具ibator，会自动生成映射文件和Domain层，还同时生成DAO层，用户只需编写Service层即可。 </p>
+<h4 id="iBator-数据库操作"><a href="#iBator-数据库操作" class="headerlink" title="iBator 数据库操作"></a>iBator 数据库操作</h4><p> 通过iBator导出的文件包括映射文件、Domain类、DAO类。它导出的Domain类和DAO类是依据iBator设计的框架生成的，其中包括了各种函数。我们要基于这些类来开发Service层代码。</p>
+<p> 新生成的DAO层的接口提供了以下操作函数：</p>
+<ul>
+<li>int countByExample(UserExample example) thorws SQLException：按条件计数。</li>
+<li>int deleteByPrimaryKey(Integer id) thorws SQLException：按主键删除。</li>
+<li>int deleteByExample(UserExample example) thorws SQLException：按条件删除。</li>
+<li>String/Integer insert(User record) thorws SQLException：插入 （返回值为id值）</li>
+<li>User selectByPrimaryKey(Integer id) thorws SQLException：按主键查询。</li>
+<li>List&lt;?&gt;selectByExample(UserExample example) thorws SQLException：按条件查询</li>
+<li>List&lt;?&gt;selectByExampleWithBLOGs(UserExample example) thorws SQLException：按条件查询（包括BLOB字段）。只有当数据表中的字段类型有为二进制的才会产生。</li>
+<li>int updateByPrimaryKey(User record) thorws SQLException：按主键更新</li>
+<li>int updateByPrimaryKeySelective(User record) thorws SQLException：按主键更新值不为null的字段</li>
+<li>int updateByExample(User record, UserExample example) thorws SQLException：按条件更新</li>
+<li>int updateByExampleSelective(User record, UserExample example) thorws SQLException：按条件更新值不为null的字段</li>
+</ul>
+<h4 id="详解："><a href="#详解：" class="headerlink" title="详解："></a>详解：</h4><p>UserDAOImpl userDAO = new UserDAOImpl(SqlMapClientFactory.getSqlMapClient());<br>注：SqlMapClientFactory.getSqlMapClient()：是自定义的类和方法，目的是获取SqlMapClient.</p>
+<ul>
+<li><p>① selectByPrimaryKey()</p>
+<p>  User user = userDAO.selectByPrimaryKey(100); 相当于select * from user where id = 100</p>
+</li>
+<li><p>② selectByExample() 和 selectByExampleWithBLOGs()</p>
+<p>  UserExample example = new UserExample();<br>  Criteria criteria = example.createCriteria();<br>  criteria.andUsernameEqualTo(“joe”);<br>  criteria.andUsernameIsNull();<br>  example.setOrderByClause(“username asc,email desc”);<br>  List&lt;?&gt;list = userDAO.selectByExample(example);<br>  相当于：select * from user where username = ‘joe’ and username is null order by username asc,email desc</p>
+<p>  注：在iBator 生成的文件UserExample.java中包含一个static 的内部类 Criteria ，在Criteria中有很多方法，主要是定义SQL 语句where后的查询条件。</p>
+</li>
+<li><p>③ insert()</p>
+<p>User user = new User();<br>user.setId(101);<br>user.setUsername(“test”);<br>user.setPassword(“123”)<br>user.setEmail(“<a href="mailto:joe@163.com" target="_blank" rel="noopener">joe@163.com</a>“);<br>userDAO.insert(user);<br>相当于：insert into user(ID,username,password,email) values(101,’test’,’123’,<a href="mailto:&#39;joe@163.com">&#39;joe@163.com</a>‘);</p>
+</li>
+<li><p>④ updateByPrimaryKey() 和 updateByPrimaryKeySelective()</p>
+<p>User user =new User();<br>user.setId(101);<br>user.setUsername(“joe”);<br>user.setPassword(“joe”);<br>user.setEmail(“<a href="mailto:joe@163.com" target="_blank" rel="noopener">joe@163.com</a>“);<br>userDAO.updateByPrimaryKey(user);<br>相当于：update user set username=’joe’,password=’joe’,<a href="mailto:email=&#39;joe@163.com" target="_blank" rel="noopener">email=&#39;joe@163.com</a>‘ where id=101</p>
+<p>User user = new User();<br>user.setId(101);<br>user.setPassword(“joe”);<br>userDAO.updateByPrimaryKeySelective(user);<br>相当于：update user set password=’joe’ where id=101</p>
+</li>
+<li><p>⑤ updateByExample() 和 updateByExampleSelective()</p>
+<p>UserExample example = new UserExample();<br>Criteria criteria = example.createCriteria();<br>criteria.andUsernameEqualTo(“joe”);<br>User user = new User();<br>user.setPassword(“123”);<br>userDAO.updateByPrimaryKeySelective(user,example);<br>相当于：update user set password=’123’ where username=’joe’</p>
+</li>
+<li><p>⑥ deleteByPrimaryKey()</p>
+<p>userDAO.deleteByPrimaryKey(101);  相当于：delete from user where id=101</p>
+</li>
+<li><p>⑦ deleteByExample()</p>
+<p>UserExample example = new UserExample();<br>Criteria criteria = example.createCriteria();<br>criteria.andUsernameEqualTo(“joe”);<br>userDAO.deleteByExample(example);<br>相当于：delete from user where username=’joe’</p>
+</li>
+<li><p>⑧ countByExample()</p>
+<p>UserExample example = new UserExample();<br>Criteria criteria = example.createCriteria();<br>criteria.andUsernameEqualTo(“joe”);<br>int count = userDAO.countByExample(example);<br>相当于：select count(*) from user where username=’joe’</p>
+<p>   return list;<br>}</p>
+</li>
+</ul>
+
+        </div>
+        <!-- .entry-content -->
+        <div class="single-reward">
+          <div class="reward-open">赏
+            <div class="reward-main">
+              <ul class="reward-row">
+                <li class="alipay-code"><img src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.1/img/custom/donate/AliPayQR1.jpg"></li>
+                <li class="wechat-code"><img src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.1/img/custom/donate/WeChanQR1.jpg"></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div style="text-align:center; width: 100%" class="social-share share-mobile" data-disabled="diandian, tencent"></div>
+        <footer class="post-footer">
+          <div class="post-lincenses"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="nofollow"><i class="fa fa-creative-commons" aria-hidden="true"></i> 知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议</a></div>
+          <div class="post-tags">
+          </div>
+          <div class="post-share">
+            <div class="social-share sharehidden share-component"></div>
+            <i class="iconfont show-share icon-forward"></i>
+          </div>
+        </footer><!-- .entry-footer -->
+      </article>
+      <!-- #post-## -->
+      <div class="toc" style="background: none;"></div>
+      <section class="post-squares nextprev">
+        
+        
+          
+            <div class="post-nepre full next">
+          
+            <a href="/二叉树的最近公共祖先/" rel="next">
+              <div class="background">
+                <img class="lazyload" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.1/img/loader/orange.progress-bar-stripe-loader.svg" data-src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/19.jpg" style="width: 100%; height: 100%; object-fit: cover; pointer-events: none;" onerror="imgError(this,3)" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/19.jpg">
+              </div>
+              <span class="label">
+              Next Post</span>
+              <div class="info">
+                <h3>
+                letcode67二叉树的最近公共祖先</h3>
+                <hr>
+              </div>
+            </a>
+          </div>
+        
+      </section>
       
-  <!-- 首页默认取最最新文章集 -->
-  
-    
-<article  class="post post-list-thumb post-list-thumb-left"  class="post post-list-thumb" itemscope="" itemtype="https://schema.org/BlogPosting">
+<div id="vcomments"></div>
+<script>
+  window.onload = function(){
+      var valine = new Valine();
+      valine.init({
+        el: '#vcomments',
+        appId: "YNsapdWTGuiurNqoV8eJHlsI-gzGzoHsz",
+        appKey: "JDannM5I5JMu49IKfVkscmIe",
+        path: window.location.pathname,
+        placeholder: "万万出来嚯奶茶了！"
+      })
+  }
+</script>
 
-  <div class="post-thumb">
-    <a href="/String-trim-理解/">
-      <img class="lazyload" onerror="imgError(this,3)" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.1/img/loader/orange.progress-bar-stripe-loader.svg" data-src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/27.jpg">
-    </a>
-  </div>
-  <div class="post-content-wrap">
-    <div class="post-content">
-      <div class="post-date">
-        <i class="iconfont icon-time">
-        </i>2020-5-13 12:05</div>
-      <a href="/String-trim-理解/" class="post-title">
-        <h3>String.trim()理解</h3>
-      </a>
-      <div class="post-meta">
-        <span><i class="fa fa-tags"></i>
-        
-        </span>
-        <span>
-          <i class="iconfont icon-file"></i>
-          
-            <a href="/categories/技术/">技术</a>
-          
-        </span>
-      </div>
-      <div class="float-content">
-        <p></p>
-        <div class="post-bottom">
-          <a href="/String-trim-理解/" class="button-normal">
-            <i class="iconfont icon-caidan"></i>
-          </a>
+      <section class="author-profile">
+        <div class="info" itemprop="author" itemscope="" itemtype="https://schema.org/Person">
+          <a href="sanwan99.cn" class="profile gravatar"><img src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.2/img/custom/touxiang.jpg" itemprop="image" alt="三万" height="70" width="70"></a>
+          <div class="meta">
+            <span class="title">Author</span>
+            <h3 itemprop="name">
+            <a href="sanwan99.cn" itemprop="url" rel="author">三万</a>
+            </h3>
+          </div>
         </div>
-      </div>
-    </div>
-  </div>
-</article>
-  
-    
-<article  class="post post-list-thumb" itemscope="" itemtype="https://schema.org/BlogPosting">
-
-  <div class="post-thumb">
-    <a href="/letcode58/">
-      <img class="lazyload" onerror="imgError(this,3)" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.1/img/loader/orange.progress-bar-stripe-loader.svg" data-src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/28.jpg">
-    </a>
-  </div>
-  <div class="post-content-wrap">
-    <div class="post-content">
-      <div class="post-date">
-        <i class="iconfont icon-time">
-        </i>2020-5-13 12:05</div>
-      <a href="/letcode58/" class="post-title">
-        <h3>letcode58反转单词顺序</h3>
-      </a>
-      <div class="post-meta">
-        <span><i class="fa fa-tags"></i>
-        
-        </span>
-        <span>
-          <i class="iconfont icon-file"></i>
-          
-            <a href="/categories/数据结构/">数据结构</a>
-          
-        </span>
-      </div>
-      <div class="float-content">
-        <p></p>
-        <div class="post-bottom">
-          <a href="/letcode58/" class="button-normal">
-            <i class="iconfont icon-caidan"></i>
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
-</article>
-  
-    
-<article  class="post post-list-thumb post-list-thumb-left"  class="post post-list-thumb" itemscope="" itemtype="https://schema.org/BlogPosting">
-
-  <div class="post-thumb">
-    <a href="/滑动窗口/">
-      <img class="lazyload" onerror="imgError(this,3)" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.1/img/loader/orange.progress-bar-stripe-loader.svg" data-src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/13.png">
-    </a>
-  </div>
-  <div class="post-content-wrap">
-    <div class="post-content">
-      <div class="post-date">
-        <i class="iconfont icon-time">
-        </i>2020-5-13 11:05</div>
-      <a href="/滑动窗口/" class="post-title">
-        <h3>Letcode57 滑动窗口</h3>
-      </a>
-      <div class="post-meta">
-        <span><i class="fa fa-tags"></i>
-        
-        </span>
-        <span>
-          <i class="iconfont icon-file"></i>
-          
-            <a href="/categories/数据结构/">数据结构</a>
-          
-        </span>
-      </div>
-      <div class="float-content">
-        <p></p>
-        <div class="post-bottom">
-          <a href="/滑动窗口/" class="button-normal">
-            <i class="iconfont icon-caidan"></i>
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
-</article>
-  
-    
-<article  class="post post-list-thumb" itemscope="" itemtype="https://schema.org/BlogPosting">
-
-  <div class="post-thumb">
-    <a href="/mysql错误代码2003的解决办法/">
-      <img class="lazyload" onerror="imgError(this,3)" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.1/img/loader/orange.progress-bar-stripe-loader.svg" data-src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/11.png">
-    </a>
-  </div>
-  <div class="post-content-wrap">
-    <div class="post-content">
-      <div class="post-date">
-        <i class="iconfont icon-time">
-        </i>2020-5-12 12:05</div>
-      <a href="/mysql错误代码2003的解决办法/" class="post-title">
-        <h3>mysql错误代码2003的解决办法</h3>
-      </a>
-      <div class="post-meta">
-        <span><i class="fa fa-tags"></i>
-        
-        </span>
-        <span>
-          <i class="iconfont icon-file"></i>
-          
-            <a href="/categories/数据库/">数据库</a>
-          
-        </span>
-      </div>
-      <div class="float-content">
-        <p></p>
-        <div class="post-bottom">
-          <a href="/mysql错误代码2003的解决办法/" class="button-normal">
-            <i class="iconfont icon-caidan"></i>
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
-</article>
-  
-    
-<article  class="post post-list-thumb post-list-thumb-left"  class="post post-list-thumb" itemscope="" itemtype="https://schema.org/BlogPosting">
-
-  <div class="post-thumb">
-    <a href="/树的按层遍历/">
-      <img class="lazyload" onerror="imgError(this,3)" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.1/img/loader/orange.progress-bar-stripe-loader.svg" data-src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/12.png">
-    </a>
-  </div>
-  <div class="post-content-wrap">
-    <div class="post-content">
-      <div class="post-date">
-        <i class="iconfont icon-time">
-        </i>2020-5-12 12:05</div>
-      <a href="/树的按层遍历/" class="post-title">
-        <h3>树的按层遍历</h3>
-      </a>
-      <div class="post-meta">
-        <span><i class="fa fa-tags"></i>
-        
-        </span>
-        <span>
-          <i class="iconfont icon-file"></i>
-          
-            <a href="/categories/数据结构/">数据结构</a>
-          
-        </span>
-      </div>
-      <div class="float-content">
-        <p></p>
-        <div class="post-bottom">
-          <a href="/树的按层遍历/" class="button-normal">
-            <i class="iconfont icon-caidan"></i>
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
-</article>
-  
-    
-<article  class="post post-list-thumb" itemscope="" itemtype="https://schema.org/BlogPosting">
-
-  <div class="post-thumb">
-    <a href="/JVM中new一个对象/">
-      <img class="lazyload" onerror="imgError(this,3)" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.1/img/loader/orange.progress-bar-stripe-loader.svg" data-src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/6.png">
-    </a>
-  </div>
-  <div class="post-content-wrap">
-    <div class="post-content">
-      <div class="post-date">
-        <i class="iconfont icon-time">
-        </i>2020-5-12 12:05</div>
-      <a href="/JVM中new一个对象/" class="post-title">
-        <h3>JVM中new一个对象</h3>
-      </a>
-      <div class="post-meta">
-        <span><i class="fa fa-tags"></i>
-        
-        </span>
-        <span>
-          <i class="iconfont icon-file"></i>
-          
-            <a href="/categories/Java/">Java</a>
-          
-        </span>
-      </div>
-      <div class="float-content">
-        <p></p>
-        <div class="post-bottom">
-          <a href="/JVM中new一个对象/" class="button-normal">
-            <i class="iconfont icon-caidan"></i>
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
-</article>
-  
-    
-<article  class="post post-list-thumb post-list-thumb-left"  class="post post-list-thumb" itemscope="" itemtype="https://schema.org/BlogPosting">
-
-  <div class="post-thumb">
-    <a href="/JVM体系结构/">
-      <img class="lazyload" onerror="imgError(this,3)" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.1/img/loader/orange.progress-bar-stripe-loader.svg" data-src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/5.png">
-    </a>
-  </div>
-  <div class="post-content-wrap">
-    <div class="post-content">
-      <div class="post-date">
-        <i class="iconfont icon-time">
-        </i>2020-5-12 12:05</div>
-      <a href="/JVM体系结构/" class="post-title">
-        <h3>JVM体系结构</h3>
-      </a>
-      <div class="post-meta">
-        <span><i class="fa fa-tags"></i>
-        
-        </span>
-        <span>
-          <i class="iconfont icon-file"></i>
-          
-            <a href="/categories/Java/">Java</a>
-          
-        </span>
-      </div>
-      <div class="float-content">
-        <p></p>
-        <div class="post-bottom">
-          <a href="/JVM体系结构/" class="button-normal">
-            <i class="iconfont icon-caidan"></i>
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
-</article>
-  
-    
-<article  class="post post-list-thumb" itemscope="" itemtype="https://schema.org/BlogPosting">
-
-  <div class="post-thumb">
-    <a href="/垃圾回收/">
-      <img class="lazyload" onerror="imgError(this,3)" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.1/img/loader/orange.progress-bar-stripe-loader.svg" data-src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/4.png">
-    </a>
-  </div>
-  <div class="post-content-wrap">
-    <div class="post-content">
-      <div class="post-date">
-        <i class="iconfont icon-time">
-        </i>2020-5-12 11:05</div>
-      <a href="/垃圾回收/" class="post-title">
-        <h3>垃圾回收</h3>
-      </a>
-      <div class="post-meta">
-        <span><i class="fa fa-tags"></i>
-        
-        </span>
-        <span>
-          <i class="iconfont icon-file"></i>
-          
-            <a href="/categories/Java/">Java</a>
-          
-        </span>
-      </div>
-      <div class="float-content">
-        <p></p>
-        <div class="post-bottom">
-          <a href="/垃圾回收/" class="button-normal">
-            <i class="iconfont icon-caidan"></i>
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
-</article>
-  
-    
-<article  class="post post-list-thumb post-list-thumb-left"  class="post post-list-thumb" itemscope="" itemtype="https://schema.org/BlogPosting">
-
-  <div class="post-thumb">
-    <a href="/主从复制/">
-      <img class="lazyload" onerror="imgError(this,3)" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.1/img/loader/orange.progress-bar-stripe-loader.svg" data-src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/10.png">
-    </a>
-  </div>
-  <div class="post-content-wrap">
-    <div class="post-content">
-      <div class="post-date">
-        <i class="iconfont icon-time">
-        </i>2020-5-12 11:05</div>
-      <a href="/主从复制/" class="post-title">
-        <h3>主从复制</h3>
-      </a>
-      <div class="post-meta">
-        <span><i class="fa fa-tags"></i>
-        
-        </span>
-        <span>
-          <i class="iconfont icon-file"></i>
-          
-            <a href="/categories/数据库/">数据库</a>
-          
-        </span>
-      </div>
-      <div class="float-content">
-        <p></p>
-        <div class="post-bottom">
-          <a href="/主从复制/" class="button-normal">
-            <i class="iconfont icon-caidan"></i>
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
-</article>
-  
-    
-<article  class="post post-list-thumb" itemscope="" itemtype="https://schema.org/BlogPosting">
-
-  <div class="post-thumb">
-    <a href="/MySQL中的锁/">
-      <img class="lazyload" onerror="imgError(this,3)" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.1/img/loader/orange.progress-bar-stripe-loader.svg" data-src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/9.png">
-    </a>
-  </div>
-  <div class="post-content-wrap">
-    <div class="post-content">
-      <div class="post-date">
-        <i class="iconfont icon-time">
-        </i>2020-5-12 11:05</div>
-      <a href="/MySQL中的锁/" class="post-title">
-        <h3>MySQL中的锁</h3>
-      </a>
-      <div class="post-meta">
-        <span><i class="fa fa-tags"></i>
-        
-        </span>
-        <span>
-          <i class="iconfont icon-file"></i>
-          
-            <a href="/categories/数据库/">数据库</a>
-          
-        </span>
-      </div>
-      <div class="float-content">
-        <p></p>
-        <div class="post-bottom">
-          <a href="/MySQL中的锁/" class="button-normal">
-            <i class="iconfont icon-caidan"></i>
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
-</article>
-  
-
-
-    </main>
-      <!-- 首页默认取最最新文章集 -->
-    <!-- 
-      <nav class="navigator">
-        
-        <a class="extend prev" rel="prev" href="/"><i class="iconfont icon-back"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/3/"><i class="iconfont icon-right"></i></a>
-      </nav>
-     -->
-  </div>
-  
-    <div id="pagination"><a href="/page/3/" class="">Previous</a></div>
-  
+        <hr>
+        <p><i class="iconfont icon-write"></i>爱搞事的三万</p>
+      </section>
+    </main><!-- #main -->
+  </div><!-- #primary -->
 </div>
+
+
 
     </div>    
     <div class="ins-search">

@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="/"/>
-  <updated>2020-08-04T01:53:51.865Z</updated>
+  <updated>2020-08-10T01:59:17.713Z</updated>
   <id>/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>iBator 数据库操作</title>
+    <link href="/8-6/"/>
+    <id>/8-6/</id>
+    <published>2020-08-06T07:18:00.000Z</published>
+    <updated>2020-08-10T01:59:17.713Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;p&gt;实习公司有个比较老的项目，用的是ibatis的代码自动生成工具ibator，会自动生成映射文件和Domain层，还同时生成DAO层，用户只需编写Service层即可。 &lt;/p&gt;
+&lt;h4 id=&quot;iBator-数据库操作&quot;&gt;&lt;a href=&quot;#iBator-数据库操作&quot;
+        
+      
+    
+    </summary>
+    
+      <category term="技术" scheme="/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+  </entry>
   
   <entry>
     <title>letcode67二叉树的最近公共祖先</title>
@@ -142,7 +167,7 @@
     <link href="/%E5%85%B3%E4%BA%8Egit%E6%8F%90%E4%BA%A4%E6%96%B9%E9%9D%A2%E7%9A%84%E6%8A%A5%E9%94%99/"/>
     <id>/关于git提交方面的报错/</id>
     <published>2020-07-24T03:12:00.000Z</published>
-    <updated>2020-07-24T03:19:58.847Z</updated>
+    <updated>2020-08-06T01:18:19.924Z</updated>
     
     <summary type="html">
     
@@ -150,7 +175,7 @@
       
         
         
-          &lt;p&gt;今天在公司搭hexo环境，发现了hexo d的时候一直报错，差了很多相关的资料发现是公钥的问题，以下是解决方案&lt;/p&gt;
+          &lt;p&gt;今天在公司搭hexo环境，发现了hexo d的时候一直报错，查找了很多相关的资料发现是公钥的问题，以下是解决方案&lt;/p&gt;
 &lt;h1 id=&quot;只适用于只有一个git环境&quot;&gt;&lt;a href=&quot;#只适用于只有一个git环境&quot; class=&quot;headerlink&quot;
         
       
@@ -475,32 +500,6 @@
         
         
           &lt;h2 id=&quot;事务及其ACID属性：&quot;&gt;&lt;a href=&quot;#事务及其ACID属性：&quot; class=&quot;headerlink&quot; title=&quot;事务及其ACID属性：&quot;&gt;&lt;/a&gt;事务及其ACID属性：&lt;/h2&gt;&lt;p&gt;  
-        
-      
-    
-    </summary>
-    
-      <category term="数据库" scheme="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>InnoDB和MyISAM的区别</title>
-    <link href="/InnoDB%E5%92%8CMyISAM%E7%9A%84%E5%8C%BA%E5%88%AB/"/>
-    <id>/InnoDB和MyISAM的区别/</id>
-    <published>2020-05-12T03:21:00.000Z</published>
-    <updated>2020-05-12T04:27:34.000Z</updated>
-    
-    <summary type="html">
-    
-      
-      
-        
-        
-          &lt;ul&gt;
-&lt;li&gt;&lt;p&gt;1：InnoDB支持事务，而MyISAM不支持，因此MyISAM的查询效率比InnoDB高&lt;/p&gt;
-&lt;p&gt;解决方法：可以取消自动提交事务功能 
         
       
     

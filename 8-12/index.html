@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
   
-  <title itemprop="name">Category: 配置 | Sanwan</title>
+  <title itemprop="name">Comparable和Comparator接口的区别 | Sanwan</title>
   
     <link rel="shortcut icon" href="/images/favicon.ico">
   
@@ -272,171 +272,219 @@
   </div>
 </header>
 
-      
+      <link rel="stylesheet" type="text/css" href="/css/sharejs.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css">
 <div class="pattern-center-blank"></div>
-<div class="pattern-center ">
-  <div class="pattern-attachment-img">
-    <img data-src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/1.png" class="lazyload" onerror="imgError(this,3)" style="width: 100%; height: 100%; object-fit: cover; pointer-events: none;">
+
+  <div class="pattern-center single-center">
+    <!-- 有配图默认渲染第一张 -->
+    <div class="pattern-attachment-img lazyload" style="background-image: url(https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/17.jpg);" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.1/img/loader/orange.progress-bar-stripe-loader.svg" data-src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/17.jpg">
+    </div>
+    <header class="pattern-header single-header">
+      <h1 class="entry-title">
+      Comparable和Comparator接口的区别</h1>
+      <p class="entry-census">
+        <span>
+          <a href="sanwan99.cn">
+            <img src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.2/img/custom/touxiang.jpg">
+          </a>
+        </span>
+        <span>
+          <a href="sanwan99.cn">三万</a>
+        </span>
+        <span class="bull">
+        ·</span>
+        2020-8-12<span class="bull">
+        ·</span>
+      <span id="busuanzi_value_page_pv"></span>次阅读</p>
+    </header>
   </div>
-  <header class="pattern-header ">
-    <h1 class="cat-title">配置文件</h1>
-    <span class="cat-des">
-      <p>偷懒的小技巧</p>
-    </span>
-  </header>
-</div>
+
 <div id="content" class="site-content">
   <div id="primary" class="content-area">
     <main id="main" class="site-main" role="main">
+      <article id="post-1" class="post-1 post type-post status-publish format-standard has-post-thumbnail hentry category-uncategorized">
+        <div class="toc"></div>
+        <!--<div class="toc-entry-content"><!-- 套嵌目录使用（主要为了支援评论）-->
+        
+        <div class="entry-content">
+          <h3 id="Comparable用法"><a href="#Comparable用法" class="headerlink" title="Comparable用法"></a>Comparable用法</h3><p> 在给集合排序的时候，我们需要用到一个工具类叫做Collections，这个工具类可以用来给集合排序,详见如下代码：</p>
+<pre><code>List&lt;Integer&gt; list = new ArrayList&lt;&gt;();
+list.add(14);
+list.add(30);
+list.add(3);
+list.add(12);
+Collections.sort(list);
+System.out.println(list);//3,12，14,30
+
+</code></pre><p>很显然，Collections对于Integer类型的数组默认的排序结果是升序的</p>
+<p> 那么如果我们创建一个自定义类型的Person数组能否进行排序呢，大家可以用代码试一下，结果是不可以的，为什么会有这样的问题呢，我们去看一下Collections中的sort方法，就可以发现问题：</p>
+<pre><code> public static &lt;T extends Comparable&lt;? super T&gt;&gt; void sort(List&lt;T&gt; list) {
+        list.sort(null);
+
+</code></pre><p> 在泛型的规则中，有一个T extends Comparable的泛型通配符 ，对于要排序的list中的T进行了一个限制，要求集合中的T必须要实现Comparable接口，我们可以按照这个思路，写一个Person类，实现Comparable接口，而这个接口中，有一个抽象方法需要我们实现，这个方法就是CompareTo</p>
+<pre><code>
+      public class Person implements Comparable&lt;Person&gt;{
+      String name;
+      Integer age;
+      public Person(String name, int age) {
+          super();
+          this.name = name;
+          this.age = age;
+      }
+      public Person()
+  {
+      super();
+  }
+      @Override
+      public String toString() {
+      return &quot;Person [name=&quot; + name + &quot;, age=&quot; + age + &quot;]&quot;;
+      }
+
+
+      public String getName() {
+          return name;
+      }
+      public void setName(String name) {
+          this.name = name;
+      }
+      public Integer getAge() {
+          return age;
+      }
+      public void setAge(Integer age) {
+          this.age = age;
+      }
+      //排序的规则
+      public int compareTo(Person o) {
+          //引用类型（可以排序的类型）可以直接调用CompareTo方法
+          //基本类型--使用   减  
+          //return this.age - o.age;//用this对象 - 参数中的对            象，是按照该属性的升序进行的排列
+          //return o.age - this.age;
+
+          //return this.name.compareTo(o.name);
+          //return o.name.compareTo(this.name);
+
+          return this.age.compareTo(o.age);
+      }
+</code></pre><p> 而compareTo方法，实际上就是我们需要设置的排序的规则，到底按照什么样的方式进行排序。简单的记，使用this对象和参数比较，就是升序，反之就是降序。所以我们如果想要让Person集合中的对象按照年龄进行降序排列，就可以使用o.age -this.age；（基本类型可以使用减法替代compareTo）；</p>
+<p>  这样，你再次使用Collections.sort就可以对Person的List进行排序了，排序的结果是按照年龄的降序。</p>
+<p>  总结一下，如果我们想要让一个List可以使用Collections.sort(list) 的方法进行排序，则必须要求集合中的元素类型，实现Comparable接口，也就是让他具备比较能力，这也是为什么Integer类型的数组可以排序，就是因为Integer已经实现了该接口，并且他是按照升序的规则实现的，这也就解释了为什么上边的第一个程序得到的结果是升序。好了那么既然Integer是按照升序的方式实现的排序，那么如果我想要得到一个降序的Integer集合该怎么办呢？难道就实现不了了么？我们接着来看下一个接口。</p>
+<h3 id="Comparator"><a href="#Comparator" class="headerlink" title="Comparator"></a>Comparator</h3><p>对于已经实现了Comparable接口的集合，或者是我压根就不想实现Comparable接口的集合难道就排不了序了么，或者就无法更改排序的规则了么，实际上不是的，我们可以通过另一种方式来排序，就是利用Comparator接口。</p>
+<p>  在集合的工具类中种还有这样的一个方法：public static <t> void sort(List<t> list, Comparator&lt;? super T&gt; c) </t></t></p>
+<p>  我们可以通过这个方法实现上面的需求：</p>
+<pre><code>Collections.sort(list,new Comparator&lt;Integer&gt;(){
+            @Override
+            public int compare(Integer o1, Integer o2) {
+                return o2 - o1;
+            }
+        });
+</code></pre><p> 比如这段代码，就实现了一个Integer集合的降序排列。这个接口中有一个方法叫做compare，里边包含两个参数：如果用第一个和第二个做比较得到的就是升序，反之得到的就是降序。同样的你也可以使用这种方式对我们自己定义的类记性排序。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><ul>
+<li><p>Comparable接口位于 java.lang包下，Comparator接口位于java.util包下。</p>
+</li>
+<li><p>Comparable:    内部比较器，一个类如果想要使用    Collections.sort(list) 方法进行排序，则需要实现该接口</p>
+</li>
+<li><p>Comparator:    外部比较器用于对那些没有实现Comparable接口或者对已经实现的Comparable中的排序规则不满意进行排序.无需改变类的结构，更加灵活。（策略模式）</p>
+</li>
+</ul>
+
+        </div>
+        <!-- .entry-content -->
+        <div class="single-reward">
+          <div class="reward-open">赏
+            <div class="reward-main">
+              <ul class="reward-row">
+                <li class="alipay-code"><img src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.1/img/custom/donate/AliPayQR1.jpg"></li>
+                <li class="wechat-code"><img src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.1/img/custom/donate/WeChanQR1.jpg"></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div style="text-align:center; width: 100%" class="social-share share-mobile" data-disabled="diandian, tencent"></div>
+        <footer class="post-footer">
+          <div class="post-lincenses"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="nofollow"><i class="fa fa-creative-commons" aria-hidden="true"></i> 知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议</a></div>
+          <div class="post-tags">
+          </div>
+          <div class="post-share">
+            <div class="social-share sharehidden share-component"></div>
+            <i class="iconfont show-share icon-forward"></i>
+          </div>
+        </footer><!-- .entry-footer -->
+      </article>
+      <!-- #post-## -->
+      <div class="toc" style="background: none;"></div>
+      <section class="post-squares nextprev">
+        
+          
+            <div class="post-nepre half previous">
+          
+            <a href="/8-12-1/" rel="prev">
+              <div class="background">
+                <img class="lazyload" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.1/img/loader/orange.progress-bar-stripe-loader.svg" data-src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/16.jpg" style="width: 100%; height: 100%; object-fit: cover; pointer-events: none;" onerror="imgError(this,3)" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/16.jpg">
+              </div>
+              <span class="label">
+              Previous Post</span>
+              <div class="info">
+                <h3>
+                Redis相关配置</h3>
+                <hr>
+              </div>
+            </a>
+          </div>
+        
+        
+          
+            <div class="post-nepre half next">
+          
+            <a href="/8-6/" rel="next">
+              <div class="background">
+                <img class="lazyload" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.1/img/loader/orange.progress-bar-stripe-loader.svg" data-src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/18.jpg" style="width: 100%; height: 100%; object-fit: cover; pointer-events: none;" onerror="imgError(this,3)" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/18.jpg">
+              </div>
+              <span class="label">
+              Next Post</span>
+              <div class="info">
+                <h3>
+                iBator 数据库操作</h3>
+                <hr>
+              </div>
+            </a>
+          </div>
+        
+      </section>
       
-  <!-- 首页默认取最最新文章集 -->
-  
-    <article class="post post-list" itemscope="" itemtype="https://schema.org/BlogPosting">
-  <div class="post-entry">
-    <div class="feature">
-      <a href="/8-12-1/">
-        <div class="overlay">
-          <i class="iconfont icon-text">
-          </i>
-        </div>
-        <img width="150" height="150" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/16.jpg" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" alt="" >
-      </a>
-    </div>
-    <h1 class="entry-title">
-    <a href="/8-12-1/">
-    Redis相关配置</a>
-    </h1>
-    <div class="p-time">
-      <i class="iconfont icon-time">
-      </i>
-    2020-8-12</div>
-    <p>
-    </p>
-    <footer class="entry-footer">
-      <div class="post-more">
-        <a href="/8-12-1/">
-          <i class="iconfont icon-caidan">
-          </i>
-        </a>
-      </div>
-    </footer>
-  </div>
-  <hr>
-</article>
-  
-    <article class="post post-list" itemscope="" itemtype="https://schema.org/BlogPosting">
-  <div class="post-entry">
-    <div class="feature">
-      <a href="/配置/">
-        <div class="overlay">
-          <i class="iconfont icon-text">
-          </i>
-        </div>
-        <img width="150" height="150" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/20.jpg" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" alt="" >
-      </a>
-    </div>
-    <h1 class="entry-title">
-    <a href="/配置/">
-    配置</a>
-    </h1>
-    <div class="p-time">
-      <i class="iconfont icon-time">
-      </i>
-    2020-5-11</div>
-    <p>
-    </p>
-    <footer class="entry-footer">
-      <div class="post-more">
-        <a href="/配置/">
-          <i class="iconfont icon-caidan">
-          </i>
-        </a>
-      </div>
-    </footer>
-  </div>
-  <hr>
-</article>
-  
+<div id="vcomments"></div>
+<script>
+  window.onload = function(){
+      var valine = new Valine();
+      valine.init({
+        el: '#vcomments',
+        appId: "YNsapdWTGuiurNqoV8eJHlsI-gzGzoHsz",
+        appKey: "JDannM5I5JMu49IKfVkscmIe",
+        path: window.location.pathname,
+        placeholder: "万万出来嚯奶茶了！"
+      })
+  }
+</script>
 
-
-      <div class="clearer">
-      </div>
-    </main>
-    <!--  -->
-    
-  </div>
+      <section class="author-profile">
+        <div class="info" itemprop="author" itemscope="" itemtype="https://schema.org/Person">
+          <a href="sanwan99.cn" class="profile gravatar"><img src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.2/img/custom/touxiang.jpg" itemprop="image" alt="三万" height="70" width="70"></a>
+          <div class="meta">
+            <span class="title">Author</span>
+            <h3 itemprop="name">
+            <a href="sanwan99.cn" itemprop="url" rel="author">三万</a>
+            </h3>
+          </div>
+        </div>
+        <hr>
+        <p><i class="iconfont icon-write"></i>爱搞事的三万</p>
+      </section>
+    </main><!-- #main -->
+  </div><!-- #primary -->
 </div>
 
-<!-- 
-  
-    <article class="post post-list" itemscope="" itemtype="https://schema.org/BlogPosting">
-  <div class="post-entry">
-    <div class="feature">
-      <a href="/8-12-1/">
-        <div class="overlay">
-          <i class="iconfont icon-text">
-          </i>
-        </div>
-        <img width="150" height="150" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/16.jpg" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" alt="" >
-      </a>
-    </div>
-    <h1 class="entry-title">
-    <a href="/8-12-1/">
-    Redis相关配置</a>
-    </h1>
-    <div class="p-time">
-      <i class="iconfont icon-time">
-      </i>
-    2020-8-12</div>
-    <p>
-    </p>
-    <footer class="entry-footer">
-      <div class="post-more">
-        <a href="/8-12-1/">
-          <i class="iconfont icon-caidan">
-          </i>
-        </a>
-      </div>
-    </footer>
-  </div>
-  <hr>
-</article>
-  
-    <article class="post post-list" itemscope="" itemtype="https://schema.org/BlogPosting">
-  <div class="post-entry">
-    <div class="feature">
-      <a href="/配置/">
-        <div class="overlay">
-          <i class="iconfont icon-text">
-          </i>
-        </div>
-        <img width="150" height="150" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/20.jpg" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" alt="" >
-      </a>
-    </div>
-    <h1 class="entry-title">
-    <a href="/配置/">
-    配置</a>
-    </h1>
-    <div class="p-time">
-      <i class="iconfont icon-time">
-      </i>
-    2020-5-11</div>
-    <p>
-    </p>
-    <footer class="entry-footer">
-      <div class="post-more">
-        <a href="/配置/">
-          <i class="iconfont icon-caidan">
-          </i>
-        </a>
-      </div>
-    </footer>
-  </div>
-  <hr>
-</article>
-  
 
- -->
+
     </div>    
     <div class="ins-search">
     <div class="ins-search-mask"></div>

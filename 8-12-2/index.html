@@ -342,7 +342,7 @@
           try (//创建一个ObjectOutputStream输出流
                ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(&quot;object.txt&quot;))) {
               //将对象序列化到文件s
-              Person person = new Person(&quot;9龙&quot;, 23);
+              Person person = new Person(&quot;序列化&quot;, 23);
               oos.writeObject(person);
           } catch (Exception e) {
               e.printStackTrace();
@@ -383,7 +383,7 @@
       }
     }
     //输出结果
-    //Person{name=&#39;9龙&#39;, age=23}
+    //Person{name=&#39;序列化&#39;, age=23}
 </code></pre><p> 输出告诉我们，反序列化并不会调用构造方法。反序列的对象是由JVM自己生成的对象，不通过构造方法生成。</p>
 <h4 id="1-2-成员是引用的序列化"><a href="#1-2-成员是引用的序列化" class="headerlink" title="1.2 成员是引用的序列化"></a>1.2 成员是引用的序列化</h4><p>如果一个可序列化的类的成员不是基本类型，也不是String类型，那这个引用类型也必须是可序列化的；否则，会导致此类不能序列化。</p>
 <p>看例子，我们新增一个Teacher类。将Person去掉实现Serializable接口代码。</p>
@@ -465,7 +465,7 @@ public class WriteObject {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(&quot;person.txt&quot;));
              ObjectInputStream ios = new ObjectInputStream(new FileInputStream(&quot;person.txt&quot;))) {
             //第一次序列化person
-            Person person = new Person(&quot;9龙&quot;, 23);
+            Person person = new Person(&quot;序列化&quot;, 23);
             oos.writeObject(person);
             System.out.println(person);
             //修改name
@@ -484,7 +484,7 @@ public class WriteObject {
     }
 }
 //输出结果
-//Person{name=&#39;9龙&#39;, age=23}
+//Person{name=&#39;序列化&#39;, age=23}
 //Person{name=&#39;海贼王&#39;, age=23}
 //true
 //true
@@ -506,7 +506,7 @@ public class WriteObject {
        public static void main(String[] args) throws Exception {
            try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(&quot;person.txt&quot;));
                 ObjectInputStream ios = new ObjectInputStream(new FileInputStream(&quot;person.txt&quot;))) {
-               Person person = new Person(&quot;9龙&quot;, 23);
+               Person person = new Person(&quot;序列化&quot;, 23);
                person.setHeight(185);
                System.out.println(person);
                oos.writeObject(person);
@@ -516,7 +516,7 @@ public class WriteObject {
        }
     }
     //输出结果
-    //Person{name=&#39;9龙&#39;, age=23&#39;, singlehood=true&#39;, height=185cm}
+    //Person{name=&#39;序列化&#39;, age=23&#39;, singlehood=true&#39;, height=185cm}
     //Person{name=&#39;null&#39;, age=0&#39;, singlehood=false&#39;, height=185cm}
 </code></pre><p>   从输出我们看到，使用<strong>transient</strong>修饰的属性，java序列化时，会忽略掉此字段，所以反序列化出的对象，被<strong>transient</strong>修饰的属性是默认值。对于引用类型，值是null；基本类型，值是0；boolean类型，值是false。<br>    使用<strong>transient</strong>虽然简单，但将此属性完全隔离在了序列化之外。java提供了可选的自定义序列化。可以进行控制序列化的方式，或者对序列化数据进行编码加密等。</p>
 <pre><code>    private void writeObject(java.io.ObjectOutputStream out) throws IOException；
@@ -560,7 +560,7 @@ public class WriteObject {
            public static void main(String[] args) throws Exception {
               try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(&quot;person.txt&quot;));
                    ObjectInputStream ios = new ObjectInputStream(new FileInputStream(&quot;person.txt&quot;))) {
-                  Person person = new Person(&quot;9龙&quot;, 23);
+                  Person person = new Person(&quot;序列化&quot;, 23);
                   oos.writeObject(person);
                   ArrayList list = (ArrayList)ios.readObject();
                   System.out.println(list);
@@ -568,7 +568,7 @@ public class WriteObject {
           }
         }
         //输出结果
-        //[9龙, 23]
+        //[序列化, 23]
 
         readResolve：反序列化时替换反序列化出的对象，反序列化出来的对象被立即丢弃。此方法在readeObject后调用。
 
@@ -582,7 +582,7 @@ public class WriteObject {
             public static void main(String[] args) throws Exception {
                 try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(&quot;person.txt&quot;));
                      ObjectInputStream ios = new ObjectInputStream(new FileInputStream(&quot;person.txt&quot;))) {
-                    Person person = new Person(&quot;9龙&quot;, 23);
+                    Person person = new Person(&quot;序列化&quot;, 23);
                     oos.writeObject(person);
                     HashMap map = (HashMap)ios.readObject();
                     System.out.println(map);

@@ -233,10 +233,10 @@ protected Object doCreateBean(final String beanName, final RootBeanDefinition mb
 <p>  注：在iBator 生成的文件UserExample.java中包含一个static 的内部类 Criteria ，在Criteria中有很多方法，主要是定义SQL 语句where后的查询条件。</p>
 </li>
 <li><p>③ insert()</p>
-<p>User user = new User();<br>user.setId(101);<br>user.setUsername(“test”);<br>user.setPassword(“123”)<br>user.setEmail(“<a href="mailto:&#x6a;&#x6f;&#x65;&#x40;&#49;&#x36;&#51;&#x2e;&#x63;&#111;&#x6d;">&#x6a;&#x6f;&#x65;&#x40;&#49;&#x36;&#51;&#x2e;&#x63;&#111;&#x6d;</a>“);<br>userDAO.insert(user);<br>相当于：insert into user(ID,username,password,email) values(101,’test’,’123’,‘joe@163.com’);</p>
+<p>User user = new User();<br>user.setId(101);<br>user.setUsername(“test”);<br>user.setPassword(“123”)<br>user.setEmail(“<a href="mailto:&#x6a;&#111;&#101;&#64;&#x31;&#54;&#51;&#46;&#99;&#x6f;&#109;">&#x6a;&#111;&#101;&#64;&#x31;&#54;&#51;&#46;&#99;&#x6f;&#109;</a>“);<br>userDAO.insert(user);<br>相当于：insert into user(ID,username,password,email) values(101,’test’,’123’,‘joe@163.com’);</p>
 </li>
 <li><p>④ updateByPrimaryKey() 和 updateByPrimaryKeySelective()</p>
-<p>User user =new User();<br>user.setId(101);<br>user.setUsername(“joe”);<br>user.setPassword(“joe”);<br>user.setEmail(“<a href="mailto:&#106;&#111;&#x65;&#64;&#49;&#54;&#51;&#x2e;&#99;&#x6f;&#109;">&#106;&#111;&#x65;&#64;&#49;&#54;&#51;&#x2e;&#99;&#x6f;&#109;</a>“);<br>userDAO.updateByPrimaryKey(user);<br>相当于：update user set username=’joe’,password=’joe’,email=’joe@163.com’ where id=101</p>
+<p>User user =new User();<br>user.setId(101);<br>user.setUsername(“joe”);<br>user.setPassword(“joe”);<br>user.setEmail(“<a href="mailto:&#x6a;&#111;&#101;&#64;&#49;&#x36;&#51;&#46;&#x63;&#111;&#x6d;">&#x6a;&#111;&#101;&#64;&#49;&#x36;&#51;&#46;&#x63;&#111;&#x6d;</a>“);<br>userDAO.updateByPrimaryKey(user);<br>相当于：update user set username=’joe’,password=’joe’,email=’joe@163.com’ where id=101</p>
 <p>User user = new User();<br>user.setId(101);<br>user.setPassword(“joe”);<br>userDAO.updateByPrimaryKeySelective(user);<br>相当于：update user set password=’joe’ where id=101</p>
 </li>
 <li><p>⑤ updateByExample() 和 updateByExampleSelective()</p>
@@ -311,6 +311,42 @@ protected Object doCreateBean(final String beanName, final RootBeanDefinition mb
       </categories>
   </entry>
   <entry>
+    <title>JVM体系结构</title>
+    <url>/2020/05/12/JVM%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/</url>
+    <content><![CDATA[<h2 id="程序计数器："><a href="#程序计数器：" class="headerlink" title="程序计数器："></a>程序计数器：</h2><ul>
+<li><p>比较小的内存空间，可以看成是当前线程所执行的字节码的行号指示器</p>
+<p>字节码解释器工作时就是通过改变它的值来选取下一条需要执行的字节码指令</p>
+</li>
+<li><p>为什么每个线程都要有一个独立的程序计数器？</p>
+<p>因为任何一个确定的时刻，一个处理器只会执行一条线程中的指令，线程会一直切换，为了让线程切换后能恢复正确的执行位置</p>
+</li>
+</ul>
+<h2 id="Java虚拟机栈："><a href="#Java虚拟机栈：" class="headerlink" title="Java虚拟机栈："></a>Java虚拟机栈：</h2><ul>
+<li><p>每个方法被执行的时候，虚拟据会同步创建一个栈帧放到虚拟机栈中，调用入栈，执行完毕出栈</p>
+</li>
+<li><p>栈帧又包含了：局部变量表，方法出口，操作数栈，动态连接（后面两个什么鬼）等信息</p>
+</li>
+<li><p>局部变量表：八大基本数据类型以及对象引用reference</p>
+</li>
+<li><p>本地方法栈和虚拟机栈的区别：<br>虚拟机栈是为虚拟机执行Java方法的（字节码服务）<br>本地方法栈则是为虚拟机使用到的本地方法服务Native！<br>native：java的作用范围达不到，会去调用底层的C语音的库通过JNI调用本地方法接口</p>
+<p>JNI的作用：融合不同的语言让java为所欲为</p>
+</li>
+</ul>
+<h2 id="本地方法区："><a href="#本地方法区：" class="headerlink" title="本地方法区："></a>本地方法区：</h2><ul>
+<li><p>用于存储以及被虚拟机加载的类信息，常量，静态变量（貌似有个常量池）</p>
+<p>以前是用永久代实现方法区，所以很多人觉得永久代等于方法区</p>
+<p>1.6常量池在方法区中，1.7常量池在堆中，1.8常量池在元空间（方法区）中</p>
+</li>
+</ul>
+<h2 id="Java堆："><a href="#Java堆：" class="headerlink" title="Java堆："></a>Java堆：</h2><ul>
+<li>所有的对象实例和数组都是在里面分配内存，也称GC堆，分为元空间，Eden，Old</li>
+</ul>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+  </entry>
+  <entry>
     <title>JVM中new一个对象</title>
     <url>/2020/05/12/JVM%E4%B8%ADnew%E4%B8%80%E4%B8%AA%E5%AF%B9%E8%B1%A1/</url>
     <content><![CDATA[<h2 id="当虚拟机遇到new指令的时候"><a href="#当虚拟机遇到new指令的时候" class="headerlink" title="当虚拟机遇到new指令的时候"></a>当虚拟机遇到new指令的时候</h2><ul>
@@ -344,42 +380,6 @@ protected Object doCreateBean(final String beanName, final RootBeanDefinition mb
 </li>
 </ul>
 <p><img src="/images/pasted-6.png" alt="upload successful"></p>
-]]></content>
-      <categories>
-        <category>Java</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>JVM体系结构</title>
-    <url>/2020/05/12/JVM%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/</url>
-    <content><![CDATA[<h2 id="程序计数器："><a href="#程序计数器：" class="headerlink" title="程序计数器："></a>程序计数器：</h2><ul>
-<li><p>比较小的内存空间，可以看成是当前线程所执行的字节码的行号指示器</p>
-<p>字节码解释器工作时就是通过改变它的值来选取下一条需要执行的字节码指令</p>
-</li>
-<li><p>为什么每个线程都要有一个独立的程序计数器？</p>
-<p>因为任何一个确定的时刻，一个处理器只会执行一条线程中的指令，线程会一直切换，为了让线程切换后能恢复正确的执行位置</p>
-</li>
-</ul>
-<h2 id="Java虚拟机栈："><a href="#Java虚拟机栈：" class="headerlink" title="Java虚拟机栈："></a>Java虚拟机栈：</h2><ul>
-<li><p>每个方法被执行的时候，虚拟据会同步创建一个栈帧放到虚拟机栈中，调用入栈，执行完毕出栈</p>
-</li>
-<li><p>栈帧又包含了：局部变量表，方法出口，操作数栈，动态连接（后面两个什么鬼）等信息</p>
-</li>
-<li><p>局部变量表：八大基本数据类型以及对象引用reference</p>
-</li>
-<li><p>本地方法栈和虚拟机栈的区别：<br>虚拟机栈是为虚拟机执行Java方法的（字节码服务）<br>本地方法栈则是为虚拟机使用到的本地方法服务Native！<br>native：java的作用范围达不到，会去调用底层的C语音的库通过JNI调用本地方法接口</p>
-<p>JNI的作用：融合不同的语言让java为所欲为</p>
-</li>
-</ul>
-<h2 id="本地方法区："><a href="#本地方法区：" class="headerlink" title="本地方法区："></a>本地方法区：</h2><ul>
-<li><p>用于存储以及被虚拟机加载的类信息，常量，静态变量（貌似有个常量池）</p>
-<p>以前是用永久代实现方法区，所以很多人觉得永久代等于方法区</p>
-<p>1.6常量池在方法区中，1.7常量池在堆中，1.8常量池在元空间（方法区）中</p>
-</li>
-</ul>
-<h2 id="Java堆："><a href="#Java堆：" class="headerlink" title="Java堆："></a>Java堆：</h2><ul>
-<li>所有的对象实例和数组都是在里面分配内存，也称GC堆，分为元空间，Eden，Old</li>
-</ul>
 ]]></content>
       <categories>
         <category>Java</category>
@@ -788,6 +788,29 @@ protected Object doCreateBean(final String beanName, final RootBeanDefinition mb
       </categories>
   </entry>
   <entry>
+    <title>letcode 65 不用加减乘除做加法</title>
+    <url>/2020/07/24/letcode-65-%E4%B8%8D%E7%94%A8%E5%8A%A0%E5%87%8F%E4%B9%98%E9%99%A4%E5%81%9A%E5%8A%A0%E6%B3%95/</url>
+    <content><![CDATA[<h3 id="题目描述"><a href="#题目描述" class="headerlink" title="题目描述"></a>题目描述</h3><p>写一个函数，求两个整数之和，要求在函数体内不得使用 “+”、“-”、“*”、“/” 四则运算符号。</p>
+<p>思路 通过a&amp;b之后左移一位算出进位<br>      即a&amp;b&lt;&lt;1<br>      可以得到进位<br>      通过a^b得到非进位的和</p>
+<pre><code>     class Solution &#123;
+    public int add(int a, int b) &#123;
+     while(b!=0)&#123;//进位为0停滞循环
+     int c=(a&amp;b)&lt;&lt;1;//进位
+     a^=b;//非进位和
+     b=c;
+    &#125;
+    return a;
+    &#125;
+    
+&#125;
+</code></pre>
+<p>感觉跟以前学的微机原理很像！</p>
+]]></content>
+      <categories>
+        <category>数据结构</category>
+      </categories>
+  </entry>
+  <entry>
     <title>http小结</title>
     <url>/2020/05/19/http%E5%B0%8F%E7%BB%93/</url>
     <content><![CDATA[<h2 id="http-1-0"><a href="#http-1-0" class="headerlink" title="http 1.0"></a>http 1.0</h2><ul>
@@ -874,29 +897,6 @@ protected Object doCreateBean(final String beanName, final RootBeanDefinition mb
 ]]></content>
       <categories>
         <category>Java</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>letcode 65 不用加减乘除做加法</title>
-    <url>/2020/07/24/letcode-65-%E4%B8%8D%E7%94%A8%E5%8A%A0%E5%87%8F%E4%B9%98%E9%99%A4%E5%81%9A%E5%8A%A0%E6%B3%95/</url>
-    <content><![CDATA[<h3 id="题目描述"><a href="#题目描述" class="headerlink" title="题目描述"></a>题目描述</h3><p>写一个函数，求两个整数之和，要求在函数体内不得使用 “+”、“-”、“*”、“/” 四则运算符号。</p>
-<p>思路 通过a&amp;b之后左移一位算出进位<br>      即a&amp;b&lt;&lt;1<br>      可以得到进位<br>      通过a^b得到非进位的和</p>
-<pre><code>     class Solution &#123;
-    public int add(int a, int b) &#123;
-     while(b!=0)&#123;//进位为0停滞循环
-     int c=(a&amp;b)&lt;&lt;1;//进位
-     a^=b;//非进位和
-     b=c;
-    &#125;
-    return a;
-    &#125;
-    
-&#125;
-</code></pre>
-<p>感觉跟以前学的微机原理很像！</p>
-]]></content>
-      <categories>
-        <category>数据结构</category>
       </categories>
   </entry>
   <entry>
@@ -1136,7 +1136,7 @@ protected Object doCreateBean(final String beanName, final RootBeanDefinition mb
 pbcopy &lt; ~/.ssh/id_rsa.pub # 自动拷贝到粘贴板
 </code></pre>
 <ul>
-<li>如没有则按下述方法<br>生成： ssh-keygen -t rsa输入文件名的地方输入可以输入自定义文件名，默认是id_rsa，然后一路回车…… 注意如果自定义文件名的话，需要加一个config文件，下文有介绍。最后，输入ssh -T <a href="mailto:&#x67;&#105;&#116;&#64;&#x67;&#105;&#116;&#x68;&#x75;&#x62;&#46;&#99;&#x6f;&#109;">&#x67;&#105;&#116;&#64;&#x67;&#105;&#116;&#x68;&#x75;&#x62;&#46;&#99;&#x6f;&#109;</a>如果没有报错，再尝试输出就应该有了```<br>cat ~/.ssh/id_rsa.pub      # 控制台上输出内容<br>pbcopy &lt; ~/.ssh/id_rsa.pub # 自动拷贝到粘贴板</li>
+<li>如没有则按下述方法<br>生成： ssh-keygen -t rsa输入文件名的地方输入可以输入自定义文件名，默认是id_rsa，然后一路回车…… 注意如果自定义文件名的话，需要加一个config文件，下文有介绍。最后，输入ssh -T <a href="mailto:&#x67;&#105;&#116;&#64;&#103;&#105;&#116;&#104;&#117;&#x62;&#46;&#99;&#x6f;&#x6d;">&#x67;&#105;&#116;&#64;&#103;&#105;&#116;&#104;&#117;&#x62;&#46;&#99;&#x6f;&#x6d;</a>如果没有报错，再尝试输出就应该有了```<br>cat ~/.ssh/id_rsa.pub      # 控制台上输出内容<br>pbcopy &lt; ~/.ssh/id_rsa.pub # 自动拷贝到粘贴板</li>
 </ul>
 <p> ```</p>
 ]]></content>
@@ -1506,6 +1506,15 @@ public static void heapify(int[] tree, int n, int i) &#123;
       </categories>
   </entry>
   <entry>
+    <title>测试类博客</title>
+    <url>/2020/05/11/%E6%B5%8B%E8%AF%95%E7%B1%BB%E5%8D%9A%E5%AE%A2/</url>
+    <content><![CDATA[<p>QAQ测试哦</p>
+]]></content>
+      <categories>
+        <category>数据库</category>
+      </categories>
+  </entry>
+  <entry>
     <title>树的按层遍历</title>
     <url>/2020/05/12/%E6%A0%91%E7%9A%84%E6%8C%89%E5%B1%82%E9%81%8D%E5%8E%86/</url>
     <content><![CDATA[<ul>
@@ -1527,15 +1536,6 @@ public static void heapify(int[] tree, int n, int i) &#123;
 ]]></content>
       <categories>
         <category>数据结构</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>测试类博客</title>
-    <url>/2020/05/11/%E6%B5%8B%E8%AF%95%E7%B1%BB%E5%8D%9A%E5%AE%A2/</url>
-    <content><![CDATA[<p>QAQ测试哦</p>
-]]></content>
-      <categories>
-        <category>数据库</category>
       </categories>
   </entry>
   <entry>

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
   
-  <title itemprop="name">Bean的生命周期 | Sanwan</title>
+  <title itemprop="name">Apollo动态修改log4j2.xml | Sanwan</title>
   
     <link rel="shortcut icon" href="/images/favicon.ico">
   
@@ -278,11 +278,11 @@
 
   <div class="pattern-center single-center">
     <!-- 有配图默认渲染第一张 -->
-    <div class="pattern-attachment-img lazyload" style="background-image: url(https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/13.jpg);" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.1/img/loader/orange.progress-bar-stripe-loader.svg" data-src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/13.jpg">
+    <div class="pattern-attachment-img lazyload" style="background-image: url(https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/14.jpg);" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.1/img/loader/orange.progress-bar-stripe-loader.svg" data-src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/14.jpg">
     </div>
     <header class="pattern-header single-header">
       <h1 class="entry-title">
-      Bean的生命周期</h1>
+      Apollo动态修改log4j2.xml</h1>
       <p class="entry-census">
         <span>
           <a href="sanwan99.cn">
@@ -290,11 +290,11 @@
           </a>
         </span>
         <span>
-          <a href="sanwan99.cn">点点</a>
+          <a href="sanwan99.cn">三万</a>
         </span>
         <span class="bull">
         ·</span>
-        2020-8-27<span class="bull">
+        2021-7-28<span class="bull">
         ·</span>
       <span id="busuanzi_value_page_pv"></span>次阅读</p>
     </header>
@@ -308,77 +308,202 @@
         <!--<div class="toc-entry-content"><!-- 套嵌目录使用（主要为了支援评论）-->
         
         <div class="entry-content">
-          <h2 id="生命周期"><a href="#生命周期" class="headerlink" title="生命周期"></a>生命周期</h2><p>   实例化 Instantiation<br>   属性赋值 Populate<br>   初始化 Initialization<br>   销毁 Destruction</p>
-<p>实例化 -&gt; 属性赋值 -&gt; 初始化 -&gt; 销毁</p>
-<p>主要逻辑都在doCreate()方法中，逻辑很清晰，就是顺序调用以下三个方法，这三个方法与三个生命周期阶段一一对应，非常重要，在后续扩展接口分析中也会涉及。</p>
-<p>   createBeanInstance() -&gt; 实例化<br>   populateBean() -&gt; 属性赋值<br>   initializeBean() -&gt; 初始化</p>
-<pre><code>/ 忽略了无关代码
-protected Object doCreateBean(final String beanName, final RootBeanDefinition mbd, final @Nullable Object[] args)
-      throws BeanCreationException &#123;
-
-   // Instantiate the bean.
-   BeanWrapper instanceWrapper = null;
-   if (instanceWrapper == null) &#123;
-       // 实例化阶段！
-      instanceWrapper = createBeanInstance(beanName, mbd, args);
-   &#125;
-
-   // Initialize the bean instance.
-   Object exposedObject = bean;
-   try &#123;
-       // 属性赋值阶段！
-      populateBean(beanName, mbd, instanceWrapper);
-       // 初始化阶段！
-      exposedObject = initializeBean(beanName, exposedObject, mbd);
-   &#125;
-
-   
-   &#125;
+          <h2 id="log4j2"><a href="#log4j2" class="headerlink" title="log4j2"></a>log4j2</h2><p>   <strong>首先resouse目录下创建log4j2.xml</strong><br>   <strong>application里面配置 logging.config = classpath:log4j2/log4j2.xml</strong></p>
+<pre><code>            &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
+            &lt;Configuration status=&quot;INFO&quot; monitorInterval=&quot;30&quot;&gt;
+                &lt;Appenders&gt;
+                    &lt;Console name=&quot;console&quot; target=&quot;SYSTEM_OUT&quot;&gt;
+                        &lt;PatternLayout pattern=&quot;%d&#123;yyyy-MM-dd HH:mm:ss.SSS&#125; [%t] [%-5p] &#123;%F:%L&#125; - %m%n&quot; /&gt;
+                    &lt;/Console&gt;
+                    &lt;!--使用redis启用下面配置--&gt;
+                    &lt;RedisAppender name=&quot;redisAppender&quot; appName=&quot;log&quot; redisHost=&quot;$&#123;ctx:redisurl&#125;&quot; &gt;
+                        &lt;PatternLayout pattern=&quot;%d&#123;yyyy-MM-dd HH:mm:ss.SSS&#125; [%t] [%-5p] &#123;%F:%L&#125; - %m%n&quot; /&gt;
+                    &lt;/RedisAppender&gt;
+                &lt;/Appenders&gt;
+                &lt;Loggers&gt;
+                    &lt;root level=&quot;info&quot;&gt;
+                        &lt;appender-ref ref=&quot;redisAppender&quot;/&gt;
+                        &lt;appender-ref ref=&quot;console&quot;/&gt;
+                    &lt;/root&gt;
+                &lt;/Loggers&gt;
+            &lt;/Configuration&gt;
 </code></pre>
-<h2 id="影响多个Bean的接口"><a href="#影响多个Bean的接口" class="headerlink" title="影响多个Bean的接口"></a>影响多个Bean的接口</h2><p>实现了这些接口的Bean会切入到多个Bean的生命周期中。正因为如此，这些接口的功能非常强大，Spring内部扩展也经常使用这些接口，例如自动注入以及AOP的实现都和他们有关。</p>
-<p>   <strong>BeanPostProcessor</strong><br>   <strong>InstantiationAwareBeanPostProcessor</strong></p>
-<p>这两兄弟可能是Spring扩展中最重要的两个接口！<br>InstantiationAwareBeanPostProcessor作用于实例化阶段的前后，BeanPostProcessor作用于初始化阶段的前后。<br>正好和第一、第三个生命周期阶段对应。通过图能更好理解：</p>
-<p><img src="/images/pasted-34.png" alt="upload successful"><br>InstantiationAwareBeanPostProcessor实际上继承了BeanPostProcessor接口，严格意义上来看他们不是两兄弟，而是两父子。但是从生命周期角度我们重点关注其特有的对实例化阶段的影响，</p>
-<h2 id="只调用一次的接口"><a href="#只调用一次的接口" class="headerlink" title="只调用一次的接口"></a>只调用一次的接口</h2><p>这一大类接口的特点是功能丰富，常用于用户自定义扩展。<br>第二大类中又可以分为两类：</p>
-<pre><code>Aware类型的接口
-生命周期接口
-</code></pre>
-<p>无所不知的Aware</p>
-<p>Aware类型的接口的作用就是让我们能够拿到Spring容器中的一些资源。基本都能够见名知意，Aware之前的名字就是可以拿到什么资源，例如BeanNameAware可以拿到BeanName，以此类推。调用时机需要注意：所有的Aware方法都是在初始化阶段之前调用的！<br>Aware接口众多，这里同样通过分类的方式帮助大家记忆。<br>Aware接口具体可以分为两组，至于为什么这么分，详见下面的源码分析。如下排列顺序同样也是Aware接口的执行顺序，能够见名知意的接口不再解释。</p>
-<p>Aware Group1</p>
-<p>   BeanNameAware<br>   BeanClassLoaderAware<br>   BeanFactoryAware</p>
-<p>Aware Group2</p>
-<p>   EnvironmentAware<br>   EmbeddedValueResolverAware 这个知道的人可能不多，实现该接口能够获取Spring EL解析器，用户的自定义注解需要支持spel表达式的时候可以使用，非常方便。<br>    ApplicationContextAware(ResourceLoaderAware\ApplicationEventPublisherAware\MessageSourceAware) 这几个接口可能让人有点懵，实际上这几个接口可以一起记，其返回值实质上都是当前的ApplicationContext对象，因为ApplicationContext是一个复合接口，</p>
-<h3 id="Aware调用时机源码分析"><a href="#Aware调用时机源码分析" class="headerlink" title="Aware调用时机源码分析"></a>Aware调用时机源码分析</h3><p>详情如下，忽略了部分无关代码。代码位置就是我们上文提到的initializeBean方法详情，这也说明了Aware都是在初始化阶段之前调用的！</p>
-<pre><code>// 见名知意，初始化阶段调用的方法
-    protected Object initializeBean(final String beanName, final Object bean, @Nullable RootBeanDefinition mbd) &#123;
+<h2 id="Apollo"><a href="#Apollo" class="headerlink" title="Apollo"></a>Apollo</h2><p><strong>Apollo配置namespace</strong></p>
+<p><img src="/images/pasted-36.png" alt="upload successful"></p>
+<h2 id="环境变量"><a href="#环境变量" class="headerlink" title="环境变量"></a>环境变量</h2><p><strong>idea的环境变量，根据自己的修改</strong></p>
+<p><img src="/images/pasted-37.png" alt="upload successful"></p>
+<h2 id="自定义ApolloConfig"><a href="#自定义ApolloConfig" class="headerlink" title="自定义ApolloConfig"></a>自定义ApolloConfig</h2><pre><code>package com.apollolog.demo.config;
 
-        // 这里调用的是Group1中的三个Bean开头的Aware
-        invokeAwareMethods(beanName, bean);
+import com.ctrip.framework.apollo.Config;
+import com.ctrip.framework.apollo.ConfigChangeListener;
+import com.ctrip.framework.apollo.ConfigService;
+import com.ctrip.framework.apollo.model.ConfigChange;
+import com.ctrip.framework.apollo.model.ConfigChangeEvent;
+import lombok.extern.slf4j.Slf4j;
 
-        Object wrappedBean = bean;
-        
-        // 这里调用的是Group2中的几个Aware，
-        // 而实质上这里就是前面所说的BeanPostProcessor的调用点！
-        // 也就是说与Group1中的Aware不同，这里是通过BeanPostProcessor（ApplicationContextAwareProcessor）实现的。
-        wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
-        // 下文即将介绍的InitializingBean调用点
-        invokeInitMethods(beanName, wrappedBean, mbd);
-        // BeanPostProcessor的另一个调用点
-        wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
+@Slf4j
+public class ApolloConfig &#123;
+    private static ApolloConfig instance;
+    private static Object locked = new Object();
+    private Config config;
+    private String DEFAULT_VALUE = &quot;undefined&quot;;
 
-        return wrappedBean;
+    private ApolloConfig()
+    &#123;
+        ConfigChangeListener changeListener = new ConfigChangeListener() &#123;
+            @Override
+            public void onChange(ConfigChangeEvent changeEvent) &#123;
+                log.info(&quot;Changes for namespace &#123;&#125;&quot;, changeEvent.getNamespace());
+                for (String key : changeEvent.changedKeys()) &#123;
+                    ConfigChange change = changeEvent.getChange(key);
+                    log.info(&quot;Change - key: &#123;&#125;, oldValue: &#123;&#125;, newValue: &#123;&#125;, changeType: &#123;&#125;&quot;,
+                            change.getPropertyName(), change.getOldValue(), change.getNewValue(),
+                            change.getChangeType());
+                &#125;
+            &#125;
+        &#125;;
+        config = ConfigService.getAppConfig();
+        config.addChangeListener(changeListener);
     &#125;
+    private ApolloConfig(String namespace)
+    &#123;
+        ConfigChangeListener changeListener = new ConfigChangeListener() &#123;
+            @Override
+            public void onChange(ConfigChangeEvent changeEvent) &#123;
+                log.info(&quot;Changes for namespace &#123;&#125;&quot;, changeEvent.getNamespace());
+                for (String key : changeEvent.changedKeys()) &#123;
+                    ConfigChange change = changeEvent.getChange(key);
+                    log.info(&quot;Change - key: &#123;&#125;, oldValue: &#123;&#125;, newValue: &#123;&#125;, changeType: &#123;&#125;&quot;,
+                            change.getPropertyName(), change.getOldValue(), change.getNewValue(),
+                            change.getChangeType());
+                &#125;
+            &#125;
+        &#125;;
+        config = ConfigService.getConfig(namespace);
+        config.addChangeListener(changeListener);
+    &#125;
+
+    public static ApolloConfig getInstance()
+    &#123;
+        if(instance ==null)
+        &#123;
+            synchronized (locked) &#123;
+                if (instance == null) &#123;
+                    instance = new ApolloConfig();
+                &#125;
+            &#125;
+        &#125;
+        return instance;
+    &#125;
+    public static ApolloConfig getInstance(String namespace)
+    &#123;
+        if(instance ==null)
+        &#123;
+            synchronized (locked) &#123;
+                if (instance == null) &#123;
+                    instance = new ApolloConfig(namespace);
+                &#125;
+            &#125;
+        &#125;
+        return instance;
+    &#125;
+    public String getConfig(String key) &#123;
+        String result = config.getProperty(key, DEFAULT_VALUE);
+        log.info(String.format(&quot;Loading key : %s with value: %s&quot;, key, result));
+        return result;
+    &#125;
+
+&#125;
 </code></pre>
-<p>可以看到并不是所有的Aware接口都使用同样的方式调用。Bean××Aware都是在代码中直接调用的，而ApplicationContext相关的Aware都是通过BeanPostProcessor#postProcessBeforeInitialization()实现的。感兴趣的可以自己看一下ApplicationContextAwareProcessor这个类的源码，就是判断当前创建的Bean是否实现了相关的Aware方法，如果实现了会调用回调方法将资源传递给Bean。<br>至于Spring为什么这么实现，应该没什么特殊的考量。也许和Spring的版本升级有关。基于对修改关闭，对扩展开放的原则，Spring对一些新的Aware采用了扩展的方式添加。</p>
-<p>BeanPostProcessor的调用时机也能在这里体现，包围住invokeInitMethods方法，也就说明了在初始化阶段的前后执行。</p>
-<p>关于Aware接口的执行顺序，其实只需要记住第一组在第二组执行之前就行了。每组中各个Aware方法的调用顺序其实没有必要记，有需要的时候点进源码一看便知。</p>
-<h2 id="简单的两个生命周期接口"><a href="#简单的两个生命周期接口" class="headerlink" title="简单的两个生命周期接口"></a>简单的两个生命周期接口</h2><p>至于剩下的两个生命周期接口就很简单了，实例化和属性赋值都是Spring帮助我们做的，能够自己实现的有初始化和销毁两个生命周期阶段。</p>
-<p>   InitializingBean 对应生命周期的初始化阶段，在上面源码的invokeInitMethods(beanName, wrappedBean, mbd);方法中调用。<br>   有一点需要注意，因为Aware方法都是执行在初始化方法之前，所以可以在初始化方法中放心大胆的使用Aware接口获取的资源，这也是我们自定义扩展Spring的常用方式。<br>   除了实现InitializingBean接口之外还能通过注解或者xml配置的方式指定初始化方法，至于这几种定义方式的调用顺序其实没有必要记。因为这几个方法对应的都是同一个生命周期，只是实现方式不同，我们一般只采用其中一种方式。        DisposableBean 类似于InitializingBean，对应生命周期的销毁阶段，以ConfigurableApplicationContext#close()方法作为入口，实现是通过循环取所有实现了DisposableBean接口的Bean然后调用其destroy()方法 。感兴趣的可以自行跟一下源码。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>Spring Bean的生命周期分为四个阶段和多个扩展点。扩展点又可以分为影响多个Bean和影响单个Bean。整理如下：<br><strong>四个阶段</strong></p>
-<p>   实例化 Instantiation<br>   属性赋值 Populate<br>   初始化 Initialization<br>   销毁 Destruction</p>
-<p><strong>多个扩展点</strong></p>
-<p>   影响多个Bean<br>        BeanPostProcessor<br>        InstantiationAwareBeanPostProcessor<br>   影响单个Bean<br>        Aware<br>            Aware Group1<br>                BeanNameAware<br>                BeanClassLoaderAware<br>                BeanFactoryAware<br>            Aware Group2<br>                EnvironmentAware<br>                EmbeddedValueResolverAware<br>                ApplicationContextAware(ResourceLoaderAware\ApplicationEventPublisherAware\MessageSourceAware)<br><strong>生命周期</strong><br>    InitializingBean<br>    DisposableBean</p>
+<h2 id="监听器"><a href="#监听器" class="headerlink" title="监听器"></a>监听器</h2><p><strong>这里要注意ApolloConfig.getInstance(“log”).getConfig(“redisurl”)，修改为自己需要的namespace和要取的参数</strong></p>
+<pre><code>package com.apollolog.demo.config;
+import com.apollolog.demo.config.ApolloConfig;
+import org.slf4j.MDC;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
+import org.springframework.boot.context.event.ApplicationFailedEvent;
+import org.springframework.boot.context.event.ApplicationPreparedEvent;
+import org.springframework.boot.context.event.ApplicationStartingEvent;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.context.event.GenericApplicationListener;
+import org.springframework.core.Ordered;
+import org.springframework.core.ResolvableType;
+
+public class ApplicationStartedEventListener implements GenericApplicationListener &#123;
+
+
+    public static final int DEFAULT_ORDER = Ordered.HIGHEST_PRECEDENCE + 10;
+
+    private static Class&lt;?&gt;[] EVENT_TYPES = &#123; ApplicationStartingEvent.class, ApplicationEnvironmentPreparedEvent.class,
+            ApplicationPreparedEvent.class, ContextClosedEvent.class, ApplicationFailedEvent.class &#125;;
+
+    private static Class&lt;?&gt;[] SOURCE_TYPES = &#123; SpringApplication.class, ApplicationContext.class &#125;;
+
+    @Override
+    public void onApplicationEvent(ApplicationEvent event) &#123;
+
+        if (event instanceof ApplicationEnvironmentPreparedEvent) &#123;
+            String redisurl = ApolloConfig.getInstance(&quot;log&quot;).getConfig(&quot;redisurl&quot;);
+            MDC.put(&quot;redisurl&quot;, redisurl);
+            System.err.println(&quot;=========redishost&quot; + redisurl);
+        &#125;
+
+    &#125;
+
+    @Override
+    public int getOrder() &#123;
+        return DEFAULT_ORDER;
+    &#125;
+
+    @Override
+    public boolean supportsEventType(ResolvableType resolvableType) &#123;
+        return isAssignableFrom(resolvableType.getRawClass(), EVENT_TYPES);
+    &#125;
+
+    @Override
+    public boolean supportsSourceType(Class&lt;?&gt; sourceType) &#123;
+        return isAssignableFrom(sourceType, SOURCE_TYPES);
+    &#125;
+
+    private boolean isAssignableFrom(Class&lt;?&gt; type, Class&lt;?&gt;... supportedTypes) &#123;
+        if (type != null) &#123;
+            for (Class&lt;?&gt; supportedType : supportedTypes) &#123;
+                if (supportedType.isAssignableFrom(type)) &#123;
+                    return true;
+                &#125;
+            &#125;
+        &#125;
+        return false;
+    &#125;
+&#125;
+</code></pre>
+<h2 id="启动类"><a href="#启动类" class="headerlink" title="启动类"></a>启动类</h2><pre><code>package com.apollolog.demo;
+
+import com.apollolog.demo.config.ApplicationStartedEventListener;
+import com.ctrip.framework.apollo.spring.annotation.EnableApolloConfig;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@EnableApolloConfig
+@SpringBootApplication
+public class DemoApplication &#123;
+
+    public static void main(String[] args) &#123;
+
+        SpringApplication app = new SpringApplication(DemoApplication.class);
+
+        ApplicationStartedEventListener asel = new ApplicationStartedEventListener();
+
+        app.addListeners(asel);
+
+        app.run(args);
+    &#125;
+
+&#125;
+</code></pre>
+<h2 id="效果"><a href="#效果" class="headerlink" title="效果"></a>效果</h2><p><img src="/images/pasted-38.png" alt="upload successful"><br><strong>log4j2.xml成功取到Apollo配置中心的redis地址</strong></p>
 
         </div>
         <!-- .entry-content -->
@@ -407,36 +532,19 @@ protected Object doCreateBean(final String beanName, final RootBeanDefinition mb
       <div class="toc" style="background: none;"></div>
       <section class="post-squares nextprev">
         
-          
-            <div class="post-nepre half previous">
-          
-            <a href="/2021/07/28/21-7-28/" rel="prev">
-              <div class="background">
-                <img class="lazyload" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.1/img/loader/orange.progress-bar-stripe-loader.svg" data-src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/14.jpg" style="width: 100%; height: 100%; object-fit: cover; pointer-events: none;" onerror="imgError(this,3)" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/14.jpg">
-              </div>
-              <span class="label">
-              Previous Post</span>
-              <div class="info">
-                <h3>
-                Apollo动态修改log4j2.xml</h3>
-                <hr>
-              </div>
-            </a>
-          </div>
-        
         
           
-            <div class="post-nepre half next">
+            <div class="post-nepre full next">
           
-            <a href="/2020/08/17/8-17/" rel="next">
+            <a href="/2020/08/27/8-27/" rel="next">
               <div class="background">
-                <img class="lazyload" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.1/img/loader/orange.progress-bar-stripe-loader.svg" data-src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/14.jpg" style="width: 100%; height: 100%; object-fit: cover; pointer-events: none;" onerror="imgError(this,3)" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/14.jpg">
+                <img class="lazyload" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.1/img/loader/orange.progress-bar-stripe-loader.svg" data-src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/13.jpg" style="width: 100%; height: 100%; object-fit: cover; pointer-events: none;" onerror="imgError(this,3)" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/13.jpg">
               </div>
               <span class="label">
               Next Post</span>
               <div class="info">
                 <h3>
-                关于HashMap几个问题</h3>
+                Bean的生命周期</h3>
                 <hr>
               </div>
             </a>
@@ -460,11 +568,11 @@ protected Object doCreateBean(final String beanName, final RootBeanDefinition mb
 
       <section class="author-profile">
         <div class="info" itemprop="author" itemscope="" itemtype="https://schema.org/Person">
-          <a href="sanwan99.cn" class="profile gravatar"><img src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.2/img/custom/touxiang.jpg" itemprop="image" alt="点点" height="70" width="70"></a>
+          <a href="sanwan99.cn" class="profile gravatar"><img src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.2/img/custom/touxiang.jpg" itemprop="image" alt="三万" height="70" width="70"></a>
           <div class="meta">
             <span class="title">Author</span>
             <h3 itemprop="name">
-            <a href="sanwan99.cn" itemprop="url" rel="author">点点</a>
+            <a href="sanwan99.cn" itemprop="url" rel="author">三万</a>
             </h3>
           </div>
         </div>

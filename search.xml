@@ -1,6 +1,210 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>Apollo动态修改log4j2.xml</title>
+    <url>/2021/07/28/21-7-28/</url>
+    <content><![CDATA[<h2 id="log4j2"><a href="#log4j2" class="headerlink" title="log4j2"></a>log4j2</h2><p>   <strong>首先resouse目录下创建log4j2.xml</strong><br>   <strong>application里面配置 logging.config = classpath:log4j2/log4j2.xml</strong></p>
+<pre><code>            &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
+            &lt;Configuration status=&quot;INFO&quot; monitorInterval=&quot;30&quot;&gt;
+                &lt;Appenders&gt;
+                    &lt;Console name=&quot;console&quot; target=&quot;SYSTEM_OUT&quot;&gt;
+                        &lt;PatternLayout pattern=&quot;%d&#123;yyyy-MM-dd HH:mm:ss.SSS&#125; [%t] [%-5p] &#123;%F:%L&#125; - %m%n&quot; /&gt;
+                    &lt;/Console&gt;
+                    &lt;!--使用redis启用下面配置--&gt;
+                    &lt;RedisAppender name=&quot;redisAppender&quot; appName=&quot;log&quot; redisHost=&quot;$&#123;ctx:redisurl&#125;&quot; &gt;
+                        &lt;PatternLayout pattern=&quot;%d&#123;yyyy-MM-dd HH:mm:ss.SSS&#125; [%t] [%-5p] &#123;%F:%L&#125; - %m%n&quot; /&gt;
+                    &lt;/RedisAppender&gt;
+                &lt;/Appenders&gt;
+                &lt;Loggers&gt;
+                    &lt;root level=&quot;info&quot;&gt;
+                        &lt;appender-ref ref=&quot;redisAppender&quot;/&gt;
+                        &lt;appender-ref ref=&quot;console&quot;/&gt;
+                    &lt;/root&gt;
+                &lt;/Loggers&gt;
+            &lt;/Configuration&gt;
+</code></pre>
+<h2 id="Apollo"><a href="#Apollo" class="headerlink" title="Apollo"></a>Apollo</h2><p><strong>Apollo配置namespace</strong></p>
+<p><img src="/images/pasted-36.png" alt="upload successful"></p>
+<h2 id="环境变量"><a href="#环境变量" class="headerlink" title="环境变量"></a>环境变量</h2><p><strong>idea的环境变量，根据自己的修改</strong></p>
+<p><img src="/images/pasted-37.png" alt="upload successful"></p>
+<h2 id="自定义ApolloConfig"><a href="#自定义ApolloConfig" class="headerlink" title="自定义ApolloConfig"></a>自定义ApolloConfig</h2><pre><code>package com.apollolog.demo.config;
+
+import com.ctrip.framework.apollo.Config;
+import com.ctrip.framework.apollo.ConfigChangeListener;
+import com.ctrip.framework.apollo.ConfigService;
+import com.ctrip.framework.apollo.model.ConfigChange;
+import com.ctrip.framework.apollo.model.ConfigChangeEvent;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+public class ApolloConfig &#123;
+    private static ApolloConfig instance;
+    private static Object locked = new Object();
+    private Config config;
+    private String DEFAULT_VALUE = &quot;undefined&quot;;
+
+    private ApolloConfig()
+    &#123;
+        ConfigChangeListener changeListener = new ConfigChangeListener() &#123;
+            @Override
+            public void onChange(ConfigChangeEvent changeEvent) &#123;
+                log.info(&quot;Changes for namespace &#123;&#125;&quot;, changeEvent.getNamespace());
+                for (String key : changeEvent.changedKeys()) &#123;
+                    ConfigChange change = changeEvent.getChange(key);
+                    log.info(&quot;Change - key: &#123;&#125;, oldValue: &#123;&#125;, newValue: &#123;&#125;, changeType: &#123;&#125;&quot;,
+                            change.getPropertyName(), change.getOldValue(), change.getNewValue(),
+                            change.getChangeType());
+                &#125;
+            &#125;
+        &#125;;
+        config = ConfigService.getAppConfig();
+        config.addChangeListener(changeListener);
+    &#125;
+    private ApolloConfig(String namespace)
+    &#123;
+        ConfigChangeListener changeListener = new ConfigChangeListener() &#123;
+            @Override
+            public void onChange(ConfigChangeEvent changeEvent) &#123;
+                log.info(&quot;Changes for namespace &#123;&#125;&quot;, changeEvent.getNamespace());
+                for (String key : changeEvent.changedKeys()) &#123;
+                    ConfigChange change = changeEvent.getChange(key);
+                    log.info(&quot;Change - key: &#123;&#125;, oldValue: &#123;&#125;, newValue: &#123;&#125;, changeType: &#123;&#125;&quot;,
+                            change.getPropertyName(), change.getOldValue(), change.getNewValue(),
+                            change.getChangeType());
+                &#125;
+            &#125;
+        &#125;;
+        config = ConfigService.getConfig(namespace);
+        config.addChangeListener(changeListener);
+    &#125;
+
+    public static ApolloConfig getInstance()
+    &#123;
+        if(instance ==null)
+        &#123;
+            synchronized (locked) &#123;
+                if (instance == null) &#123;
+                    instance = new ApolloConfig();
+                &#125;
+            &#125;
+        &#125;
+        return instance;
+    &#125;
+    public static ApolloConfig getInstance(String namespace)
+    &#123;
+        if(instance ==null)
+        &#123;
+            synchronized (locked) &#123;
+                if (instance == null) &#123;
+                    instance = new ApolloConfig(namespace);
+                &#125;
+            &#125;
+        &#125;
+        return instance;
+    &#125;
+    public String getConfig(String key) &#123;
+        String result = config.getProperty(key, DEFAULT_VALUE);
+        log.info(String.format(&quot;Loading key : %s with value: %s&quot;, key, result));
+        return result;
+    &#125;
+
+&#125;
+</code></pre>
+<h2 id="监听器"><a href="#监听器" class="headerlink" title="监听器"></a>监听器</h2><p><strong>这里要注意ApolloConfig.getInstance(“log”).getConfig(“redisurl”)，修改为自己需要的namespace和要取的参数</strong></p>
+<pre><code>package com.apollolog.demo.config;
+import com.apollolog.demo.config.ApolloConfig;
+import org.slf4j.MDC;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
+import org.springframework.boot.context.event.ApplicationFailedEvent;
+import org.springframework.boot.context.event.ApplicationPreparedEvent;
+import org.springframework.boot.context.event.ApplicationStartingEvent;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.context.event.GenericApplicationListener;
+import org.springframework.core.Ordered;
+import org.springframework.core.ResolvableType;
+
+public class ApplicationStartedEventListener implements GenericApplicationListener &#123;
+
+
+    public static final int DEFAULT_ORDER = Ordered.HIGHEST_PRECEDENCE + 10;
+
+    private static Class&lt;?&gt;[] EVENT_TYPES = &#123; ApplicationStartingEvent.class, ApplicationEnvironmentPreparedEvent.class,
+            ApplicationPreparedEvent.class, ContextClosedEvent.class, ApplicationFailedEvent.class &#125;;
+
+    private static Class&lt;?&gt;[] SOURCE_TYPES = &#123; SpringApplication.class, ApplicationContext.class &#125;;
+
+    @Override
+    public void onApplicationEvent(ApplicationEvent event) &#123;
+
+        if (event instanceof ApplicationEnvironmentPreparedEvent) &#123;
+            String redisurl = ApolloConfig.getInstance(&quot;log&quot;).getConfig(&quot;redisurl&quot;);
+            MDC.put(&quot;redisurl&quot;, redisurl);
+            System.err.println(&quot;=========redishost&quot; + redisurl);
+        &#125;
+
+    &#125;
+
+    @Override
+    public int getOrder() &#123;
+        return DEFAULT_ORDER;
+    &#125;
+
+    @Override
+    public boolean supportsEventType(ResolvableType resolvableType) &#123;
+        return isAssignableFrom(resolvableType.getRawClass(), EVENT_TYPES);
+    &#125;
+
+    @Override
+    public boolean supportsSourceType(Class&lt;?&gt; sourceType) &#123;
+        return isAssignableFrom(sourceType, SOURCE_TYPES);
+    &#125;
+
+    private boolean isAssignableFrom(Class&lt;?&gt; type, Class&lt;?&gt;... supportedTypes) &#123;
+        if (type != null) &#123;
+            for (Class&lt;?&gt; supportedType : supportedTypes) &#123;
+                if (supportedType.isAssignableFrom(type)) &#123;
+                    return true;
+                &#125;
+            &#125;
+        &#125;
+        return false;
+    &#125;
+&#125;
+</code></pre>
+<h2 id="启动类"><a href="#启动类" class="headerlink" title="启动类"></a>启动类</h2><pre><code>package com.apollolog.demo;
+
+import com.apollolog.demo.config.ApplicationStartedEventListener;
+import com.ctrip.framework.apollo.spring.annotation.EnableApolloConfig;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@EnableApolloConfig
+@SpringBootApplication
+public class DemoApplication &#123;
+
+    public static void main(String[] args) &#123;
+
+        SpringApplication app = new SpringApplication(DemoApplication.class);
+
+        ApplicationStartedEventListener asel = new ApplicationStartedEventListener();
+
+        app.addListeners(asel);
+
+        app.run(args);
+    &#125;
+
+&#125;
+</code></pre>
+<h2 id="效果"><a href="#效果" class="headerlink" title="效果"></a>效果</h2><p><img src="/images/pasted-38.png" alt="upload successful"><br><strong>log4j2.xml成功取到Apollo配置中心的redis地址</strong></p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+  </entry>
+  <entry>
     <title>Comparable和Comparator接口的区别</title>
     <url>/2020/08/12/8-12/</url>
     <content><![CDATA[<h3 id="Comparable用法"><a href="#Comparable用法" class="headerlink" title="Comparable用法"></a>Comparable用法</h3><p> 在给集合排序的时候，我们需要用到一个工具类叫做Collections，这个工具类可以用来给集合排序,详见如下代码：</p>
@@ -233,10 +437,10 @@ protected Object doCreateBean(final String beanName, final RootBeanDefinition mb
 <p>  注：在iBator 生成的文件UserExample.java中包含一个static 的内部类 Criteria ，在Criteria中有很多方法，主要是定义SQL 语句where后的查询条件。</p>
 </li>
 <li><p>③ insert()</p>
-<p>User user = new User();<br>user.setId(101);<br>user.setUsername(“test”);<br>user.setPassword(“123”)<br>user.setEmail(“<a href="mailto:&#106;&#111;&#x65;&#x40;&#49;&#x36;&#51;&#x2e;&#x63;&#111;&#109;">&#106;&#111;&#x65;&#x40;&#49;&#x36;&#51;&#x2e;&#x63;&#111;&#109;</a>“);<br>userDAO.insert(user);<br>相当于：insert into user(ID,username,password,email) values(101,’test’,’123’,‘joe@163.com’);</p>
+<p>User user = new User();<br>user.setId(101);<br>user.setUsername(“test”);<br>user.setPassword(“123”)<br>user.setEmail(“<a href="mailto:&#x6a;&#x6f;&#x65;&#x40;&#x31;&#54;&#x33;&#46;&#99;&#x6f;&#x6d;">&#x6a;&#x6f;&#x65;&#x40;&#x31;&#54;&#x33;&#46;&#99;&#x6f;&#x6d;</a>“);<br>userDAO.insert(user);<br>相当于：insert into user(ID,username,password,email) values(101,’test’,’123’,‘joe@163.com’);</p>
 </li>
 <li><p>④ updateByPrimaryKey() 和 updateByPrimaryKeySelective()</p>
-<p>User user =new User();<br>user.setId(101);<br>user.setUsername(“joe”);<br>user.setPassword(“joe”);<br>user.setEmail(“<a href="mailto:&#106;&#111;&#x65;&#x40;&#x31;&#x36;&#51;&#46;&#x63;&#111;&#x6d;">&#106;&#111;&#x65;&#x40;&#x31;&#x36;&#51;&#46;&#x63;&#111;&#x6d;</a>“);<br>userDAO.updateByPrimaryKey(user);<br>相当于：update user set username=’joe’,password=’joe’,email=’joe@163.com’ where id=101</p>
+<p>User user =new User();<br>user.setId(101);<br>user.setUsername(“joe”);<br>user.setPassword(“joe”);<br>user.setEmail(“<a href="mailto:&#x6a;&#111;&#101;&#x40;&#x31;&#54;&#x33;&#x2e;&#99;&#x6f;&#x6d;">&#x6a;&#111;&#101;&#x40;&#x31;&#54;&#x33;&#x2e;&#99;&#x6f;&#x6d;</a>“);<br>userDAO.updateByPrimaryKey(user);<br>相当于：update user set username=’joe’,password=’joe’,email=’joe@163.com’ where id=101</p>
 <p>User user = new User();<br>user.setId(101);<br>user.setPassword(“joe”);<br>userDAO.updateByPrimaryKeySelective(user);<br>相当于：update user set password=’joe’ where id=101</p>
 </li>
 <li><p>⑤ updateByExample() 和 updateByExampleSelective()</p>
@@ -628,88 +832,69 @@ protected Object doCreateBean(final String beanName, final RootBeanDefinition mb
       </categories>
   </entry>
   <entry>
-    <title>MySQL中的锁</title>
-    <url>/2020/05/12/MySQL%E4%B8%AD%E7%9A%84%E9%94%81/</url>
-    <content><![CDATA[<h2 id="事务及其ACID属性："><a href="#事务及其ACID属性：" class="headerlink" title="事务及其ACID属性："></a>事务及其ACID属性：</h2><p>   事务是由一组sql语句组成的逻辑处理单元，具有4个属性</p>
-<ul>
-<li><p>原子性：事务是一个原子操作单元，其对数据的修改，要么都执行，要么都不执行</p>
-</li>
-<li><p>一致性：事务开始和完成的时候，数据都必须保持一致。事物的修改必须保持数据的完整性，事务结束后所有的内部数据结构（B+树，双向链表）多必须是正确的</p>
-</li>
-<li><p>隔离性：数据库系统提供一定的隔离机制，保证事务在不受外界并发操作影响的环境中执行。意味着事务处理过程中的中间状态对外部是不可见的</p>
-</li>
-<li><p>持久性：事务完成之后，对数据的修改是永久性的</p>
-</li>
-</ul>
-<h2 id="并发事务处理带来的问题："><a href="#并发事务处理带来的问题：" class="headerlink" title="并发事务处理带来的问题："></a>并发事务处理带来的问题：</h2><ul>
-<li><p>更新丢失：两个或多个事务同时选择一行并更新该行的数据，最后的更新覆盖了由其他事务做的更新。</p>
-</li>
-<li><p>脏读：一个事务正在对一条记录进行修改，在这个事务提交之前，其他事务过来了读取了脏数据并进一步做了处理，就会产生未提交的数据依赖关系。  </p>
-</li>
-<li><p>不可重复读：一个数据在读取某些数据后的某个时间，再次读取以前读过的数据，会发现其读出的数据发生了变化或者被删除</p>
-</li>
-<li><p>幻读：一个事务按相同的查询条件重新读取以前检索过的数据，发现其他事务插入了满足其查询条件的新数据</p>
-</li>
-</ul>
-<h2 id="事务隔离级别："><a href="#事务隔离级别：" class="headerlink" title="事务隔离级别："></a>事务隔离级别：</h2><ul>
-<li><p>更新丢失问题通常是应该完全避免的，并不能只靠数据库的事务控制器解决，需要应用程序对要更新的数据加必要的锁来解决，防止更新丢失是应用的责任</p>
-</li>
-<li><p>脏读，不可重复读，幻读属于数据库读一致性问题，必须由数据库提供一定的事务隔离机制解决</p>
-</li>
-<li><p>1.在读取数据前加锁</p>
-</li>
-<li><p>2.不加锁，通过数据多版本并发控制</p>
-</li>
-</ul>
-<h2 id="四种事务隔离级别："><a href="#四种事务隔离级别：" class="headerlink" title="四种事务隔离级别："></a>四种事务隔离级别：</h2><p><img src="/images/pasted-3.png" alt="upload successful"></p>
-<h2 id="锁"><a href="#锁" class="headerlink" title="锁"></a>锁</h2><ul>
-<li><p>表锁：开销小，加锁快，不会出现死锁，并发度低，容易锁冲突</p>
-</li>
-<li><p>行锁：开销大，加锁慢，会出现死锁，并发度高，不容易锁冲突</p>
-</li>
-</ul>
-<h2 id="InnoDB使用两种类型的行锁："><a href="#InnoDB使用两种类型的行锁：" class="headerlink" title="InnoDB使用两种类型的行锁："></a>InnoDB使用两种类型的行锁：</h2><ul>
-<li><p>共享锁S（锁的是行）：称为读锁，就是说事务1对数据A加了S锁，事务1只能读不能修改A，其他事务也一样只能读不能写，只能加S锁不能加X锁，除非事务1释放S锁</p>
-</li>
-<li><p>排他锁X（du’de锁的是行）：称为写锁，事务1对数据加了X锁，能读能写，其他事务不能读和写，不能加任何锁</p>
-</li>
-<li><p>意向共享锁IS（锁的是表）：通知数据库要加什么表并对表进行加锁，如果需要对A进行加共享锁，先对该表加意向共享锁后再对A加共享锁</p>
-</li>
-<li><p>意向排他锁IX（锁的是表）：同上</p>
-</li>
-<li><p>意向共享锁和意向排他锁都是由数据库加的</p>
-</li>
-<li><p>InnoDB行锁是通过给索引加锁来实现的，只有通过索引条件检索数据才是使用行锁，否则使用表锁</p>
-</li>
-</ul>
-<ul>
-<li><p>间隙锁：</p>
-<p>当我们用范围t条件而不是相等条件检索数据时，并请求了共享锁或者排他锁，InnoDB会给符合条件的已有数据记录的索引项加锁，对于在范围但是不存在的记录，会加间隙锁</p>
-<p>目的：防止幻读，满足相关隔离级别的要求。因为有可能在读的过程其他事务插入了新的数据，就会产生幻读。</p>
-<p>但这会造成严重的锁等待，因此要尽量使用相等条件来访问更新数据，避免使用范围条件</p>
-</li>
-</ul>
-<h2 id="什么时候使用表锁："><a href="#什么时候使用表锁：" class="headerlink" title="什么时候使用表锁："></a>什么时候使用表锁：</h2><ul>
-<li><p>对于InnoDB表，在绝大部分情况下都应该使用行级锁，因为事务和行锁往往是我们之所以选择InnoDB表的理由。但在个别特殊事务中，也可以考虑使用表级锁。</p>
-</li>
-<li><p>第一种情况是：事务需要更新大部分或全部数据，表又比较大，如果使用默认的行锁，不仅这个事务执行效率低，而且可能造成其他事务长时间锁等待和锁冲突，这种情况下可以考虑使用表锁来提高该事务的执行速度。</p>
-</li>
-<li><p>第二种情况是：事务涉及多个表，比较复杂，很可能引起死锁，造成大量事务回滚。这种情况也可以考虑一次性锁定事务涉及的表，从而避免死锁、减少数据库因事务回滚带来的开销。</p>
-</li>
-<li><p>当然，应用中这两种事务不能太多，否则，就应该考虑使用MyISAM表了。</p>
-</li>
-</ul>
-<h2 id="避免死锁的方法："><a href="#避免死锁的方法：" class="headerlink" title="避免死锁的方法："></a>避免死锁的方法：</h2><ul>
-<li><p>（1）在应用中，如果不同的程序会并发存取多个表，应尽量约定以相同的顺序来访问表，这样可以大大降低产生死锁的机会。</p>
-</li>
-<li><p>（2）在程序以批量方式处理数据的时候，如果事先对数据排序，保证每个线程按固定的顺序来处理记录，也可以大大降低出现死锁的可能。</p>
-</li>
-<li><p>（3）在事务中，如果要更新记录，应该直接申请足够级别的锁，即排他锁，而不应先申请共享锁，更新时再申请排他锁，因为当用户申请排他锁时，其他事务可能又已经获得了相同记录的共享锁，从而造成锁冲突，甚至死锁。</p>
-</li>
-</ul>
+    <title>String.trim()理解</title>
+    <url>/2020/05/13/String-trim-%E7%90%86%E8%A7%A3/</url>
+    <content><![CDATA[<h2 id="trim去掉的是什么字符？"><a href="#trim去掉的是什么字符？" class="headerlink" title="trim去掉的是什么字符？"></a>trim去掉的是什么字符？</h2><p> 《Java核心技术》书上说的trim主要是是“返回一个新的字符串。这个字符串将删除了原始字符串头部和尾部的空格。”<br> 但是，有些特殊字符是看不到的</p>
+<pre><code>         public static void main(String[] args) &#123;
+         String str = &quot;abc&quot;;
+         System.out.println(str.length());
+         str = str.trim();
+         System.out.println(str.length());
+    &#125;
+</code></pre>
+<p>比如这段代码，输出的是9和3，但是在eclipse或者idea是看不到的，也就是说trim不只是排掉空格这么简单的作用</p>
+<pre><code>/**
+     * @return  A string whose value is this string, with any leading and trailing white
+     *          space removed, or this string if it has no leading or
+     *          trailing white space.
+     */
+    public String trim() &#123;
+        int len = value.length;
+        int st = 0;
+        char[] val = value;    /* avoid getfield opcode */
+
+        while ((st &lt; len) &amp;&amp; (val[st] &lt;= &#39; &#39;)) &#123;
+            st++;
+        &#125;
+        while ((st &lt; len) &amp;&amp; (val[len - 1] &lt;= &#39; &#39;)) &#123;
+            len--;
+        &#125;
+        return ((st &gt; 0) || (len &lt; value.length)) ? substring(st, len) : this;
+    &#125;
+</code></pre>
+<p> 可以知道，由于空格的Unicode编码是32，trim()方法实际上trim掉了字符串两端Unicode编码小于等于32（\u0020）的所有字符。</p>
+<h2 id="trim返回的对象"><a href="#trim返回的对象" class="headerlink" title="trim返回的对象"></a>trim返回的对象</h2><pre><code>public static void main(String[] args) &#123;
+        String str1 = &quot;abc   &quot;;
+        String str2 = &quot;abc&quot;;
+        String str3 = &quot;abc&quot;;
+        str1 = str1.trim();
+        System.out.println(str1 == str2);  // false
+        System.out.println(str3 == str2);  // true
+   &#125;
+</code></pre>
+<p> str1.trim()返回的字符串为”abc”，而在常量池中已经确定存在这个”abc”这个String对象，那为何str1==str2不成立呢？<br>我们看trim()方法的最后一行：</p>
+<pre><code>return ((st &gt; 0) || (len &lt; value.length)) ? substring(st, len) : this;
+</code></pre>
+<p>也就是说，trim()方法实际上的行为并不是去掉两端的空白字符，而是截取中间的非空白字符</p>
+<pre><code> public String substring(int beginIndex, int endIndex) &#123;
+        if (beginIndex &lt; 0) &#123;
+            throw new StringIndexOutOfBoundsException(beginIndex);
+        &#125;
+        if (endIndex &gt; value.length) &#123;
+            throw new StringIndexOutOfBoundsException(endIndex);
+        &#125;
+        int subLen = endIndex - beginIndex;
+        if (subLen &lt; 0) &#123;
+            throw new StringIndexOutOfBoundsException(subLen);
+        &#125;
+        return ((beginIndex == 0) &amp;&amp; (endIndex == value.length)) ? this
+                : new String(value, beginIndex, subLen);
+    &#125;
+</code></pre>
+<p>当实际发生了”截取“这个动作的时候，因为此处无法直接声明一个String常量，即substring()无法像我们写String str = “abc”这样直接在常量池中创建对象，所以它返回的是一个new出来的对象，这个对象位于Heap内存中。</p>
 ]]></content>
       <categories>
-        <category>数据库</category>
+        <category>技术</category>
       </categories>
   </entry>
   <entry>
@@ -802,78 +987,97 @@ protected Object doCreateBean(final String beanName, final RootBeanDefinition mb
       </categories>
   </entry>
   <entry>
-    <title>String.trim()理解</title>
-    <url>/2020/05/13/String-trim-%E7%90%86%E8%A7%A3/</url>
-    <content><![CDATA[<h2 id="trim去掉的是什么字符？"><a href="#trim去掉的是什么字符？" class="headerlink" title="trim去掉的是什么字符？"></a>trim去掉的是什么字符？</h2><p> 《Java核心技术》书上说的trim主要是是“返回一个新的字符串。这个字符串将删除了原始字符串头部和尾部的空格。”<br> 但是，有些特殊字符是看不到的</p>
-<pre><code>         public static void main(String[] args) &#123;
-         String str = &quot;abc&quot;;
-         System.out.println(str.length());
-         str = str.trim();
-         System.out.println(str.length());
-    &#125;
-</code></pre>
-<p>比如这段代码，输出的是9和3，但是在eclipse或者idea是看不到的，也就是说trim不只是排掉空格这么简单的作用</p>
-<pre><code>/**
-     * @return  A string whose value is this string, with any leading and trailing white
-     *          space removed, or this string if it has no leading or
-     *          trailing white space.
-     */
-    public String trim() &#123;
-        int len = value.length;
-        int st = 0;
-        char[] val = value;    /* avoid getfield opcode */
-
-        while ((st &lt; len) &amp;&amp; (val[st] &lt;= &#39; &#39;)) &#123;
-            st++;
-        &#125;
-        while ((st &lt; len) &amp;&amp; (val[len - 1] &lt;= &#39; &#39;)) &#123;
-            len--;
-        &#125;
-        return ((st &gt; 0) || (len &lt; value.length)) ? substring(st, len) : this;
-    &#125;
-</code></pre>
-<p> 可以知道，由于空格的Unicode编码是32，trim()方法实际上trim掉了字符串两端Unicode编码小于等于32（\u0020）的所有字符。</p>
-<h2 id="trim返回的对象"><a href="#trim返回的对象" class="headerlink" title="trim返回的对象"></a>trim返回的对象</h2><pre><code>public static void main(String[] args) &#123;
-        String str1 = &quot;abc   &quot;;
-        String str2 = &quot;abc&quot;;
-        String str3 = &quot;abc&quot;;
-        str1 = str1.trim();
-        System.out.println(str1 == str2);  // false
-        System.out.println(str3 == str2);  // true
-   &#125;
-</code></pre>
-<p> str1.trim()返回的字符串为”abc”，而在常量池中已经确定存在这个”abc”这个String对象，那为何str1==str2不成立呢？<br>我们看trim()方法的最后一行：</p>
-<pre><code>return ((st &gt; 0) || (len &lt; value.length)) ? substring(st, len) : this;
-</code></pre>
-<p>也就是说，trim()方法实际上的行为并不是去掉两端的空白字符，而是截取中间的非空白字符</p>
-<pre><code> public String substring(int beginIndex, int endIndex) &#123;
-        if (beginIndex &lt; 0) &#123;
-            throw new StringIndexOutOfBoundsException(beginIndex);
-        &#125;
-        if (endIndex &gt; value.length) &#123;
-            throw new StringIndexOutOfBoundsException(endIndex);
-        &#125;
-        int subLen = endIndex - beginIndex;
-        if (subLen &lt; 0) &#123;
-            throw new StringIndexOutOfBoundsException(subLen);
-        &#125;
-        return ((beginIndex == 0) &amp;&amp; (endIndex == value.length)) ? this
-                : new String(value, beginIndex, subLen);
-    &#125;
-</code></pre>
-<p>当实际发生了”截取“这个动作的时候，因为此处无法直接声明一个String常量，即substring()无法像我们写String str = “abc”这样直接在常量池中创建对象，所以它返回的是一个new出来的对象，这个对象位于Heap内存中。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-  </entry>
-  <entry>
     <title>java</title>
     <url>/2020/05/11/java/</url>
     <content><![CDATA[<p>java是最好的语言</p>
 ]]></content>
       <categories>
         <category>Java</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>MySQL中的锁</title>
+    <url>/2020/05/12/MySQL%E4%B8%AD%E7%9A%84%E9%94%81/</url>
+    <content><![CDATA[<h2 id="事务及其ACID属性："><a href="#事务及其ACID属性：" class="headerlink" title="事务及其ACID属性："></a>事务及其ACID属性：</h2><p>   事务是由一组sql语句组成的逻辑处理单元，具有4个属性</p>
+<ul>
+<li><p>原子性：事务是一个原子操作单元，其对数据的修改，要么都执行，要么都不执行</p>
+</li>
+<li><p>一致性：事务开始和完成的时候，数据都必须保持一致。事物的修改必须保持数据的完整性，事务结束后所有的内部数据结构（B+树，双向链表）多必须是正确的</p>
+</li>
+<li><p>隔离性：数据库系统提供一定的隔离机制，保证事务在不受外界并发操作影响的环境中执行。意味着事务处理过程中的中间状态对外部是不可见的</p>
+</li>
+<li><p>持久性：事务完成之后，对数据的修改是永久性的</p>
+</li>
+</ul>
+<h2 id="并发事务处理带来的问题："><a href="#并发事务处理带来的问题：" class="headerlink" title="并发事务处理带来的问题："></a>并发事务处理带来的问题：</h2><ul>
+<li><p>更新丢失：两个或多个事务同时选择一行并更新该行的数据，最后的更新覆盖了由其他事务做的更新。</p>
+</li>
+<li><p>脏读：一个事务正在对一条记录进行修改，在这个事务提交之前，其他事务过来了读取了脏数据并进一步做了处理，就会产生未提交的数据依赖关系。  </p>
+</li>
+<li><p>不可重复读：一个数据在读取某些数据后的某个时间，再次读取以前读过的数据，会发现其读出的数据发生了变化或者被删除</p>
+</li>
+<li><p>幻读：一个事务按相同的查询条件重新读取以前检索过的数据，发现其他事务插入了满足其查询条件的新数据</p>
+</li>
+</ul>
+<h2 id="事务隔离级别："><a href="#事务隔离级别：" class="headerlink" title="事务隔离级别："></a>事务隔离级别：</h2><ul>
+<li><p>更新丢失问题通常是应该完全避免的，并不能只靠数据库的事务控制器解决，需要应用程序对要更新的数据加必要的锁来解决，防止更新丢失是应用的责任</p>
+</li>
+<li><p>脏读，不可重复读，幻读属于数据库读一致性问题，必须由数据库提供一定的事务隔离机制解决</p>
+</li>
+<li><p>1.在读取数据前加锁</p>
+</li>
+<li><p>2.不加锁，通过数据多版本并发控制</p>
+</li>
+</ul>
+<h2 id="四种事务隔离级别："><a href="#四种事务隔离级别：" class="headerlink" title="四种事务隔离级别："></a>四种事务隔离级别：</h2><p><img src="/images/pasted-3.png" alt="upload successful"></p>
+<h2 id="锁"><a href="#锁" class="headerlink" title="锁"></a>锁</h2><ul>
+<li><p>表锁：开销小，加锁快，不会出现死锁，并发度低，容易锁冲突</p>
+</li>
+<li><p>行锁：开销大，加锁慢，会出现死锁，并发度高，不容易锁冲突</p>
+</li>
+</ul>
+<h2 id="InnoDB使用两种类型的行锁："><a href="#InnoDB使用两种类型的行锁：" class="headerlink" title="InnoDB使用两种类型的行锁："></a>InnoDB使用两种类型的行锁：</h2><ul>
+<li><p>共享锁S（锁的是行）：称为读锁，就是说事务1对数据A加了S锁，事务1只能读不能修改A，其他事务也一样只能读不能写，只能加S锁不能加X锁，除非事务1释放S锁</p>
+</li>
+<li><p>排他锁X（du’de锁的是行）：称为写锁，事务1对数据加了X锁，能读能写，其他事务不能读和写，不能加任何锁</p>
+</li>
+<li><p>意向共享锁IS（锁的是表）：通知数据库要加什么表并对表进行加锁，如果需要对A进行加共享锁，先对该表加意向共享锁后再对A加共享锁</p>
+</li>
+<li><p>意向排他锁IX（锁的是表）：同上</p>
+</li>
+<li><p>意向共享锁和意向排他锁都是由数据库加的</p>
+</li>
+<li><p>InnoDB行锁是通过给索引加锁来实现的，只有通过索引条件检索数据才是使用行锁，否则使用表锁</p>
+</li>
+</ul>
+<ul>
+<li><p>间隙锁：</p>
+<p>当我们用范围t条件而不是相等条件检索数据时，并请求了共享锁或者排他锁，InnoDB会给符合条件的已有数据记录的索引项加锁，对于在范围但是不存在的记录，会加间隙锁</p>
+<p>目的：防止幻读，满足相关隔离级别的要求。因为有可能在读的过程其他事务插入了新的数据，就会产生幻读。</p>
+<p>但这会造成严重的锁等待，因此要尽量使用相等条件来访问更新数据，避免使用范围条件</p>
+</li>
+</ul>
+<h2 id="什么时候使用表锁："><a href="#什么时候使用表锁：" class="headerlink" title="什么时候使用表锁："></a>什么时候使用表锁：</h2><ul>
+<li><p>对于InnoDB表，在绝大部分情况下都应该使用行级锁，因为事务和行锁往往是我们之所以选择InnoDB表的理由。但在个别特殊事务中，也可以考虑使用表级锁。</p>
+</li>
+<li><p>第一种情况是：事务需要更新大部分或全部数据，表又比较大，如果使用默认的行锁，不仅这个事务执行效率低，而且可能造成其他事务长时间锁等待和锁冲突，这种情况下可以考虑使用表锁来提高该事务的执行速度。</p>
+</li>
+<li><p>第二种情况是：事务涉及多个表，比较复杂，很可能引起死锁，造成大量事务回滚。这种情况也可以考虑一次性锁定事务涉及的表，从而避免死锁、减少数据库因事务回滚带来的开销。</p>
+</li>
+<li><p>当然，应用中这两种事务不能太多，否则，就应该考虑使用MyISAM表了。</p>
+</li>
+</ul>
+<h2 id="避免死锁的方法："><a href="#避免死锁的方法：" class="headerlink" title="避免死锁的方法："></a>避免死锁的方法：</h2><ul>
+<li><p>（1）在应用中，如果不同的程序会并发存取多个表，应尽量约定以相同的顺序来访问表，这样可以大大降低产生死锁的机会。</p>
+</li>
+<li><p>（2）在程序以批量方式处理数据的时候，如果事先对数据排序，保证每个线程按固定的顺序来处理记录，也可以大大降低出现死锁的可能。</p>
+</li>
+<li><p>（3）在事务中，如果要更新记录，应该直接申请足够级别的锁，即排他锁，而不应先申请共享锁，更新时再申请排他锁，因为当用户申请排他锁时，其他事务可能又已经获得了相同记录的共享锁，从而造成锁冲突，甚至死锁。</p>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>数据库</category>
       </categories>
   </entry>
   <entry>
@@ -1136,51 +1340,12 @@ protected Object doCreateBean(final String beanName, final RootBeanDefinition mb
 pbcopy &lt; ~/.ssh/id_rsa.pub # 自动拷贝到粘贴板
 </code></pre>
 <ul>
-<li>如没有则按下述方法<br>生成： ssh-keygen -t rsa输入文件名的地方输入可以输入自定义文件名，默认是id_rsa，然后一路回车…… 注意如果自定义文件名的话，需要加一个config文件，下文有介绍。最后，输入ssh -T <a href="mailto:&#x67;&#x69;&#x74;&#x40;&#103;&#x69;&#116;&#104;&#x75;&#x62;&#46;&#99;&#111;&#109;">&#x67;&#x69;&#x74;&#x40;&#103;&#x69;&#116;&#104;&#x75;&#x62;&#46;&#99;&#111;&#109;</a>如果没有报错，再尝试输出就应该有了```<br>cat ~/.ssh/id_rsa.pub      # 控制台上输出内容<br>pbcopy &lt; ~/.ssh/id_rsa.pub # 自动拷贝到粘贴板</li>
+<li>如没有则按下述方法<br>生成： ssh-keygen -t rsa输入文件名的地方输入可以输入自定义文件名，默认是id_rsa，然后一路回车…… 注意如果自定义文件名的话，需要加一个config文件，下文有介绍。最后，输入ssh -T <a href="mailto:&#103;&#105;&#x74;&#x40;&#x67;&#x69;&#116;&#104;&#x75;&#x62;&#x2e;&#99;&#x6f;&#x6d;">&#103;&#105;&#x74;&#x40;&#x67;&#x69;&#116;&#104;&#x75;&#x62;&#x2e;&#99;&#x6f;&#x6d;</a>如果没有报错，再尝试输出就应该有了```<br>cat ~/.ssh/id_rsa.pub      # 控制台上输出内容<br>pbcopy &lt; ~/.ssh/id_rsa.pub # 自动拷贝到粘贴板</li>
 </ul>
 <p> ```</p>
 ]]></content>
       <categories>
         <category>技术</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>内部类</title>
-    <url>/2020/05/12/%E5%86%85%E9%83%A8%E7%B1%BB/</url>
-    <content><![CDATA[<h3 id="什么是内部类？"><a href="#什么是内部类？" class="headerlink" title="什么是内部类？###"></a>什么是内部类？###</h3><hr>
-<p>定义在其它类内部中的类叫做内部类。</p>
-<p>内部类成员可以直接访问外部类的私有数据，因为内部类是外部类的成员。</p>
-<p>编译过后会生成两个或者多个class文件（取决于内部类的数量，中间用￥符号隔开）</p>
-<hr>
-<h3 id="内部类分为"><a href="#内部类分为" class="headerlink" title="内部类分为?"></a>内部类分为?</h3><p>（成员内部类）非静态内部类，静态内部类：算是类成员</p>
-<p>局部内部类，匿名内部类。</p>
-<ul>
-<li>非静态内部类：</li>
-</ul>
-<p> 1.在其内部方法找一个变量，会先在该方法找，再去内部类找，最后再去外部类找</p>
-<p> 2.不允许外部类的静态成员调用非静态内部类，常识</p>
-<p> 3.非静态内部类中不能定义静态成员</p>
-<p> 4.非静态内部类普通初始化块的作用与外部类完全相同</p>
-<ul>
-<li>静态内部类：</li>
-</ul>
-<p> 1.这个内部类属于外部类本身，不属于外部类的对象</p>
-<p> 2.可以包含静态成员和非静态成员</p>
-<p> 3.外部类的上一级是包，所以不能用static修饰，内部类的上一级是外部类，用static修饰成<br> 为外部类相关</p>
-<ul>
-<li><p>局部内部类：</p>
-<p>把一个内部类放在方法内定义，就是局部内部类。不能用访问控制符和static</p>
-</li>
-</ul>
-<p>修饰。</p>
-<ul>
-<li><p>匿名内部类：</p>
-<p> 只需要使用一次的类。</p>
-</li>
-</ul>
-]]></content>
-      <categories>
-        <category>Java</category>
       </categories>
   </entry>
   <entry>
@@ -1257,6 +1422,45 @@ pbcopy &lt; ~/.ssh/id_rsa.pub # 自动拷贝到粘贴板
 </li>
 <li><p>对比CMS：<br> 1.不会产生内存碎片，G1从整体上看是标记整理法，局部上是复制算法，都不会产生内存碎片<br> 2.可以设定停顿时间<br> G1各代的存储地址不是连续的，每一代都使用了n个不连续的大小相同的Region，除了新老生代，还有个H区，放大对象，防止反复拷贝移动。<br> 可以根据价值大小维护一个优先列表，优先收集回收价值的Region，避免了整个老年代的回收，减少了STW</p>
 <p> 初始标记，并发标记，最终标记，筛选回收</p>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>内部类</title>
+    <url>/2020/05/12/%E5%86%85%E9%83%A8%E7%B1%BB/</url>
+    <content><![CDATA[<h3 id="什么是内部类？"><a href="#什么是内部类？" class="headerlink" title="什么是内部类？###"></a>什么是内部类？###</h3><hr>
+<p>定义在其它类内部中的类叫做内部类。</p>
+<p>内部类成员可以直接访问外部类的私有数据，因为内部类是外部类的成员。</p>
+<p>编译过后会生成两个或者多个class文件（取决于内部类的数量，中间用￥符号隔开）</p>
+<hr>
+<h3 id="内部类分为"><a href="#内部类分为" class="headerlink" title="内部类分为?"></a>内部类分为?</h3><p>（成员内部类）非静态内部类，静态内部类：算是类成员</p>
+<p>局部内部类，匿名内部类。</p>
+<ul>
+<li>非静态内部类：</li>
+</ul>
+<p> 1.在其内部方法找一个变量，会先在该方法找，再去内部类找，最后再去外部类找</p>
+<p> 2.不允许外部类的静态成员调用非静态内部类，常识</p>
+<p> 3.非静态内部类中不能定义静态成员</p>
+<p> 4.非静态内部类普通初始化块的作用与外部类完全相同</p>
+<ul>
+<li>静态内部类：</li>
+</ul>
+<p> 1.这个内部类属于外部类本身，不属于外部类的对象</p>
+<p> 2.可以包含静态成员和非静态成员</p>
+<p> 3.外部类的上一级是包，所以不能用static修饰，内部类的上一级是外部类，用static修饰成<br> 为外部类相关</p>
+<ul>
+<li><p>局部内部类：</p>
+<p>把一个内部类放在方法内定义，就是局部内部类。不能用访问控制符和static</p>
+</li>
+</ul>
+<p>修饰。</p>
+<ul>
+<li><p>匿名内部类：</p>
+<p> 只需要使用一次的类。</p>
 </li>
 </ul>
 ]]></content>
@@ -1506,6 +1710,15 @@ public static void heapify(int[] tree, int n, int i) &#123;
       </categories>
   </entry>
   <entry>
+    <title>测试类博客</title>
+    <url>/2020/05/11/%E6%B5%8B%E8%AF%95%E7%B1%BB%E5%8D%9A%E5%AE%A2/</url>
+    <content><![CDATA[<p>QAQ测试哦</p>
+]]></content>
+      <categories>
+        <category>数据库</category>
+      </categories>
+  </entry>
+  <entry>
     <title>树的按层遍历</title>
     <url>/2020/05/12/%E6%A0%91%E7%9A%84%E6%8C%89%E5%B1%82%E9%81%8D%E5%8E%86/</url>
     <content><![CDATA[<ul>
@@ -1527,24 +1740,6 @@ public static void heapify(int[] tree, int n, int i) &#123;
 ]]></content>
       <categories>
         <category>数据结构</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>测试类博客</title>
-    <url>/2020/05/11/%E6%B5%8B%E8%AF%95%E7%B1%BB%E5%8D%9A%E5%AE%A2/</url>
-    <content><![CDATA[<p>QAQ测试哦</p>
-]]></content>
-      <categories>
-        <category>数据库</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>测试背景图</title>
-    <url>/2020/05/11/%E6%B5%8B%E8%AF%95%E8%83%8C%E6%99%AF%E5%9B%BE/</url>
-    <content><![CDATA[<p>真让人无语呀</p>
-]]></content>
-      <categories>
-        <category>技术</category>
       </categories>
   </entry>
   <entry>
@@ -1597,6 +1792,15 @@ public static void heapify(int[] tree, int n, int i) &#123;
 ]]></content>
       <categories>
         <category>数据结构</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>测试背景图</title>
+    <url>/2020/05/11/%E6%B5%8B%E8%AF%95%E8%83%8C%E6%99%AF%E5%9B%BE/</url>
+    <content><![CDATA[<p>真让人无语呀</p>
+]]></content>
+      <categories>
+        <category>技术</category>
       </categories>
   </entry>
   <entry>

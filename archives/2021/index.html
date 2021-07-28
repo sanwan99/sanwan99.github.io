@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
   
-  <title itemprop="name">Bean的生命周期 | Sanwan</title>
+  <title itemprop="name">archive_a: 2021 | Sanwan</title>
   
     <link rel="shortcut icon" href="/images/favicon.ico">
   
@@ -272,210 +272,549 @@
   </div>
 </header>
 
-      <link rel="stylesheet" type="text/css" href="/css/sharejs.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css">
-<div class="pattern-center-blank"></div>
-
-  <div class="pattern-center single-center">
-    <!-- 有配图默认渲染第一张 -->
-    <div class="pattern-attachment-img lazyload" style="background-image: url(https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/13.jpg);" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.1/img/loader/orange.progress-bar-stripe-loader.svg" data-src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/13.jpg">
-    </div>
-    <header class="pattern-header single-header">
-      <h1 class="entry-title">
-      Bean的生命周期</h1>
-      <p class="entry-census">
-        <span>
-          <a href="sanwan99.cn">
-            <img src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.2/img/custom/touxiang.jpg">
-          </a>
-        </span>
-        <span>
-          <a href="sanwan99.cn">点点</a>
-        </span>
-        <span class="bull">
-        ·</span>
-        2020-8-27<span class="bull">
-        ·</span>
-      <span id="busuanzi_value_page_pv"></span>次阅读</p>
-    </header>
-  </div>
-
+      <div class="blank" style="padding-top: 75px;">
+</div>
 <div id="content" class="site-content">
-  <div id="primary" class="content-area">
-    <main id="main" class="site-main" role="main">
-      <article id="post-1" class="post-1 post type-post status-publish format-standard has-post-thumbnail hentry category-uncategorized">
-        <div class="toc"></div>
-        <!--<div class="toc-entry-content"><!-- 套嵌目录使用（主要为了支援评论）-->
-        
-        <div class="entry-content">
-          <h2 id="生命周期"><a href="#生命周期" class="headerlink" title="生命周期"></a>生命周期</h2><p>   实例化 Instantiation<br>   属性赋值 Populate<br>   初始化 Initialization<br>   销毁 Destruction</p>
-<p>实例化 -&gt; 属性赋值 -&gt; 初始化 -&gt; 销毁</p>
-<p>主要逻辑都在doCreate()方法中，逻辑很清晰，就是顺序调用以下三个方法，这三个方法与三个生命周期阶段一一对应，非常重要，在后续扩展接口分析中也会涉及。</p>
-<p>   createBeanInstance() -&gt; 实例化<br>   populateBean() -&gt; 属性赋值<br>   initializeBean() -&gt; 初始化</p>
-<pre><code>/ 忽略了无关代码
-protected Object doCreateBean(final String beanName, final RootBeanDefinition mbd, final @Nullable Object[] args)
-      throws BeanCreationException &#123;
-
-   // Instantiate the bean.
-   BeanWrapper instanceWrapper = null;
-   if (instanceWrapper == null) &#123;
-       // 实例化阶段！
-      instanceWrapper = createBeanInstance(beanName, mbd, args);
-   &#125;
-
-   // Initialize the bean instance.
-   Object exposedObject = bean;
-   try &#123;
-       // 属性赋值阶段！
-      populateBean(beanName, mbd, instanceWrapper);
-       // 初始化阶段！
-      exposedObject = initializeBean(beanName, exposedObject, mbd);
-   &#125;
-
-   
-   &#125;
-</code></pre>
-<h2 id="影响多个Bean的接口"><a href="#影响多个Bean的接口" class="headerlink" title="影响多个Bean的接口"></a>影响多个Bean的接口</h2><p>实现了这些接口的Bean会切入到多个Bean的生命周期中。正因为如此，这些接口的功能非常强大，Spring内部扩展也经常使用这些接口，例如自动注入以及AOP的实现都和他们有关。</p>
-<p>   <strong>BeanPostProcessor</strong><br>   <strong>InstantiationAwareBeanPostProcessor</strong></p>
-<p>这两兄弟可能是Spring扩展中最重要的两个接口！<br>InstantiationAwareBeanPostProcessor作用于实例化阶段的前后，BeanPostProcessor作用于初始化阶段的前后。<br>正好和第一、第三个生命周期阶段对应。通过图能更好理解：</p>
-<p><img src="/images/pasted-34.png" alt="upload successful"><br>InstantiationAwareBeanPostProcessor实际上继承了BeanPostProcessor接口，严格意义上来看他们不是两兄弟，而是两父子。但是从生命周期角度我们重点关注其特有的对实例化阶段的影响，</p>
-<h2 id="只调用一次的接口"><a href="#只调用一次的接口" class="headerlink" title="只调用一次的接口"></a>只调用一次的接口</h2><p>这一大类接口的特点是功能丰富，常用于用户自定义扩展。<br>第二大类中又可以分为两类：</p>
-<pre><code>Aware类型的接口
-生命周期接口
-</code></pre>
-<p>无所不知的Aware</p>
-<p>Aware类型的接口的作用就是让我们能够拿到Spring容器中的一些资源。基本都能够见名知意，Aware之前的名字就是可以拿到什么资源，例如BeanNameAware可以拿到BeanName，以此类推。调用时机需要注意：所有的Aware方法都是在初始化阶段之前调用的！<br>Aware接口众多，这里同样通过分类的方式帮助大家记忆。<br>Aware接口具体可以分为两组，至于为什么这么分，详见下面的源码分析。如下排列顺序同样也是Aware接口的执行顺序，能够见名知意的接口不再解释。</p>
-<p>Aware Group1</p>
-<p>   BeanNameAware<br>   BeanClassLoaderAware<br>   BeanFactoryAware</p>
-<p>Aware Group2</p>
-<p>   EnvironmentAware<br>   EmbeddedValueResolverAware 这个知道的人可能不多，实现该接口能够获取Spring EL解析器，用户的自定义注解需要支持spel表达式的时候可以使用，非常方便。<br>    ApplicationContextAware(ResourceLoaderAware\ApplicationEventPublisherAware\MessageSourceAware) 这几个接口可能让人有点懵，实际上这几个接口可以一起记，其返回值实质上都是当前的ApplicationContext对象，因为ApplicationContext是一个复合接口，</p>
-<h3 id="Aware调用时机源码分析"><a href="#Aware调用时机源码分析" class="headerlink" title="Aware调用时机源码分析"></a>Aware调用时机源码分析</h3><p>详情如下，忽略了部分无关代码。代码位置就是我们上文提到的initializeBean方法详情，这也说明了Aware都是在初始化阶段之前调用的！</p>
-<pre><code>// 见名知意，初始化阶段调用的方法
-    protected Object initializeBean(final String beanName, final Object bean, @Nullable RootBeanDefinition mbd) &#123;
-
-        // 这里调用的是Group1中的三个Bean开头的Aware
-        invokeAwareMethods(beanName, bean);
-
-        Object wrappedBean = bean;
-        
-        // 这里调用的是Group2中的几个Aware，
-        // 而实质上这里就是前面所说的BeanPostProcessor的调用点！
-        // 也就是说与Group1中的Aware不同，这里是通过BeanPostProcessor（ApplicationContextAwareProcessor）实现的。
-        wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
-        // 下文即将介绍的InitializingBean调用点
-        invokeInitMethods(beanName, wrappedBean, mbd);
-        // BeanPostProcessor的另一个调用点
-        wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
-
-        return wrappedBean;
-    &#125;
-</code></pre>
-<p>可以看到并不是所有的Aware接口都使用同样的方式调用。Bean××Aware都是在代码中直接调用的，而ApplicationContext相关的Aware都是通过BeanPostProcessor#postProcessBeforeInitialization()实现的。感兴趣的可以自己看一下ApplicationContextAwareProcessor这个类的源码，就是判断当前创建的Bean是否实现了相关的Aware方法，如果实现了会调用回调方法将资源传递给Bean。<br>至于Spring为什么这么实现，应该没什么特殊的考量。也许和Spring的版本升级有关。基于对修改关闭，对扩展开放的原则，Spring对一些新的Aware采用了扩展的方式添加。</p>
-<p>BeanPostProcessor的调用时机也能在这里体现，包围住invokeInitMethods方法，也就说明了在初始化阶段的前后执行。</p>
-<p>关于Aware接口的执行顺序，其实只需要记住第一组在第二组执行之前就行了。每组中各个Aware方法的调用顺序其实没有必要记，有需要的时候点进源码一看便知。</p>
-<h2 id="简单的两个生命周期接口"><a href="#简单的两个生命周期接口" class="headerlink" title="简单的两个生命周期接口"></a>简单的两个生命周期接口</h2><p>至于剩下的两个生命周期接口就很简单了，实例化和属性赋值都是Spring帮助我们做的，能够自己实现的有初始化和销毁两个生命周期阶段。</p>
-<p>   InitializingBean 对应生命周期的初始化阶段，在上面源码的invokeInitMethods(beanName, wrappedBean, mbd);方法中调用。<br>   有一点需要注意，因为Aware方法都是执行在初始化方法之前，所以可以在初始化方法中放心大胆的使用Aware接口获取的资源，这也是我们自定义扩展Spring的常用方式。<br>   除了实现InitializingBean接口之外还能通过注解或者xml配置的方式指定初始化方法，至于这几种定义方式的调用顺序其实没有必要记。因为这几个方法对应的都是同一个生命周期，只是实现方式不同，我们一般只采用其中一种方式。        DisposableBean 类似于InitializingBean，对应生命周期的销毁阶段，以ConfigurableApplicationContext#close()方法作为入口，实现是通过循环取所有实现了DisposableBean接口的Bean然后调用其destroy()方法 。感兴趣的可以自行跟一下源码。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>Spring Bean的生命周期分为四个阶段和多个扩展点。扩展点又可以分为影响多个Bean和影响单个Bean。整理如下：<br><strong>四个阶段</strong></p>
-<p>   实例化 Instantiation<br>   属性赋值 Populate<br>   初始化 Initialization<br>   销毁 Destruction</p>
-<p><strong>多个扩展点</strong></p>
-<p>   影响多个Bean<br>        BeanPostProcessor<br>        InstantiationAwareBeanPostProcessor<br>   影响单个Bean<br>        Aware<br>            Aware Group1<br>                BeanNameAware<br>                BeanClassLoaderAware<br>                BeanFactoryAware<br>            Aware Group2<br>                EnvironmentAware<br>                EmbeddedValueResolverAware<br>                ApplicationContextAware(ResourceLoaderAware\ApplicationEventPublisherAware\MessageSourceAware)<br><strong>生命周期</strong><br>    InitializingBean<br>    DisposableBean</p>
-
-        </div>
-        <!-- .entry-content -->
-        <div class="single-reward">
-          <div class="reward-open">赏
-            <div class="reward-main">
-              <ul class="reward-row">
-                <li class="alipay-code"><img src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.1/img/custom/donate/AliPayQR1.jpg"></li>
-                <li class="wechat-code"><img src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.1/img/custom/donate/WeChanQR1.jpg"></li>
-              </ul>
+  <div id="main">
+    <header class="page-header">
+      <h1 class="cat-title">
+      归档</h1>
+      <span class="cat-des">
+        <p>
+        Archives</p>
+      </span>
+    </header>
+    <div id="main-part">
+      <article class="art">
+        <div class="art-main">
+          <div class="art-content">
+            <div id="archives">
+              <p style="text-align:right;">
+                [<span id="al_expand_collapse" style="cursor: s-resize;">
+                全部展开/收缩</span>
+              ]</p>
+              
+              
+              
+              
+              
+                
+                <h3 class="al_year">2021年</h3>
+              
+              
+                
+                <ul class="al_mon_list">
+                  <li class="al_li">
+                    <span class="al_mon" style="cursor: s-resize;">
+                      07月(<span id="post-num">
+                      3</span>
+                    篇文章)</span>
+                    <ul class="al_post_list" style="">
+              
+                      <li>
+                        <a href="/2021/07/28/21-7-28/">
+                          <span style="color:#0bf;">
+                          28日15:48:00</span>
+                          Apollo动态修改log4j2.xml
+                        </a>
+                      </li>
+                      
+                    </ul>
+                  </li>
+                </ul>
+              
+              
+              
+              
+              
+                
+                <h3 class="al_year">2020年</h3>
+              
+              
+                
+                <ul class="al_mon_list">
+                  <li class="al_li">
+                    <span class="al_mon" style="cursor: s-resize;">
+                      08月(<span id="post-num">
+                      3</span>
+                    篇文章)</span>
+                    <ul class="al_post_list" style="">
+              
+                      <li>
+                        <a href="/2020/08/27/8-27/">
+                          <span style="color:#0bf;">
+                          27日17:30:00</span>
+                          Bean的生命周期
+                        </a>
+                      </li>
+                      
+              
+              
+              
+              
+              
+                      <li>
+                        <a href="/2020/08/17/8-17/">
+                          <span style="color:#0bf;">
+                          17日09:26:00</span>
+                          关于HashMap几个问题
+                        </a>
+                      </li>
+                      
+              
+              
+              
+              
+              
+                      <li>
+                        <a href="/2020/08/15/8-12-2/">
+                          <span style="color:#0bf;">
+                          15日09:42:00</span>
+                          java序列化
+                        </a>
+                      </li>
+                      
+              
+              
+              
+              
+              
+                      <li>
+                        <a href="/2020/08/12/8-12-1/">
+                          <span style="color:#0bf;">
+                          12日15:53:00</span>
+                          Redis相关配置
+                        </a>
+                      </li>
+                      
+              
+              
+              
+              
+              
+                      <li>
+                        <a href="/2020/08/12/8-12/">
+                          <span style="color:#0bf;">
+                          12日11:06:00</span>
+                          Comparable和Comparator接口的区别
+                        </a>
+                      </li>
+                      
+              
+              
+              
+              
+              
+                      <li>
+                        <a href="/2020/08/06/8-6/">
+                          <span style="color:#0bf;">
+                          06日15:18:00</span>
+                          iBator 数据库操作
+                        </a>
+                      </li>
+                      
+              
+              
+              
+              
+              
+                      <li>
+                        <a href="/2020/08/04/%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E6%9C%80%E8%BF%91%E5%85%AC%E5%85%B1%E7%A5%96%E5%85%88/">
+                          <span style="color:#0bf;">
+                          04日09:17:00</span>
+                          letcode67二叉树的最近公共祖先
+                        </a>
+                      </li>
+                      
+              
+              
+              
+              
+              
+                      <li>
+                        <a href="/2020/08/04/8-4/">
+                          <span style="color:#0bf;">
+                          04日08:55:00</span>
+                          @Configuration与@Bean注解的原理
+                        </a>
+                      </li>
+                      
+                    </ul>
+                  </li>
+                </ul>
+              
+              
+              
+              
+              
+              
+                
+                <ul class="al_mon_list">
+                  <li class="al_li">
+                    <span class="al_mon" style="cursor: s-resize;">
+                      07月(<span id="post-num">
+                      3</span>
+                    篇文章)</span>
+                    <ul class="al_post_list" style="">
+              
+                      <li>
+                        <a href="/2020/07/24/letcode-65-%E4%B8%8D%E7%94%A8%E5%8A%A0%E5%87%8F%E4%B9%98%E9%99%A4%E5%81%9A%E5%8A%A0%E6%B3%95/">
+                          <span style="color:#0bf;">
+                          24日14:16:00</span>
+                          letcode 65 不用加减乘除做加法
+                        </a>
+                      </li>
+                      
+              
+              
+              
+              
+              
+                      <li>
+                        <a href="/2020/07/24/Jquery3/">
+                          <span style="color:#0bf;">
+                          24日13:49:00</span>
+                          Jquery03
+                        </a>
+                      </li>
+                      
+              
+              
+              
+              
+              
+                      <li>
+                        <a href="/2020/07/24/Jquery2/">
+                          <span style="color:#0bf;">
+                          24日13:41:00</span>
+                          Jquery02
+                        </a>
+                      </li>
+                      
+              
+              
+              
+              
+              
+                      <li>
+                        <a href="/2020/07/24/%E5%85%B3%E4%BA%8Egit%E6%8F%90%E4%BA%A4%E6%96%B9%E9%9D%A2%E7%9A%84%E6%8A%A5%E9%94%99/">
+                          <span style="color:#0bf;">
+                          24日11:12:00</span>
+                          关于git提交方面的报错
+                        </a>
+                      </li>
+                      
+              
+              
+              
+              
+              
+                      <li>
+                        <a href="/2020/07/24/Jquery/">
+                          <span style="color:#0bf;">
+                          24日08:49:00</span>
+                          Jquery01
+                        </a>
+                      </li>
+                      
+                    </ul>
+                  </li>
+                </ul>
+              
+              
+              
+              
+              
+              
+                
+                <ul class="al_mon_list">
+                  <li class="al_li">
+                    <span class="al_mon" style="cursor: s-resize;">
+                      05月(<span id="post-num">
+                      3</span>
+                    篇文章)</span>
+                    <ul class="al_post_list" style="">
+              
+                      <li>
+                        <a href="/2020/05/20/%E6%8E%92%E5%BA%8F/">
+                          <span style="color:#0bf;">
+                          20日22:39:00</span>
+                          排序
+                        </a>
+                      </li>
+                      
+              
+              
+              
+              
+              
+                      <li>
+                        <a href="/2020/05/19/http%E5%B0%8F%E7%BB%93/">
+                          <span style="color:#0bf;">
+                          19日11:00:00</span>
+                          http小结
+                        </a>
+                      </li>
+                      
+              
+              
+              
+              
+              
+                      <li>
+                        <a href="/2020/05/13/String-trim-%E7%90%86%E8%A7%A3/">
+                          <span style="color:#0bf;">
+                          13日12:19:22</span>
+                          String.trim()理解
+                        </a>
+                      </li>
+                      
+              
+              
+              
+              
+              
+                      <li>
+                        <a href="/2020/05/13/letcode58/">
+                          <span style="color:#0bf;">
+                          13日12:03:00</span>
+                          letcode58反转单词顺序
+                        </a>
+                      </li>
+                      
+              
+              
+              
+              
+              
+                      <li>
+                        <a href="/2020/05/13/%E6%BB%91%E5%8A%A8%E7%AA%97%E5%8F%A3/">
+                          <span style="color:#0bf;">
+                          13日11:01:00</span>
+                          Letcode57 滑动窗口
+                        </a>
+                      </li>
+                      
+              
+              
+              
+              
+              
+                      <li>
+                        <a href="/2020/05/12/mysql%E9%94%99%E8%AF%AF%E4%BB%A3%E7%A0%812003%E7%9A%84%E8%A7%A3%E5%86%B3%E5%8A%9E%E6%B3%95/">
+                          <span style="color:#0bf;">
+                          12日12:12:00</span>
+                          mysql错误代码2003的解决办法
+                        </a>
+                      </li>
+                      
+              
+              
+              
+              
+              
+                      <li>
+                        <a href="/2020/05/12/%E6%A0%91%E7%9A%84%E6%8C%89%E5%B1%82%E9%81%8D%E5%8E%86/">
+                          <span style="color:#0bf;">
+                          12日12:07:00</span>
+                          树的按层遍历
+                        </a>
+                      </li>
+                      
+              
+              
+              
+              
+              
+                      <li>
+                        <a href="/2020/05/12/JVM%E4%B8%ADnew%E4%B8%80%E4%B8%AA%E5%AF%B9%E8%B1%A1/">
+                          <span style="color:#0bf;">
+                          12日12:04:00</span>
+                          JVM中new一个对象
+                        </a>
+                      </li>
+                      
+              
+              
+              
+              
+              
+                      <li>
+                        <a href="/2020/05/12/JVM%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/">
+                          <span style="color:#0bf;">
+                          12日12:00:00</span>
+                          JVM体系结构
+                        </a>
+                      </li>
+                      
+              
+              
+              
+              
+              
+                      <li>
+                        <a href="/2020/05/12/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6/">
+                          <span style="color:#0bf;">
+                          12日11:49:00</span>
+                          垃圾回收
+                        </a>
+                      </li>
+                      
+              
+              
+              
+              
+              
+                      <li>
+                        <a href="/2020/05/12/%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6/">
+                          <span style="color:#0bf;">
+                          12日11:37:00</span>
+                          主从复制
+                        </a>
+                      </li>
+                      
+              
+              
+              
+              
+              
+                      <li>
+                        <a href="/2020/05/12/MySQL%E4%B8%AD%E7%9A%84%E9%94%81/">
+                          <span style="color:#0bf;">
+                          12日11:28:00</span>
+                          MySQL中的锁
+                        </a>
+                      </li>
+                      
+              
+              
+              
+              
+              
+                      <li>
+                        <a href="/2020/05/12/InnoDB%E5%92%8CMyISAM%E7%9A%84%E5%8C%BA%E5%88%AB/">
+                          <span style="color:#0bf;">
+                          12日11:21:00</span>
+                          InnoDB和MyISAM的区别
+                        </a>
+                      </li>
+                      
+              
+              
+              
+              
+              
+                      <li>
+                        <a href="/2020/05/12/%E7%B4%A2%E5%BC%95/">
+                          <span style="color:#0bf;">
+                          12日11:02:00</span>
+                          索引
+                        </a>
+                      </li>
+                      
+              
+              
+              
+              
+              
+                      <li>
+                        <a href="/2020/05/12/%E5%86%85%E9%83%A8%E7%B1%BB/">
+                          <span style="color:#0bf;">
+                          12日10:45:00</span>
+                          内部类
+                        </a>
+                      </li>
+                      
+              
+              
+              
+              
+              
+                      <li>
+                        <a href="/2020/05/11/%E9%85%8D%E7%BD%AE/">
+                          <span style="color:#0bf;">
+                          11日20:39:00</span>
+                          配置
+                        </a>
+                      </li>
+                      
+              
+              
+              
+              
+              
+                      <li>
+                        <a href="/2020/05/11/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">
+                          <span style="color:#0bf;">
+                          11日20:38:43</span>
+                          数据结构
+                        </a>
+                      </li>
+                      
+              
+              
+              
+              
+              
+                      <li>
+                        <a href="/2020/05/11/java/">
+                          <span style="color:#0bf;">
+                          11日20:37:25</span>
+                          java
+                        </a>
+                      </li>
+                      
+              
+              
+              
+              
+              
+                      <li>
+                        <a href="/2020/05/11/%E6%B5%8B%E8%AF%95%E8%83%8C%E6%99%AF%E5%9B%BE/">
+                          <span style="color:#0bf;">
+                          11日13:34:59</span>
+                          测试背景图
+                        </a>
+                      </li>
+                      
+              
+              
+              
+              
+              
+                      <li>
+                        <a href="/2020/05/11/%E6%B5%8B%E8%AF%95%E7%B1%BB%E5%8D%9A%E5%AE%A2/">
+                          <span style="color:#0bf;">
+                          11日13:00:54</span>
+                          测试类博客
+                        </a>
+                      </li>
+                      
+              
+              
+              
+              
+              
+                      <li>
+                        <a href="/2020/05/05/helloworld/">
+                          <span style="color:#0bf;">
+                          05日22:06:17</span>
+                          HelloWorld
+                        </a>
+                      </li>
+                      
+                    </ul>
+                  </li>
+                </ul>
+              
+              
             </div>
           </div>
         </div>
-        <div style="text-align:center; width: 100%" class="social-share share-mobile" data-disabled="diandian, tencent"></div>
-        <footer class="post-footer">
-          <div class="post-lincenses"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="nofollow"><i class="fa fa-creative-commons" aria-hidden="true"></i> 知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议</a></div>
-          <div class="post-tags">
-          </div>
-          <div class="post-share">
-            <div class="social-share sharehidden share-component"></div>
-            <i class="iconfont show-share icon-forward"></i>
-          </div>
-        </footer><!-- .entry-footer -->
       </article>
-      <!-- #post-## -->
-      <div class="toc" style="background: none;"></div>
-      <section class="post-squares nextprev">
-        
-          
-            <div class="post-nepre half previous">
-          
-            <a href="/2021/07/28/21-7-28/" rel="prev">
-              <div class="background">
-                <img class="lazyload" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.1/img/loader/orange.progress-bar-stripe-loader.svg" data-src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/14.jpg" style="width: 100%; height: 100%; object-fit: cover; pointer-events: none;" onerror="imgError(this,3)" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/14.jpg">
-              </div>
-              <span class="label">
-              Previous Post</span>
-              <div class="info">
-                <h3>
-                Apollo动态修改log4j2.xml</h3>
-                <hr>
-              </div>
-            </a>
-          </div>
-        
-        
-          
-            <div class="post-nepre half next">
-          
-            <a href="/2020/08/17/8-17/" rel="next">
-              <div class="background">
-                <img class="lazyload" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.1/img/loader/orange.progress-bar-stripe-loader.svg" data-src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/14.jpg" style="width: 100%; height: 100%; object-fit: cover; pointer-events: none;" onerror="imgError(this,3)" src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@2.0/img/articleBg/14.jpg">
-              </div>
-              <span class="label">
-              Next Post</span>
-              <div class="info">
-                <h3>
-                关于HashMap几个问题</h3>
-                <hr>
-              </div>
-            </a>
-          </div>
-        
-      </section>
-      
-<div id="vcomments"></div>
-<script>
-  window.onload = function(){
-      var valine = new Valine();
-      valine.init({
-        el: '#vcomments',
-        appId: "YNsapdWTGuiurNqoV8eJHlsI-gzGzoHsz",
-        appKey: "JDannM5I5JMu49IKfVkscmIe",
-        path: window.location.pathname,
-        placeholder: "万万出来嚯奶茶了！"
-      })
-  }
-</script>
-
-      <section class="author-profile">
-        <div class="info" itemprop="author" itemscope="" itemtype="https://schema.org/Person">
-          <a href="sanwan99.cn" class="profile gravatar"><img src="https://cdn.jsdelivr.net/gh/sanwan99/cdn@1.2/img/custom/touxiang.jpg" itemprop="image" alt="点点" height="70" width="70"></a>
-          <div class="meta">
-            <span class="title">Author</span>
-            <h3 itemprop="name">
-            <a href="sanwan99.cn" itemprop="url" rel="author">点点</a>
-            </h3>
-          </div>
-        </div>
-        <hr>
-        <p><i class="iconfont icon-write"></i>爱搞事的三万</p>
-      </section>
-    </main><!-- #main -->
-  </div><!-- #primary -->
+    </div>
+  </div>
 </div>
-
-
 
     </div>    
     <div class="ins-search">

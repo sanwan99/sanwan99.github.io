@@ -205,6 +205,60 @@ protected Object doCreateBean(final String beanName, final RootBeanDefinition mb
       </categories>
   </entry>
   <entry>
+    <title>iBator 数据库操作</title>
+    <url>/2020/08/06/8-6/</url>
+    <content><![CDATA[<p>实习公司有个比较老的项目，用的是ibatis的代码自动生成工具ibator，会自动生成映射文件和Domain层，还同时生成DAO层，用户只需编写Service层即可。 </p>
+<h4 id="iBator-数据库操作"><a href="#iBator-数据库操作" class="headerlink" title="iBator 数据库操作"></a>iBator 数据库操作</h4><p> 通过iBator导出的文件包括映射文件、Domain类、DAO类。它导出的Domain类和DAO类是依据iBator设计的框架生成的，其中包括了各种函数。我们要基于这些类来开发Service层代码。</p>
+<p> 新生成的DAO层的接口提供了以下操作函数：</p>
+<ul>
+<li>int countByExample(UserExample example) thorws SQLException：按条件计数。</li>
+<li>int deleteByPrimaryKey(Integer id) thorws SQLException：按主键删除。</li>
+<li>int deleteByExample(UserExample example) thorws SQLException：按条件删除。</li>
+<li>String/Integer insert(User record) thorws SQLException：插入 （返回值为id值）</li>
+<li>User selectByPrimaryKey(Integer id) thorws SQLException：按主键查询。</li>
+<li>List&lt;?&gt;selectByExample(UserExample example) thorws SQLException：按条件查询</li>
+<li>List&lt;?&gt;selectByExampleWithBLOGs(UserExample example) thorws SQLException：按条件查询（包括BLOB字段）。只有当数据表中的字段类型有为二进制的才会产生。</li>
+<li>int updateByPrimaryKey(User record) thorws SQLException：按主键更新</li>
+<li>int updateByPrimaryKeySelective(User record) thorws SQLException：按主键更新值不为null的字段</li>
+<li>int updateByExample(User record, UserExample example) thorws SQLException：按条件更新</li>
+<li>int updateByExampleSelective(User record, UserExample example) thorws SQLException：按条件更新值不为null的字段</li>
+</ul>
+<h4 id="详解："><a href="#详解：" class="headerlink" title="详解："></a>详解：</h4><p>UserDAOImpl userDAO = new UserDAOImpl(SqlMapClientFactory.getSqlMapClient());<br>注：SqlMapClientFactory.getSqlMapClient()：是自定义的类和方法，目的是获取SqlMapClient.</p>
+<ul>
+<li><p>① selectByPrimaryKey()</p>
+<p>  User user = userDAO.selectByPrimaryKey(100); 相当于select * from user where id = 100</p>
+</li>
+<li><p>② selectByExample() 和 selectByExampleWithBLOGs()</p>
+<p>  UserExample example = new UserExample();<br>  Criteria criteria = example.createCriteria();<br>  criteria.andUsernameEqualTo(“joe”);<br>  criteria.andUsernameIsNull();<br>  example.setOrderByClause(“username asc,email desc”);<br>  List&lt;?&gt;list = userDAO.selectByExample(example);<br>  相当于：select * from user where username = ‘joe’ and username is null order by username asc,email desc</p>
+<p>  注：在iBator 生成的文件UserExample.java中包含一个static 的内部类 Criteria ，在Criteria中有很多方法，主要是定义SQL 语句where后的查询条件。</p>
+</li>
+<li><p>③ insert()</p>
+<p>User user = new User();<br>user.setId(101);<br>user.setUsername(“test”);<br>user.setPassword(“123”)<br>user.setEmail(“<a href="mailto:&#106;&#111;&#x65;&#x40;&#49;&#x36;&#51;&#x2e;&#x63;&#111;&#109;">&#106;&#111;&#x65;&#x40;&#49;&#x36;&#51;&#x2e;&#x63;&#111;&#109;</a>“);<br>userDAO.insert(user);<br>相当于：insert into user(ID,username,password,email) values(101,’test’,’123’,‘joe@163.com’);</p>
+</li>
+<li><p>④ updateByPrimaryKey() 和 updateByPrimaryKeySelective()</p>
+<p>User user =new User();<br>user.setId(101);<br>user.setUsername(“joe”);<br>user.setPassword(“joe”);<br>user.setEmail(“<a href="mailto:&#106;&#111;&#x65;&#x40;&#x31;&#x36;&#51;&#46;&#x63;&#111;&#x6d;">&#106;&#111;&#x65;&#x40;&#x31;&#x36;&#51;&#46;&#x63;&#111;&#x6d;</a>“);<br>userDAO.updateByPrimaryKey(user);<br>相当于：update user set username=’joe’,password=’joe’,email=’joe@163.com’ where id=101</p>
+<p>User user = new User();<br>user.setId(101);<br>user.setPassword(“joe”);<br>userDAO.updateByPrimaryKeySelective(user);<br>相当于：update user set password=’joe’ where id=101</p>
+</li>
+<li><p>⑤ updateByExample() 和 updateByExampleSelective()</p>
+<p>UserExample example = new UserExample();<br>Criteria criteria = example.createCriteria();<br>criteria.andUsernameEqualTo(“joe”);<br>User user = new User();<br>user.setPassword(“123”);<br>userDAO.updateByPrimaryKeySelective(user,example);<br>相当于：update user set password=’123’ where username=’joe’</p>
+</li>
+<li><p>⑥ deleteByPrimaryKey()</p>
+<p>userDAO.deleteByPrimaryKey(101);  相当于：delete from user where id=101</p>
+</li>
+<li><p>⑦ deleteByExample()</p>
+<p>UserExample example = new UserExample();<br>Criteria criteria = example.createCriteria();<br>criteria.andUsernameEqualTo(“joe”);<br>userDAO.deleteByExample(example);<br>相当于：delete from user where username=’joe’</p>
+</li>
+<li><p>⑧ countByExample()</p>
+<p>UserExample example = new UserExample();<br>Criteria criteria = example.createCriteria();<br>criteria.andUsernameEqualTo(“joe”);<br>int count = userDAO.countByExample(example);<br>相当于：select count(*) from user where username=’joe’</p>
+<p>   return list;<br>}</p>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+  </entry>
+  <entry>
     <title>InnoDB和MyISAM的区别</title>
     <url>/2020/05/12/InnoDB%E5%92%8CMyISAM%E7%9A%84%E5%8C%BA%E5%88%AB/</url>
     <content><![CDATA[<ul>
@@ -254,60 +308,6 @@ protected Object doCreateBean(final String beanName, final RootBeanDefinition mb
 ]]></content>
       <categories>
         <category>数据库</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>iBator 数据库操作</title>
-    <url>/2020/08/06/8-6/</url>
-    <content><![CDATA[<p>实习公司有个比较老的项目，用的是ibatis的代码自动生成工具ibator，会自动生成映射文件和Domain层，还同时生成DAO层，用户只需编写Service层即可。 </p>
-<h4 id="iBator-数据库操作"><a href="#iBator-数据库操作" class="headerlink" title="iBator 数据库操作"></a>iBator 数据库操作</h4><p> 通过iBator导出的文件包括映射文件、Domain类、DAO类。它导出的Domain类和DAO类是依据iBator设计的框架生成的，其中包括了各种函数。我们要基于这些类来开发Service层代码。</p>
-<p> 新生成的DAO层的接口提供了以下操作函数：</p>
-<ul>
-<li>int countByExample(UserExample example) thorws SQLException：按条件计数。</li>
-<li>int deleteByPrimaryKey(Integer id) thorws SQLException：按主键删除。</li>
-<li>int deleteByExample(UserExample example) thorws SQLException：按条件删除。</li>
-<li>String/Integer insert(User record) thorws SQLException：插入 （返回值为id值）</li>
-<li>User selectByPrimaryKey(Integer id) thorws SQLException：按主键查询。</li>
-<li>List&lt;?&gt;selectByExample(UserExample example) thorws SQLException：按条件查询</li>
-<li>List&lt;?&gt;selectByExampleWithBLOGs(UserExample example) thorws SQLException：按条件查询（包括BLOB字段）。只有当数据表中的字段类型有为二进制的才会产生。</li>
-<li>int updateByPrimaryKey(User record) thorws SQLException：按主键更新</li>
-<li>int updateByPrimaryKeySelective(User record) thorws SQLException：按主键更新值不为null的字段</li>
-<li>int updateByExample(User record, UserExample example) thorws SQLException：按条件更新</li>
-<li>int updateByExampleSelective(User record, UserExample example) thorws SQLException：按条件更新值不为null的字段</li>
-</ul>
-<h4 id="详解："><a href="#详解：" class="headerlink" title="详解："></a>详解：</h4><p>UserDAOImpl userDAO = new UserDAOImpl(SqlMapClientFactory.getSqlMapClient());<br>注：SqlMapClientFactory.getSqlMapClient()：是自定义的类和方法，目的是获取SqlMapClient.</p>
-<ul>
-<li><p>① selectByPrimaryKey()</p>
-<p>  User user = userDAO.selectByPrimaryKey(100); 相当于select * from user where id = 100</p>
-</li>
-<li><p>② selectByExample() 和 selectByExampleWithBLOGs()</p>
-<p>  UserExample example = new UserExample();<br>  Criteria criteria = example.createCriteria();<br>  criteria.andUsernameEqualTo(“joe”);<br>  criteria.andUsernameIsNull();<br>  example.setOrderByClause(“username asc,email desc”);<br>  List&lt;?&gt;list = userDAO.selectByExample(example);<br>  相当于：select * from user where username = ‘joe’ and username is null order by username asc,email desc</p>
-<p>  注：在iBator 生成的文件UserExample.java中包含一个static 的内部类 Criteria ，在Criteria中有很多方法，主要是定义SQL 语句where后的查询条件。</p>
-</li>
-<li><p>③ insert()</p>
-<p>User user = new User();<br>user.setId(101);<br>user.setUsername(“test”);<br>user.setPassword(“123”)<br>user.setEmail(“<a href="mailto:&#x6a;&#111;&#101;&#x40;&#x31;&#x36;&#51;&#x2e;&#99;&#x6f;&#109;">&#x6a;&#111;&#101;&#x40;&#x31;&#x36;&#51;&#x2e;&#99;&#x6f;&#109;</a>“);<br>userDAO.insert(user);<br>相当于：insert into user(ID,username,password,email) values(101,’test’,’123’,‘joe@163.com’);</p>
-</li>
-<li><p>④ updateByPrimaryKey() 和 updateByPrimaryKeySelective()</p>
-<p>User user =new User();<br>user.setId(101);<br>user.setUsername(“joe”);<br>user.setPassword(“joe”);<br>user.setEmail(“<a href="mailto:&#106;&#x6f;&#x65;&#x40;&#x31;&#54;&#x33;&#46;&#99;&#111;&#109;">&#106;&#x6f;&#x65;&#x40;&#x31;&#54;&#x33;&#46;&#99;&#111;&#109;</a>“);<br>userDAO.updateByPrimaryKey(user);<br>相当于：update user set username=’joe’,password=’joe’,email=’joe@163.com’ where id=101</p>
-<p>User user = new User();<br>user.setId(101);<br>user.setPassword(“joe”);<br>userDAO.updateByPrimaryKeySelective(user);<br>相当于：update user set password=’joe’ where id=101</p>
-</li>
-<li><p>⑤ updateByExample() 和 updateByExampleSelective()</p>
-<p>UserExample example = new UserExample();<br>Criteria criteria = example.createCriteria();<br>criteria.andUsernameEqualTo(“joe”);<br>User user = new User();<br>user.setPassword(“123”);<br>userDAO.updateByPrimaryKeySelective(user,example);<br>相当于：update user set password=’123’ where username=’joe’</p>
-</li>
-<li><p>⑥ deleteByPrimaryKey()</p>
-<p>userDAO.deleteByPrimaryKey(101);  相当于：delete from user where id=101</p>
-</li>
-<li><p>⑦ deleteByExample()</p>
-<p>UserExample example = new UserExample();<br>Criteria criteria = example.createCriteria();<br>criteria.andUsernameEqualTo(“joe”);<br>userDAO.deleteByExample(example);<br>相当于：delete from user where username=’joe’</p>
-</li>
-<li><p>⑧ countByExample()</p>
-<p>UserExample example = new UserExample();<br>Criteria criteria = example.createCriteria();<br>criteria.andUsernameEqualTo(“joe”);<br>int count = userDAO.countByExample(example);<br>相当于：select count(*) from user where username=’joe’</p>
-<p>   return list;<br>}</p>
-</li>
-</ul>
-]]></content>
-      <categories>
-        <category>技术</category>
       </categories>
   </entry>
   <entry>
@@ -713,72 +713,6 @@ protected Object doCreateBean(final String beanName, final RootBeanDefinition mb
       </categories>
   </entry>
   <entry>
-    <title>String.trim()理解</title>
-    <url>/2020/05/13/String-trim-%E7%90%86%E8%A7%A3/</url>
-    <content><![CDATA[<h2 id="trim去掉的是什么字符？"><a href="#trim去掉的是什么字符？" class="headerlink" title="trim去掉的是什么字符？"></a>trim去掉的是什么字符？</h2><p> 《Java核心技术》书上说的trim主要是是“返回一个新的字符串。这个字符串将删除了原始字符串头部和尾部的空格。”<br> 但是，有些特殊字符是看不到的</p>
-<pre><code>         public static void main(String[] args) &#123;
-         String str = &quot;abc&quot;;
-         System.out.println(str.length());
-         str = str.trim();
-         System.out.println(str.length());
-    &#125;
-</code></pre>
-<p>比如这段代码，输出的是9和3，但是在eclipse或者idea是看不到的，也就是说trim不只是排掉空格这么简单的作用</p>
-<pre><code>/**
-     * @return  A string whose value is this string, with any leading and trailing white
-     *          space removed, or this string if it has no leading or
-     *          trailing white space.
-     */
-    public String trim() &#123;
-        int len = value.length;
-        int st = 0;
-        char[] val = value;    /* avoid getfield opcode */
-
-        while ((st &lt; len) &amp;&amp; (val[st] &lt;= &#39; &#39;)) &#123;
-            st++;
-        &#125;
-        while ((st &lt; len) &amp;&amp; (val[len - 1] &lt;= &#39; &#39;)) &#123;
-            len--;
-        &#125;
-        return ((st &gt; 0) || (len &lt; value.length)) ? substring(st, len) : this;
-    &#125;
-</code></pre>
-<p> 可以知道，由于空格的Unicode编码是32，trim()方法实际上trim掉了字符串两端Unicode编码小于等于32（\u0020）的所有字符。</p>
-<h2 id="trim返回的对象"><a href="#trim返回的对象" class="headerlink" title="trim返回的对象"></a>trim返回的对象</h2><pre><code>public static void main(String[] args) &#123;
-        String str1 = &quot;abc   &quot;;
-        String str2 = &quot;abc&quot;;
-        String str3 = &quot;abc&quot;;
-        str1 = str1.trim();
-        System.out.println(str1 == str2);  // false
-        System.out.println(str3 == str2);  // true
-   &#125;
-</code></pre>
-<p> str1.trim()返回的字符串为”abc”，而在常量池中已经确定存在这个”abc”这个String对象，那为何str1==str2不成立呢？<br>我们看trim()方法的最后一行：</p>
-<pre><code>return ((st &gt; 0) || (len &lt; value.length)) ? substring(st, len) : this;
-</code></pre>
-<p>也就是说，trim()方法实际上的行为并不是去掉两端的空白字符，而是截取中间的非空白字符</p>
-<pre><code> public String substring(int beginIndex, int endIndex) &#123;
-        if (beginIndex &lt; 0) &#123;
-            throw new StringIndexOutOfBoundsException(beginIndex);
-        &#125;
-        if (endIndex &gt; value.length) &#123;
-            throw new StringIndexOutOfBoundsException(endIndex);
-        &#125;
-        int subLen = endIndex - beginIndex;
-        if (subLen &lt; 0) &#123;
-            throw new StringIndexOutOfBoundsException(subLen);
-        &#125;
-        return ((beginIndex == 0) &amp;&amp; (endIndex == value.length)) ? this
-                : new String(value, beginIndex, subLen);
-    &#125;
-</code></pre>
-<p>当实际发生了”截取“这个动作的时候，因为此处无法直接声明一个String常量，即substring()无法像我们写String str = “abc”这样直接在常量池中创建对象，所以它返回的是一个new出来的对象，这个对象位于Heap内存中。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-  </entry>
-  <entry>
     <title>HelloWorld</title>
     <url>/2020/05/05/helloworld/</url>
     <content><![CDATA[<p>helloHexo</p>
@@ -862,6 +796,72 @@ protected Object doCreateBean(final String beanName, final RootBeanDefinition mb
 <li><p><strong>性能</strong><br>HTTP 的性能不算差，但不完全适应现在的互联网，还有很大的提升空间。</p>
 </li>
 </ul>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>String.trim()理解</title>
+    <url>/2020/05/13/String-trim-%E7%90%86%E8%A7%A3/</url>
+    <content><![CDATA[<h2 id="trim去掉的是什么字符？"><a href="#trim去掉的是什么字符？" class="headerlink" title="trim去掉的是什么字符？"></a>trim去掉的是什么字符？</h2><p> 《Java核心技术》书上说的trim主要是是“返回一个新的字符串。这个字符串将删除了原始字符串头部和尾部的空格。”<br> 但是，有些特殊字符是看不到的</p>
+<pre><code>         public static void main(String[] args) &#123;
+         String str = &quot;abc&quot;;
+         System.out.println(str.length());
+         str = str.trim();
+         System.out.println(str.length());
+    &#125;
+</code></pre>
+<p>比如这段代码，输出的是9和3，但是在eclipse或者idea是看不到的，也就是说trim不只是排掉空格这么简单的作用</p>
+<pre><code>/**
+     * @return  A string whose value is this string, with any leading and trailing white
+     *          space removed, or this string if it has no leading or
+     *          trailing white space.
+     */
+    public String trim() &#123;
+        int len = value.length;
+        int st = 0;
+        char[] val = value;    /* avoid getfield opcode */
+
+        while ((st &lt; len) &amp;&amp; (val[st] &lt;= &#39; &#39;)) &#123;
+            st++;
+        &#125;
+        while ((st &lt; len) &amp;&amp; (val[len - 1] &lt;= &#39; &#39;)) &#123;
+            len--;
+        &#125;
+        return ((st &gt; 0) || (len &lt; value.length)) ? substring(st, len) : this;
+    &#125;
+</code></pre>
+<p> 可以知道，由于空格的Unicode编码是32，trim()方法实际上trim掉了字符串两端Unicode编码小于等于32（\u0020）的所有字符。</p>
+<h2 id="trim返回的对象"><a href="#trim返回的对象" class="headerlink" title="trim返回的对象"></a>trim返回的对象</h2><pre><code>public static void main(String[] args) &#123;
+        String str1 = &quot;abc   &quot;;
+        String str2 = &quot;abc&quot;;
+        String str3 = &quot;abc&quot;;
+        str1 = str1.trim();
+        System.out.println(str1 == str2);  // false
+        System.out.println(str3 == str2);  // true
+   &#125;
+</code></pre>
+<p> str1.trim()返回的字符串为”abc”，而在常量池中已经确定存在这个”abc”这个String对象，那为何str1==str2不成立呢？<br>我们看trim()方法的最后一行：</p>
+<pre><code>return ((st &gt; 0) || (len &lt; value.length)) ? substring(st, len) : this;
+</code></pre>
+<p>也就是说，trim()方法实际上的行为并不是去掉两端的空白字符，而是截取中间的非空白字符</p>
+<pre><code> public String substring(int beginIndex, int endIndex) &#123;
+        if (beginIndex &lt; 0) &#123;
+            throw new StringIndexOutOfBoundsException(beginIndex);
+        &#125;
+        if (endIndex &gt; value.length) &#123;
+            throw new StringIndexOutOfBoundsException(endIndex);
+        &#125;
+        int subLen = endIndex - beginIndex;
+        if (subLen &lt; 0) &#123;
+            throw new StringIndexOutOfBoundsException(subLen);
+        &#125;
+        return ((beginIndex == 0) &amp;&amp; (endIndex == value.length)) ? this
+                : new String(value, beginIndex, subLen);
+    &#125;
+</code></pre>
+<p>当实际发生了”截取“这个动作的时候，因为此处无法直接声明一个String常量，即substring()无法像我们写String str = “abc”这样直接在常量池中创建对象，所以它返回的是一个new出来的对象，这个对象位于Heap内存中。</p>
 ]]></content>
       <categories>
         <category>技术</category>
@@ -1125,6 +1125,26 @@ protected Object doCreateBean(final String beanName, final RootBeanDefinition mb
       </categories>
   </entry>
   <entry>
+    <title>关于git提交方面的报错</title>
+    <url>/2020/07/24/%E5%85%B3%E4%BA%8Egit%E6%8F%90%E4%BA%A4%E6%96%B9%E9%9D%A2%E7%9A%84%E6%8A%A5%E9%94%99/</url>
+    <content><![CDATA[<p>今天在公司搭hexo环境，发现了hexo d的时候一直报错，查找了很多相关的资料发现是公钥的问题，以下是解决方案</p>
+<h1 id="只适用于只有一个git环境"><a href="#只适用于只有一个git环境" class="headerlink" title="只适用于只有一个git环境"></a>只适用于只有一个git环境</h1><ul>
+<li>如果你的电脑只有一个git环境，那么极大多数情况是由于 GitHub 账号没有设置 ssh 公钥信息所致。 前往 GitHub 网站的”account settings”依次点击”Setting -&gt; SSH Keys”-&gt;”New SSH key”Title处填写“id_rsa.pub”或其他任意信息。 </li>
+<li>key处原样拷贝下面命令的打印 ~/.ssh/id_rsa.pub 文件的内容：</li>
+</ul>
+<pre><code>cat ~/.ssh/id_rsa.pub      # 控制台上输出内容
+pbcopy &lt; ~/.ssh/id_rsa.pub # 自动拷贝到粘贴板
+</code></pre>
+<ul>
+<li>如没有则按下述方法<br>生成： ssh-keygen -t rsa输入文件名的地方输入可以输入自定义文件名，默认是id_rsa，然后一路回车…… 注意如果自定义文件名的话，需要加一个config文件，下文有介绍。最后，输入ssh -T <a href="mailto:&#x67;&#x69;&#x74;&#x40;&#103;&#x69;&#116;&#104;&#x75;&#x62;&#46;&#99;&#111;&#109;">&#x67;&#x69;&#x74;&#x40;&#103;&#x69;&#116;&#104;&#x75;&#x62;&#46;&#99;&#111;&#109;</a>如果没有报错，再尝试输出就应该有了```<br>cat ~/.ssh/id_rsa.pub      # 控制台上输出内容<br>pbcopy &lt; ~/.ssh/id_rsa.pub # 自动拷贝到粘贴板</li>
+</ul>
+<p> ```</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+  </entry>
+  <entry>
     <title>内部类</title>
     <url>/2020/05/12/%E5%86%85%E9%83%A8%E7%B1%BB/</url>
     <content><![CDATA[<h3 id="什么是内部类？"><a href="#什么是内部类？" class="headerlink" title="什么是内部类？###"></a>什么是内部类？###</h3><hr>
@@ -1161,26 +1181,6 @@ protected Object doCreateBean(final String beanName, final RootBeanDefinition mb
 ]]></content>
       <categories>
         <category>Java</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>关于git提交方面的报错</title>
-    <url>/2020/07/24/%E5%85%B3%E4%BA%8Egit%E6%8F%90%E4%BA%A4%E6%96%B9%E9%9D%A2%E7%9A%84%E6%8A%A5%E9%94%99/</url>
-    <content><![CDATA[<p>今天在公司搭hexo环境，发现了hexo d的时候一直报错，查找了很多相关的资料发现是公钥的问题，以下是解决方案</p>
-<h1 id="只适用于只有一个git环境"><a href="#只适用于只有一个git环境" class="headerlink" title="只适用于只有一个git环境"></a>只适用于只有一个git环境</h1><ul>
-<li>如果你的电脑只有一个git环境，那么极大多数情况是由于 GitHub 账号没有设置 ssh 公钥信息所致。 前往 GitHub 网站的”account settings”依次点击”Setting -&gt; SSH Keys”-&gt;”New SSH key”Title处填写“id_rsa.pub”或其他任意信息。 </li>
-<li>key处原样拷贝下面命令的打印 ~/.ssh/id_rsa.pub 文件的内容：</li>
-</ul>
-<pre><code>cat ~/.ssh/id_rsa.pub      # 控制台上输出内容
-pbcopy &lt; ~/.ssh/id_rsa.pub # 自动拷贝到粘贴板
-</code></pre>
-<ul>
-<li>如没有则按下述方法<br>生成： ssh-keygen -t rsa输入文件名的地方输入可以输入自定义文件名，默认是id_rsa，然后一路回车…… 注意如果自定义文件名的话，需要加一个config文件，下文有介绍。最后，输入ssh -T <a href="mailto:&#x67;&#105;&#116;&#64;&#103;&#105;&#x74;&#104;&#117;&#x62;&#46;&#99;&#x6f;&#109;">&#x67;&#105;&#116;&#64;&#103;&#105;&#x74;&#104;&#117;&#x62;&#46;&#99;&#x6f;&#109;</a>如果没有报错，再尝试输出就应该有了```<br>cat ~/.ssh/id_rsa.pub      # 控制台上输出内容<br>pbcopy &lt; ~/.ssh/id_rsa.pub # 自动拷贝到粘贴板</li>
-</ul>
-<p> ```</p>
-]]></content>
-      <categories>
-        <category>技术</category>
       </categories>
   </entry>
   <entry>

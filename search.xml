@@ -1,0 +1,4282 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>Comparable和Comparator接口的区别</title>
+    <url>/2020/08/12/8-12/</url>
+    <content><![CDATA[<h3 id="Comparable用法"><a href="#Comparable用法" class="headerlink" title="Comparable用法"></a>Comparable用法</h3><p> 在给集合排序的时候，我们需要用到一个工具类叫做Collections，这个工具类可以用来给集合排序,详见如下代码：</p>
+<pre><code>List&lt;Integer&gt; list = new ArrayList&lt;&gt;();
+list.add(14);
+list.add(30);
+list.add(3);
+list.add(12);
+Collections.sort(list);
+System.out.println(list);//3,12，14,30
+</code></pre>
+<p>很显然，Collections对于Integer类型的数组默认的排序结果是升序的</p>
+<p> 那么如果我们创建一个自定义类型的Person数组能否进行排序呢，大家可以用代码试一下，结果是不可以的，为什么会有这样的问题呢，我们去看一下Collections中的sort方法，就可以发现问题：</p>
+<pre><code>public static &lt;T extends Comparable&lt;? super T&gt;&gt; void sort(List&lt;T&gt; list) &#123;
+       list.sort(null);
+</code></pre>
+<p> 在泛型的规则中，有一个T extends Comparable的泛型通配符 ，对于要排序的list中的T进行了一个限制，要求集合中的T必须要实现Comparable接口，我们可以按照这个思路，写一个Person类，实现Comparable接口，而这个接口中，有一个抽象方法需要我们实现，这个方法就是CompareTo</p>
+<pre><code>
+      public class Person implements Comparable&lt;Person&gt;&#123;
+      String name;
+      Integer age;
+      public Person(String name, int age) &#123;
+          super();
+          this.name = name;
+          this.age = age;
+      &#125;
+      public Person()
+  &#123;
+      super();
+  &#125;
+      @Override
+      public String toString() &#123;
+      return &quot;Person [name=&quot; + name + &quot;, age=&quot; + age + &quot;]&quot;;
+      &#125;
+
+
+      public String getName() &#123;
+          return name;
+      &#125;
+      public void setName(String name) &#123;
+          this.name = name;
+      &#125;
+      public Integer getAge() &#123;
+          return age;
+      &#125;
+      public void setAge(Integer age) &#123;
+          this.age = age;
+      &#125;
+      //排序的规则
+      public int compareTo(Person o) &#123;
+          //引用类型（可以排序的类型）可以直接调用CompareTo方法
+          //基本类型--使用   减  
+          //return this.age - o.age;//用this对象 - 参数中的对            象，是按照该属性的升序进行的排列
+          //return o.age - this.age;
+
+          //return this.name.compareTo(o.name);
+          //return o.name.compareTo(this.name);
+
+          return this.age.compareTo(o.age);
+      &#125;
+</code></pre>
+<p> 而compareTo方法，实际上就是我们需要设置的排序的规则，到底按照什么样的方式进行排序。简单的记，使用this对象和参数比较，就是升序，反之就是降序。所以我们如果想要让Person集合中的对象按照年龄进行降序排列，就可以使用o.age -this.age；（基本类型可以使用减法替代compareTo）；</p>
+<p>  这样，你再次使用Collections.sort就可以对Person的List进行排序了，排序的结果是按照年龄的降序。</p>
+<p>  总结一下，如果我们想要让一个List可以使用Collections.sort(list) 的方法进行排序，则必须要求集合中的元素类型，实现Comparable接口，也就是让他具备比较能力，这也是为什么Integer类型的数组可以排序，就是因为Integer已经实现了该接口，并且他是按照升序的规则实现的，这也就解释了为什么上边的第一个程序得到的结果是升序。好了那么既然Integer是按照升序的方式实现的排序，那么如果我想要得到一个降序的Integer集合该怎么办呢？难道就实现不了了么？我们接着来看下一个接口。</p>
+<h3 id="Comparator"><a href="#Comparator" class="headerlink" title="Comparator"></a>Comparator</h3><p>对于已经实现了Comparable接口的集合，或者是我压根就不想实现Comparable接口的集合难道就排不了序了么，或者就无法更改排序的规则了么，实际上不是的，我们可以通过另一种方式来排序，就是利用Comparator接口。</p>
+<p>  在集合的工具类中种还有这样的一个方法：public static <T> void sort(List<T> list, Comparator&lt;? super T&gt; c) </p>
+<p>  我们可以通过这个方法实现上面的需求：</p>
+<pre><code>Collections.sort(list,new Comparator&lt;Integer&gt;()&#123;
+            @Override
+            public int compare(Integer o1, Integer o2) &#123;
+                return o2 - o1;
+            &#125;
+        &#125;);
+        
+</code></pre>
+<p> 比如这段代码，就实现了一个Integer集合的降序排列。这个接口中有一个方法叫做compare，里边包含两个参数：如果用第一个和第二个做比较得到的就是升序，反之得到的就是降序。同样的你也可以使用这种方式对我们自己定义的类记性排序。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><ul>
+<li><p>Comparable接口位于 java.lang包下，Comparator接口位于java.util包下。</p>
+</li>
+<li><p>Comparable:    内部比较器，一个类如果想要使用    Collections.sort(list) 方法进行排序，则需要实现该接口</p>
+</li>
+<li><p>Comparator:    外部比较器用于对那些没有实现Comparable接口或者对已经实现的Comparable中的排序规则不满意进行排序.无需改变类的结构，更加灵活。（策略模式）</p>
+</li>
+</ul>
+]]></content>
+  </entry>
+  <entry>
+    <title>Bean的生命周期</title>
+    <url>/2020/08/27/8-27/</url>
+    <content><![CDATA[<h2 id="生命周期"><a href="#生命周期" class="headerlink" title="生命周期"></a>生命周期</h2><p>   实例化 Instantiation<br>   属性赋值 Populate<br>   初始化 Initialization<br>   销毁 Destruction</p>
+<p>实例化 -&gt; 属性赋值 -&gt; 初始化 -&gt; 销毁</p>
+<p>主要逻辑都在doCreate()方法中，逻辑很清晰，就是顺序调用以下三个方法，这三个方法与三个生命周期阶段一一对应，非常重要，在后续扩展接口分析中也会涉及。</p>
+<p>   createBeanInstance() -&gt; 实例化<br>   populateBean() -&gt; 属性赋值<br>   initializeBean() -&gt; 初始化</p>
+<pre><code>/ 忽略了无关代码
+protected Object doCreateBean(final String beanName, final RootBeanDefinition mbd, final @Nullable Object[] args)
+      throws BeanCreationException &#123;
+
+   // Instantiate the bean.
+   BeanWrapper instanceWrapper = null;
+   if (instanceWrapper == null) &#123;
+       // 实例化阶段！
+      instanceWrapper = createBeanInstance(beanName, mbd, args);
+   &#125;
+
+   // Initialize the bean instance.
+   Object exposedObject = bean;
+   try &#123;
+       // 属性赋值阶段！
+      populateBean(beanName, mbd, instanceWrapper);
+       // 初始化阶段！
+      exposedObject = initializeBean(beanName, exposedObject, mbd);
+   &#125;
+
+   
+   &#125;
+</code></pre>
+<h2 id="影响多个Bean的接口"><a href="#影响多个Bean的接口" class="headerlink" title="影响多个Bean的接口"></a>影响多个Bean的接口</h2><p>实现了这些接口的Bean会切入到多个Bean的生命周期中。正因为如此，这些接口的功能非常强大，Spring内部扩展也经常使用这些接口，例如自动注入以及AOP的实现都和他们有关。</p>
+<p>   <strong>BeanPostProcessor</strong><br>   <strong>InstantiationAwareBeanPostProcessor</strong></p>
+<p>这两兄弟可能是Spring扩展中最重要的两个接口！<br>InstantiationAwareBeanPostProcessor作用于实例化阶段的前后，BeanPostProcessor作用于初始化阶段的前后。<br>正好和第一、第三个生命周期阶段对应。通过图能更好理解：</p>
+<p><img src="/images/pasted-34.png" alt="upload successful"><br>InstantiationAwareBeanPostProcessor实际上继承了BeanPostProcessor接口，严格意义上来看他们不是两兄弟，而是两父子。但是从生命周期角度我们重点关注其特有的对实例化阶段的影响，</p>
+<h2 id="只调用一次的接口"><a href="#只调用一次的接口" class="headerlink" title="只调用一次的接口"></a>只调用一次的接口</h2><p>这一大类接口的特点是功能丰富，常用于用户自定义扩展。<br>第二大类中又可以分为两类：</p>
+<pre><code>Aware类型的接口
+生命周期接口
+</code></pre>
+<p>无所不知的Aware</p>
+<p>Aware类型的接口的作用就是让我们能够拿到Spring容器中的一些资源。基本都能够见名知意，Aware之前的名字就是可以拿到什么资源，例如BeanNameAware可以拿到BeanName，以此类推。调用时机需要注意：所有的Aware方法都是在初始化阶段之前调用的！<br>Aware接口众多，这里同样通过分类的方式帮助大家记忆。<br>Aware接口具体可以分为两组，至于为什么这么分，详见下面的源码分析。如下排列顺序同样也是Aware接口的执行顺序，能够见名知意的接口不再解释。</p>
+<p>Aware Group1</p>
+<p>   BeanNameAware<br>   BeanClassLoaderAware<br>   BeanFactoryAware</p>
+<p>Aware Group2</p>
+<p>   EnvironmentAware<br>   EmbeddedValueResolverAware 这个知道的人可能不多，实现该接口能够获取Spring EL解析器，用户的自定义注解需要支持spel表达式的时候可以使用，非常方便。<br>    ApplicationContextAware(ResourceLoaderAware\ApplicationEventPublisherAware\MessageSourceAware) 这几个接口可能让人有点懵，实际上这几个接口可以一起记，其返回值实质上都是当前的ApplicationContext对象，因为ApplicationContext是一个复合接口，</p>
+<h3 id="Aware调用时机源码分析"><a href="#Aware调用时机源码分析" class="headerlink" title="Aware调用时机源码分析"></a>Aware调用时机源码分析</h3><p>详情如下，忽略了部分无关代码。代码位置就是我们上文提到的initializeBean方法详情，这也说明了Aware都是在初始化阶段之前调用的！</p>
+<pre><code>// 见名知意，初始化阶段调用的方法
+    protected Object initializeBean(final String beanName, final Object bean, @Nullable RootBeanDefinition mbd) &#123;
+
+        // 这里调用的是Group1中的三个Bean开头的Aware
+        invokeAwareMethods(beanName, bean);
+
+        Object wrappedBean = bean;
+        
+        // 这里调用的是Group2中的几个Aware，
+        // 而实质上这里就是前面所说的BeanPostProcessor的调用点！
+        // 也就是说与Group1中的Aware不同，这里是通过BeanPostProcessor（ApplicationContextAwareProcessor）实现的。
+        wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
+        // 下文即将介绍的InitializingBean调用点
+        invokeInitMethods(beanName, wrappedBean, mbd);
+        // BeanPostProcessor的另一个调用点
+        wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
+
+        return wrappedBean;
+    &#125;
+</code></pre>
+<p>可以看到并不是所有的Aware接口都使用同样的方式调用。Bean××Aware都是在代码中直接调用的，而ApplicationContext相关的Aware都是通过BeanPostProcessor#postProcessBeforeInitialization()实现的。感兴趣的可以自己看一下ApplicationContextAwareProcessor这个类的源码，就是判断当前创建的Bean是否实现了相关的Aware方法，如果实现了会调用回调方法将资源传递给Bean。<br>至于Spring为什么这么实现，应该没什么特殊的考量。也许和Spring的版本升级有关。基于对修改关闭，对扩展开放的原则，Spring对一些新的Aware采用了扩展的方式添加。</p>
+<p>BeanPostProcessor的调用时机也能在这里体现，包围住invokeInitMethods方法，也就说明了在初始化阶段的前后执行。</p>
+<p>关于Aware接口的执行顺序，其实只需要记住第一组在第二组执行之前就行了。每组中各个Aware方法的调用顺序其实没有必要记，有需要的时候点进源码一看便知。</p>
+<h2 id="简单的两个生命周期接口"><a href="#简单的两个生命周期接口" class="headerlink" title="简单的两个生命周期接口"></a>简单的两个生命周期接口</h2><p>至于剩下的两个生命周期接口就很简单了，实例化和属性赋值都是Spring帮助我们做的，能够自己实现的有初始化和销毁两个生命周期阶段。</p>
+<p>   InitializingBean 对应生命周期的初始化阶段，在上面源码的invokeInitMethods(beanName, wrappedBean, mbd);方法中调用。<br>   有一点需要注意，因为Aware方法都是执行在初始化方法之前，所以可以在初始化方法中放心大胆的使用Aware接口获取的资源，这也是我们自定义扩展Spring的常用方式。<br>   除了实现InitializingBean接口之外还能通过注解或者xml配置的方式指定初始化方法，至于这几种定义方式的调用顺序其实没有必要记。因为这几个方法对应的都是同一个生命周期，只是实现方式不同，我们一般只采用其中一种方式。        DisposableBean 类似于InitializingBean，对应生命周期的销毁阶段，以ConfigurableApplicationContext#close()方法作为入口，实现是通过循环取所有实现了DisposableBean接口的Bean然后调用其destroy()方法 。感兴趣的可以自行跟一下源码。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>Spring Bean的生命周期分为四个阶段和多个扩展点。扩展点又可以分为影响多个Bean和影响单个Bean。整理如下：<br><strong>四个阶段</strong></p>
+<p>   实例化 Instantiation<br>   属性赋值 Populate<br>   初始化 Initialization<br>   销毁 Destruction</p>
+<p><strong>多个扩展点</strong></p>
+<p>   影响多个Bean<br>        BeanPostProcessor<br>        InstantiationAwareBeanPostProcessor<br>   影响单个Bean<br>        Aware<br>            Aware Group1<br>                BeanNameAware<br>                BeanClassLoaderAware<br>                BeanFactoryAware<br>            Aware Group2<br>                EnvironmentAware<br>                EmbeddedValueResolverAware<br>                ApplicationContextAware(ResourceLoaderAware\ApplicationEventPublisherAware\MessageSourceAware)<br><strong>生命周期</strong><br>    InitializingBean<br>    DisposableBean</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>@Configuration与@Bean注解的原理</title>
+    <url>/2020/08/04/8-4/</url>
+    <content><![CDATA[<h2 id="作用"><a href="#作用" class="headerlink" title="作用"></a>作用</h2><ul>
+<li>@Configuration与@Bean结合使用。</li>
+</ul>
+<pre><code>@Configuration可理解为用spring的时候xml里面的&lt;beans&gt;标签，@Bean可理解为用spring的时候xml里面的&lt;bean&gt;标签。Spring Boot不是spring的加强版，所以@Configuration和@Bean同样可以用在普通的spring项目中，而不是Spring Boot特有的，只是在spring用的时候，注意加上扫包配置。
+</code></pre>
+<ul>
+<li>bean的作用</li>
+</ul>
+<pre><code>Bean注解的作用之一就是能够管理第三方jar包内的类到容器中。 比如我们引入一个第三方的jar包，这其中的某个类，StringUtil需要注入到我们的IndexService类中，因为我们没有源码，不能再StringUtil中增加@Component或者@Service注解。这时候我们可以通过使用@Bean的方式，把这个类交到Spring容器进行管理，最终就能够被注入到IndexService实例中。
+</code></pre>
+<ul>
+<li>Configuration</li>
+</ul>
+<pre><code>在@Configuration中被@Bean标记的方法，会被Spring进行CGLIB代理，从而进行增强。
+@SpringBootApplication注解相当于使用@Configuration、@EnableAutoConfiguration和@ComponentScan的默认属性@ComponentScan默认为当前包与其子包。
+</code></pre>
+<h2 id="过程"><a href="#过程" class="headerlink" title="过程"></a>过程</h2><ul>
+<li><p>SpringBoot中的Spring容器在启动的时候，会扫描当前包与子包中所有实现@Component注解或者其子类如@Configuration(找个本质上还是@Component)标记的类，认为这些类是bean, 并且把这些bean对应的beanDefinition放到容器中进行管理。BeanDefinition是对bean的描述，里边存有bean的名称，Class等基本信息。</p>
+</li>
+<li><p>在获取到所有的bean defenition之后，Spring会有一些post process执行，其中一个就是ConfigurationClassPostProcessor， 在这里的时候，Spring会遍历所有的bean definition， 如果发现其中有标记了@Configuration注解的，会对这个类进行CGLIB代码，生成一个代理的类，并且把这个类设置到BeanDefenition的Class属性中。当需要拿到这个bean的实例的时候，会从这个class属性中拿到的Class对象进行反射，那么最终反射出来的是代理增强后的类。</p>
+</li>
+<li><p>代理中对方法进行了增强？在哪方面进行了增强？对于@Bean标记的方法，返回的都是一个bean，在增强的方法中，Spring会先去容器中查看一下是否有这个bean的实例了，如果有了的话，就返回已有对象，没有的话就创建一个，然后放到容器中。</p>
+</li>
+<li><p>在执行getBean(IndexService.class)对应的bean的时候，会调用indexService()方法，而因为现在我们是在CGLIB增强的类中，indexService()方法已经被增强，Spring会先查看Spring容器中有没有实例，此时还没有，就new一个IndexService实例放到容器中。</p>
+</li>
+<li><p>在执行getBean(OrderService.class)的时候，会调用orderService()方法，这里会调用indexService()方法，因为现在是在增强的类中，所以此处调用的也是增强的indexService()方法，会先去容器中查看有没有实例。现在已经有实例了，就会直接返回这个实例，不再新创建。</p>
+</li>
+<li><p>@Bean注解可以对第三方的某些托管给Spring容器的工具类进行定制化。在传统配置文件方式的时候，我们需要定制某个bean的属性，我们会使用这些bean，既可以是我们的实体类，也可以是某些工具类的配置文件对应的类。比如说RestTemplate.在我们获取RestTemplate对应的实例的时候，初始化这个实例的时候，会在容器中寻找配置文件对应的类，如果有的话则注入到这个类中。那么RestTemplate实例对应的各种参数，比如说timeout时间长度等，就全部定制好了。使用@Bean注解，同样也是达到这种目的。不过这个是在扫描的时候把bean放入到容器中，而不是读取配置文件。前提是RestTemplate内部定义了这种兼容性的设计，即内部有地方接收这些注入的参数，并且把这些参数合理转化到相应的属性中。</p>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>iBator 数据库操作</title>
+    <url>/2020/08/06/8-6/</url>
+    <content><![CDATA[<p>实习公司有个比较老的项目，用的是ibatis的代码自动生成工具ibator，会自动生成映射文件和Domain层，还同时生成DAO层，用户只需编写Service层即可。 </p>
+<h4 id="iBator-数据库操作"><a href="#iBator-数据库操作" class="headerlink" title="iBator 数据库操作"></a>iBator 数据库操作</h4><p> 通过iBator导出的文件包括映射文件、Domain类、DAO类。它导出的Domain类和DAO类是依据iBator设计的框架生成的，其中包括了各种函数。我们要基于这些类来开发Service层代码。</p>
+<p> 新生成的DAO层的接口提供了以下操作函数：</p>
+<ul>
+<li>int countByExample(UserExample example) thorws SQLException：按条件计数。</li>
+<li>int deleteByPrimaryKey(Integer id) thorws SQLException：按主键删除。</li>
+<li>int deleteByExample(UserExample example) thorws SQLException：按条件删除。</li>
+<li>String/Integer insert(User record) thorws SQLException：插入 （返回值为id值）</li>
+<li>User selectByPrimaryKey(Integer id) thorws SQLException：按主键查询。</li>
+<li>List&lt;?&gt;selectByExample(UserExample example) thorws SQLException：按条件查询</li>
+<li>List&lt;?&gt;selectByExampleWithBLOGs(UserExample example) thorws SQLException：按条件查询（包括BLOB字段）。只有当数据表中的字段类型有为二进制的才会产生。</li>
+<li>int updateByPrimaryKey(User record) thorws SQLException：按主键更新</li>
+<li>int updateByPrimaryKeySelective(User record) thorws SQLException：按主键更新值不为null的字段</li>
+<li>int updateByExample(User record, UserExample example) thorws SQLException：按条件更新</li>
+<li>int updateByExampleSelective(User record, UserExample example) thorws SQLException：按条件更新值不为null的字段</li>
+</ul>
+<h4 id="详解："><a href="#详解：" class="headerlink" title="详解："></a>详解：</h4><p>UserDAOImpl userDAO = new UserDAOImpl(SqlMapClientFactory.getSqlMapClient());<br>注：SqlMapClientFactory.getSqlMapClient()：是自定义的类和方法，目的是获取SqlMapClient.</p>
+<ul>
+<li><p>① selectByPrimaryKey()</p>
+<p>  User user = userDAO.selectByPrimaryKey(100); 相当于select * from user where id = 100</p>
+</li>
+<li><p>② selectByExample() 和 selectByExampleWithBLOGs()</p>
+<p>  UserExample example = new UserExample();<br>  Criteria criteria = example.createCriteria();<br>  criteria.andUsernameEqualTo(“joe”);<br>  criteria.andUsernameIsNull();<br>  example.setOrderByClause(“username asc,email desc”);<br>  List&lt;?&gt;list = userDAO.selectByExample(example);<br>  相当于：select * from user where username = ‘joe’ and username is null order by username asc,email desc</p>
+<p>  注：在iBator 生成的文件UserExample.java中包含一个static 的内部类 Criteria ，在Criteria中有很多方法，主要是定义SQL 语句where后的查询条件。</p>
+</li>
+<li><p>③ insert()</p>
+<p>User user = new User();<br>user.setId(101);<br>user.setUsername(“test”);<br>user.setPassword(“123”)<br>user.setEmail(“<a href="mailto:&#x6a;&#x6f;&#x65;&#x40;&#49;&#x36;&#51;&#x2e;&#x63;&#111;&#x6d;">&#x6a;&#x6f;&#x65;&#x40;&#49;&#x36;&#51;&#x2e;&#x63;&#111;&#x6d;</a>“);<br>userDAO.insert(user);<br>相当于：insert into user(ID,username,password,email) values(101,’test’,’123’,‘joe@163.com’);</p>
+</li>
+<li><p>④ updateByPrimaryKey() 和 updateByPrimaryKeySelective()</p>
+<p>User user =new User();<br>user.setId(101);<br>user.setUsername(“joe”);<br>user.setPassword(“joe”);<br>user.setEmail(“<a href="mailto:&#106;&#111;&#x65;&#64;&#49;&#54;&#51;&#x2e;&#99;&#x6f;&#109;">&#106;&#111;&#x65;&#64;&#49;&#54;&#51;&#x2e;&#99;&#x6f;&#109;</a>“);<br>userDAO.updateByPrimaryKey(user);<br>相当于：update user set username=’joe’,password=’joe’,email=’joe@163.com’ where id=101</p>
+<p>User user = new User();<br>user.setId(101);<br>user.setPassword(“joe”);<br>userDAO.updateByPrimaryKeySelective(user);<br>相当于：update user set password=’joe’ where id=101</p>
+</li>
+<li><p>⑤ updateByExample() 和 updateByExampleSelective()</p>
+<p>UserExample example = new UserExample();<br>Criteria criteria = example.createCriteria();<br>criteria.andUsernameEqualTo(“joe”);<br>User user = new User();<br>user.setPassword(“123”);<br>userDAO.updateByPrimaryKeySelective(user,example);<br>相当于：update user set password=’123’ where username=’joe’</p>
+</li>
+<li><p>⑥ deleteByPrimaryKey()</p>
+<p>userDAO.deleteByPrimaryKey(101);  相当于：delete from user where id=101</p>
+</li>
+<li><p>⑦ deleteByExample()</p>
+<p>UserExample example = new UserExample();<br>Criteria criteria = example.createCriteria();<br>criteria.andUsernameEqualTo(“joe”);<br>userDAO.deleteByExample(example);<br>相当于：delete from user where username=’joe’</p>
+</li>
+<li><p>⑧ countByExample()</p>
+<p>UserExample example = new UserExample();<br>Criteria criteria = example.createCriteria();<br>criteria.andUsernameEqualTo(“joe”);<br>int count = userDAO.countByExample(example);<br>相当于：select count(*) from user where username=’joe’</p>
+<p>   return list;<br>}</p>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>InnoDB和MyISAM的区别</title>
+    <url>/2020/05/12/InnoDB%E5%92%8CMyISAM%E7%9A%84%E5%8C%BA%E5%88%AB/</url>
+    <content><![CDATA[<ul>
+<li><p>1：InnoDB支持事务，而MyISAM不支持，因此MyISAM的查询效率比InnoDB高</p>
+<p>解决方法：可以取消自动提交事务功能  多条sql放在begin和commit之间组成一个事务</p>
+</li>
+</ul>
+<ul>
+<li><p>2：虽然多是B+树的结构，但是实现方式不同</p>
+<p>InnoDB是聚集索引，MyISAM是非聚集索引</p>
+<p>通过聚集索引可以查到需要的数据，而非聚集索引可以先查到对应的主键，再使用主键的值通过聚集索引定位到数据，总之，聚集索引是通往真实数据的唯一途径</p>
+</li>
+</ul>
+<ul>
+<li><p>3：InnoDB要求必须有主键，如果没有定义主键，那么该表的第一个唯一非空索引做为聚集索引</p>
+<p>如果全都没有，innodb内部会生成一个隐藏的主键作为聚集索引，且这个主键会自增，6字节</p>
+</li>
+</ul>
+<ul>
+<li><p>4：InnoDB支持行锁，MyISAM支持表锁</p>
+<p>行锁必须要有索引才能实现，否则会自动锁全表</p>
+</li>
+<li><p>5：如何选择？</p>
+<p>a.支持事务选择InnoDB</p>
+<p>b.增删改频繁InnoDB</p>
+<p>c.读多写少选MyISAM</p>
+</li>
+<li><p>6：InnoDB四大特性</p>
+<p>a.插入缓冲：提升插入性能</p>
+<p>条件：非聚类索引，非唯一索引</p>
+<p>先判断插入的非聚类索引页是否在缓冲池中，在就直接插入</p>
+<p>不在就先放到Insert Buffer，按照一定的频率进行合并，写回disk，目的是为了减少随机IO带来的性能损耗</p>
+<p>b.二次写</p>
+<p>c.自适应哈希索引</p>
+<p>d.预读</p>
+<p>使用两种预读算法提高I/O的性能：线性预读和随机预读</p>
+</li>
+</ul>
+<ul>
+<li><p>7：为什么InnoDB推荐使用自增ID作为主键？</p>
+<p>保证每次插入时B+树索引是从右边扩展的，避免B+树频繁合并和分裂，否则会使得数据随即插入，效率比较差</p>
+</li>
+<li><p>8：MyISAM支持查询和插入操作的并发进行</p>
+<p>通过设置concurrent-insert</p>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>数据库</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>JVM中new一个对象</title>
+    <url>/2020/05/12/JVM%E4%B8%ADnew%E4%B8%80%E4%B8%AA%E5%AF%B9%E8%B1%A1/</url>
+    <content><![CDATA[<h2 id="当虚拟机遇到new指令的时候"><a href="#当虚拟机遇到new指令的时候" class="headerlink" title="当虚拟机遇到new指令的时候"></a>当虚拟机遇到new指令的时候</h2><ul>
+<li><p>检查、确认内存大小和分配内存、初始化内存空间</p>
+<p> 1.检查指令的参数能否在常量池中定位到一个类的符合引用，并且检查这个符号引用代表的类有没有被加载、解析和初始化过</p>
+<p> 2.如果没有，则执行类加载过程</p>
+<p> 3类加载检查通过后，便可以确认对象所需的内存大小，如何进行分配内存</p>
+<p> 4.指针碰撞：可以理解为一边是使用的内存一边是空的，夹在中间的指针，分配内存的时候就是指针往空的内存挪一丢丢距离，即和对象所需内存大小一样的内存空间。 高效简单！</p>
+<p> 5.空闲列表：就是内存不够整齐，坑坑洼洼的，得专门记录哪块内存可用，分配时找到大的内存空间给对象。比较复杂！</p>
+<p> 6.如果是使用复制算法和标记压缩法  使用指针碰撞</p>
+<p> 如果是使用标记清除算法，则使用空闲列表</p>
+<p> 7.分到内存后要将分配到的内存空间都初始化为0，不包含对象头（不知道为什么，日后研究）</p>
+<p> 8.设置对象，将一些信息存放到对象头（哪个类的实例，如何找到类的元数据信息，hash码，GC分代年龄）。到这一步对象就产生了！</p>
+</li>
+</ul>
+<h2 id="对象的内存布局"><a href="#对象的内存布局" class="headerlink" title="对象的内存布局"></a>对象的内存布局</h2><ul>
+<li><p>1.对象头（两部分）</p>
+<p>Mark World：存放运行时数据（hashcoad，GC分代年龄，锁的状态标志，线程持有的锁）</p>
+<p>类型指针：对象指向它的类型元数据指针</p>
+</li>
+<li><p>2.实例数据</p>
+</li>
+<li><p>3.对齐填充：占位符作用</p>
+</li>
+</ul>
+<h2 id="对象的访问定位："><a href="#对象的访问定位：" class="headerlink" title="对象的访问定位："></a>对象的访问定位：</h2><ul>
+<li><p>通过栈的reference</p>
+<p>1.句柄访问：Java堆中专门划分内存当作句柄池，reference存储的是对象的句柄地址</p>
+<p>好处：储存的是稳定的句柄地址，GC时候对象位置发生变化只需要修改句柄中的实例数据指针</p>
+<p>2.直接指针访问：referenc直接存储的是对象地址，速度较快</p>
+</li>
+</ul>
+<p><img src="/images/pasted-6.png" alt="upload successful"></p>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>JVM体系结构</title>
+    <url>/2020/05/12/JVM%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/</url>
+    <content><![CDATA[<h2 id="程序计数器："><a href="#程序计数器：" class="headerlink" title="程序计数器："></a>程序计数器：</h2><ul>
+<li><p>比较小的内存空间，可以看成是当前线程所执行的字节码的行号指示器</p>
+<p>字节码解释器工作时就是通过改变它的值来选取下一条需要执行的字节码指令</p>
+</li>
+<li><p>为什么每个线程都要有一个独立的程序计数器？</p>
+<p>因为任何一个确定的时刻，一个处理器只会执行一条线程中的指令，线程会一直切换，为了让线程切换后能恢复正确的执行位置</p>
+</li>
+</ul>
+<h2 id="Java虚拟机栈："><a href="#Java虚拟机栈：" class="headerlink" title="Java虚拟机栈："></a>Java虚拟机栈：</h2><ul>
+<li><p>每个方法被执行的时候，虚拟据会同步创建一个栈帧放到虚拟机栈中，调用入栈，执行完毕出栈</p>
+</li>
+<li><p>栈帧又包含了：局部变量表，方法出口，操作数栈，动态连接（后面两个什么鬼）等信息</p>
+</li>
+<li><p>局部变量表：八大基本数据类型以及对象引用reference</p>
+</li>
+<li><p>本地方法栈和虚拟机栈的区别：<br>虚拟机栈是为虚拟机执行Java方法的（字节码服务）<br>本地方法栈则是为虚拟机使用到的本地方法服务Native！<br>native：java的作用范围达不到，会去调用底层的C语音的库通过JNI调用本地方法接口</p>
+<p>JNI的作用：融合不同的语言让java为所欲为</p>
+</li>
+</ul>
+<h2 id="本地方法区："><a href="#本地方法区：" class="headerlink" title="本地方法区："></a>本地方法区：</h2><ul>
+<li><p>用于存储以及被虚拟机加载的类信息，常量，静态变量（貌似有个常量池）</p>
+<p>以前是用永久代实现方法区，所以很多人觉得永久代等于方法区</p>
+<p>1.6常量池在方法区中，1.7常量池在堆中，1.8常量池在元空间（方法区）中</p>
+</li>
+</ul>
+<h2 id="Java堆："><a href="#Java堆：" class="headerlink" title="Java堆："></a>Java堆：</h2><ul>
+<li>所有的对象实例和数组都是在里面分配内存，也称GC堆，分为元空间，Eden，Old</li>
+</ul>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>Jquery02</title>
+    <url>/2020/07/24/Jquery2/</url>
+    <content><![CDATA[<h2 id="1-1-jQuery-属性操作"><a href="#1-1-jQuery-属性操作" class="headerlink" title="1.1. jQuery 属性操作"></a>1.1. jQuery 属性操作</h2><p>​    jQuery 常用属性操作有三种：prop() / attr() / data() ;</p>
+<h3 id="1-1-1-元素固有属性值-prop"><a href="#1-1-1-元素固有属性值-prop" class="headerlink" title="1.1.1 元素固有属性值 prop()"></a>1.1.1 元素固有属性值 prop()</h3><p>​    所谓元素固有属性就是元素本身自带的属性，比如 <a> 元素里面的 href ，比如 <input> 元素里面的 type。 </p>
+<p><strong>语法</strong></p>
+<p><img src="images/prop.png" alt="prop"></p>
+<p>​    注意：prop() 除了普通属性操作，更适合操作表单属性：disabled / checked / selected 等。</p>
+<h3 id="1-1-2-元素自定义属性值-attr"><a href="#1-1-2-元素自定义属性值-attr" class="headerlink" title="1.1.2 元素自定义属性值 attr()"></a>1.1.2 元素自定义属性值 attr()</h3><p>​    用户自己给元素添加的属性，我们称为自定义属性。 比如给 div 添加 index =“1”。 </p>
+<p><strong>语法</strong></p>
+<p><img src="images/attr.png" alt="attr"></p>
+<p>​    注意：attr() 除了普通属性操作，更适合操作自定义属性。（该方法也可以获取 H5 自定义属性）</p>
+<h3 id="1-1-3-数据缓存-data"><a href="#1-1-3-数据缓存-data" class="headerlink" title="1.1.3 数据缓存 data()"></a>1.1.3 数据缓存 data()</h3><p>​    data() 方法可以在指定的元素上存取数据，并不会修改 DOM 元素结构。一旦页面刷新，之前存放的数据都将被移除。 </p>
+<p><strong>语法</strong></p>
+<p><img src="images/data.png" alt="data"></p>
+<p>​    注意：同时，还可以读取 HTML5 自定义属性  data-index ，得到的是数字型。</p>
+<p><strong>演示代码</strong></p>
+<pre><code class="javascript">&lt;body&gt;
+    &lt;a href=&quot;http://www.itcast.cn&quot; title=&quot;都挺好&quot;&gt;都挺好&lt;/a&gt;
+    &lt;input type=&quot;checkbox&quot; name=&quot;&quot; id=&quot;&quot; checked&gt;
+    &lt;div index=&quot;1&quot; data-index=&quot;2&quot;&gt;我是div&lt;/div&gt;
+    &lt;span&gt;123&lt;/span&gt;
+    &lt;script&gt;
+        $(function() &#123;
+            //1. element.prop(&quot;属性名&quot;) 获取元素固有的属性值
+            console.log($(&quot;a&quot;).prop(&quot;href&quot;));
+            $(&quot;a&quot;).prop(&quot;title&quot;, &quot;我们都挺好&quot;);
+            $(&quot;input&quot;).change(function() &#123;
+                console.log($(this).prop(&quot;checked&quot;));
+            &#125;);
+            // console.log($(&quot;div&quot;).prop(&quot;index&quot;));
+            // 2. 元素的自定义属性 我们通过 attr()
+            console.log($(&quot;div&quot;).attr(&quot;index&quot;));
+            $(&quot;div&quot;).attr(&quot;index&quot;, 4);
+            console.log($(&quot;div&quot;).attr(&quot;data-index&quot;));
+            // 3. 数据缓存 data() 这个里面的数据是存放在元素的内存里面
+            $(&quot;span&quot;).data(&quot;uname&quot;, &quot;andy&quot;);
+            console.log($(&quot;span&quot;).data(&quot;uname&quot;));
+            // 这个方法获取data-index h5自定义属性 第一个 不用写data-  而且返回的是数字型
+            console.log($(&quot;div&quot;).data(&quot;index&quot;));
+        &#125;)
+    &lt;/script&gt;
+&lt;/body&gt;
+</code></pre>
+<h2 id="1-2-jQuery-文本属性值"><a href="#1-2-jQuery-文本属性值" class="headerlink" title="1.2. jQuery 文本属性值"></a>1.2. jQuery 文本属性值</h2><p>​    jQuery的文本属性值常见操作有三种：html() / text() / val() ; 分别对应JS中的 innerHTML 、innerText 和 value 属性。</p>
+<h3 id="1-2-1-jQuery内容文本值"><a href="#1-2-1-jQuery内容文本值" class="headerlink" title="1.2.1 jQuery内容文本值"></a>1.2.1 jQuery内容文本值</h3><p>​    常见操作有三种：html() / text() / val() ; 分别对应JS中的 innerHTML 、innerText 和 value 属性，主要针对元素的内容还有表单的值操作。</p>
+<p><strong>语法</strong></p>
+<p><img src="images/html.png" alt="html"></p>
+<p>​    注意：html() 可识别标签，text() 不识别标签。</p>
+<p><strong>演示代码</strong></p>
+<pre><code class="javascript">&lt;body&gt;
+    &lt;div&gt;
+        &lt;span&gt;我是内容&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;input type=&quot;text&quot; value=&quot;请输入内容&quot;&gt;
+    &lt;script&gt;
+        // 1. 获取设置元素内容 html()
+        console.log($(&quot;div&quot;).html());
+        // $(&quot;div&quot;).html(&quot;123&quot;);
+        // 2. 获取设置元素文本内容 text()
+        console.log($(&quot;div&quot;).text());
+        $(&quot;div&quot;).text(&quot;123&quot;);
+        // 3. 获取设置表单值 val()
+        console.log($(&quot;input&quot;).val());
+        $(&quot;input&quot;).val(&quot;123&quot;);
+    &lt;/script&gt;
+&lt;/body&gt;
+</code></pre>
+<h2 id="1-3-jQuery-元素操作"><a href="#1-3-jQuery-元素操作" class="headerlink" title="1.3. jQuery 元素操作"></a>1.3. jQuery 元素操作</h2><p>​    jQuery 元素操作主要讲的是用jQuery方法，操作标签的遍历、创建、添加、删除等操作。</p>
+<h3 id="1-3-1-遍历元素"><a href="#1-3-1-遍历元素" class="headerlink" title="1.3.1. 遍历元素"></a>1.3.1. 遍历元素</h3><p>​    jQuery 隐式迭代是对同一类元素做了同样的操作。 如果想要给同一类元素做不同操作，就需要用到遍历。</p>
+<p><strong>语法1</strong></p>
+<p><img src="images/each1.png" alt="each1"></p>
+<p>​    注意：此方法用于遍历 jQuery 对象中的每一项，回调函数中元素为 DOM 对象，想要使用 jQuery 方法需要转换。</p>
+<p><strong>语法2</strong></p>
+<p><img src="images/each2.png" alt="each2"></p>
+<p>​    注意：此方法用于遍历 jQuery 对象中的每一项，回调函数中元素为 DOM 对象，想要使用 jQuery 方法需要转换。</p>
+<p><strong>演示代码</strong></p>
+<pre><code class="javascript">&lt;body&gt;
+    &lt;div&gt;1&lt;/div&gt;
+    &lt;div&gt;2&lt;/div&gt;
+    &lt;div&gt;3&lt;/div&gt;
+    &lt;script&gt;
+        $(function() &#123;
+            // 如果针对于同一类元素做不同操作，需要用到遍历元素（类似for，但是比for强大）
+            var sum = 0;
+            var arr = [&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;];
+            // 1. each() 方法遍历元素 
+            $(&quot;div&quot;).each(function(i, domEle) &#123;
+                // 回调函数第一个参数一定是索引号  可以自己指定索引号号名称
+                // console.log(i);
+                // 回调函数第二个参数一定是 dom 元素对象，也是自己命名
+                // console.log(domEle);  // 使用jQuery方法需要转换 $(domEle)
+                $(domEle).css(&quot;color&quot;, arr[i]);
+                sum += parseInt($(domEle).text());
+            &#125;)
+            console.log(sum);
+            // 2. $.each() 方法遍历元素 主要用于遍历数据，处理数据
+            // $.each($(&quot;div&quot;), function(i, ele) &#123;
+            //     console.log(i);
+            //     console.log(ele);
+            // &#125;);
+            // $.each(arr, function(i, ele) &#123;
+            //     console.log(i);
+            //     console.log(ele);
+            // &#125;)
+            $.each(&#123;
+                name: &quot;andy&quot;,
+                age: 18
+            &#125;, function(i, ele) &#123;
+                console.log(i); // 输出的是 name age 属性名
+                console.log(ele); // 输出的是 andy  18 属性值
+            &#125;)
+        &#125;)
+    &lt;/script&gt;
+&lt;/body&gt;
+</code></pre>
+<h3 id="1-3-3-创建、添加、删除"><a href="#1-3-3-创建、添加、删除" class="headerlink" title="1.3.3. 创建、添加、删除"></a>1.3.3. 创建、添加、删除</h3><p>​    jQuery方法操作元素的创建、添加、删除方法很多，则重点使用部分，如下：</p>
+<p><strong>语法总和</strong></p>
+<p><img src="images/create.png" alt="create"></p>
+<p><img src="images/append1.png" alt="append1"></p>
+<p><img src="images/append2.png" alt="append2"></p>
+<p><img src="images/remove.png" alt="remove"></p>
+<p>​    注意：以上只是元素的创建、添加、删除方法的常用方法，其他方法请参详API。</p>
+<p><strong>案例代码</strong></p>
+<pre><code class="js">&lt;body&gt;
+    &lt;ul&gt;
+        &lt;li&gt;原先的li&lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;div class=&quot;test&quot;&gt;我是原先的div&lt;/div&gt;
+    &lt;script&gt;
+        $(function() &#123;
+            // 1. 创建元素
+            var li = $(&quot;&lt;li&gt;我是后来创建的li&lt;/li&gt;&quot;);
+      
+            // 2. 添加元素
+            //     2.1 内部添加
+            // $(&quot;ul&quot;).append(li);  内部添加并且放到内容的最后面 
+            $(&quot;ul&quot;).prepend(li); // 内部添加并且放到内容的最前面
+            //  2.2 外部添加
+            var div = $(&quot;&lt;div&gt;我是后妈生的&lt;/div&gt;&quot;);
+            // $(&quot;.test&quot;).after(div);
+            $(&quot;.test&quot;).before(div);
+      
+            // 3. 删除元素
+            // $(&quot;ul&quot;).remove(); 可以删除匹配的元素 自杀
+            // $(&quot;ul&quot;).empty(); // 可以删除匹配的元素里面的子节点 孩子
+            $(&quot;ul&quot;).html(&quot;&quot;); // 可以删除匹配的元素里面的子节点 孩子
+        &#125;)
+    &lt;/script&gt;
+&lt;/body&gt;
+</code></pre>
+<h2 id="1-4-jQuery-尺寸、位置操作"><a href="#1-4-jQuery-尺寸、位置操作" class="headerlink" title="1.4.  jQuery 尺寸、位置操作"></a>1.4.  jQuery 尺寸、位置操作</h2><p>​    jQuery中分别为我们提供了两套快速获取和设置元素尺寸和位置的API，方便易用，内容如下。</p>
+<h3 id="1-4-1-jQuery-尺寸操作"><a href="#1-4-1-jQuery-尺寸操作" class="headerlink" title="1.4.1.  jQuery 尺寸操作"></a>1.4.1.  jQuery 尺寸操作</h3><p>​     jQuery 尺寸操作包括元素宽高的获取和设置，且不一样的API对应不一样的盒子模型。</p>
+<p><strong>语法</strong></p>
+<p><img src="images/size.png" alt="size"></p>
+<p><strong>代码演示</strong></p>
+<pre><code class="javascript">&lt;body&gt;
+    &lt;div&gt;&lt;/div&gt;
+    &lt;script&gt;
+        $(function() &#123;
+            // 1. width() / height() 获取设置元素 width和height大小 
+            console.log($(&quot;div&quot;).width());
+            // $(&quot;div&quot;).width(300);
+
+            // 2. innerWidth() / innerHeight()  获取设置元素 width和height + padding 大小 
+            console.log($(&quot;div&quot;).innerWidth());
+
+            // 3. outerWidth()  / outerHeight()  获取设置元素 width和height + padding + border 大小 
+            console.log($(&quot;div&quot;).outerWidth());
+
+            // 4. outerWidth(true) / outerHeight(true) 获取设置 width和height + padding + border + margin
+            console.log($(&quot;div&quot;).outerWidth(true));
+        &#125;)
+    &lt;/script&gt;
+&lt;/body&gt;
+</code></pre>
+<p>​    注意：有了这套 API 我们将可以快速获取和子的宽高，至于其他属性想要获取和设置，还要使用 css() 等方法配合。</p>
+<h3 id="1-4-2-jQuery-位置操作"><a href="#1-4-2-jQuery-位置操作" class="headerlink" title="1.4.2. jQuery 位置操作"></a>1.4.2. jQuery 位置操作</h3><p>​    jQuery的位置操作主要有三个： offset()、position()、scrollTop()/scrollLeft() , 具体介绍如下: </p>
+<p><strong>语法</strong></p>
+<p><img src="images/offset.png" alt="offset"></p>
+<p><img src="images/position.png" alt="position"></p>
+<p><img src="images/scroll.png" alt="scroll"></p>
+<p><strong>代码演示</strong></p>
+<pre><code class="javascript">&lt;body&gt;
+    &lt;div class=&quot;father&quot;&gt;
+        &lt;div class=&quot;son&quot;&gt;&lt;/div&gt;
+    &lt;/div&gt;
+        
+    &lt;div class=&quot;back&quot;&gt;返回顶部&lt;/div&gt;
+    &lt;div class=&quot;container&quot;&gt;&lt;/div&gt;
+   
+    &lt;script&gt;
+        $(function() &#123;
+            // 1. 获取设置距离文档的位置（偏移） offset
+            console.log($(&quot;.son&quot;).offset());
+            console.log($(&quot;.son&quot;).offset().top);
+            // $(&quot;.son&quot;).offset(&#123;
+            //     top: 200,
+            //     left: 200
+            // &#125;);
+      
+            // 2. 获取距离带有定位父级位置（偏移） position   如果没有带有定位的父级，则以文档为准
+            // 这个方法只能获取不能设置偏移
+            console.log($(&quot;.son&quot;).position());
+            // $(&quot;.son&quot;).position(&#123;
+            //     top: 200,
+            //     left: 200
+            // &#125;);
+      
+              // 3. 被卷去的头部
+              $(document).scrollTop(100);
+            // 被卷去的头部 scrollTop()  / 被卷去的左侧 scrollLeft()
+            // 页面滚动事件
+            var boxTop = $(&quot;.container&quot;).offset().top;
+            $(window).scroll(function() &#123;
+                // console.log(11);
+                console.log($(document).scrollTop());
+                if ($(document).scrollTop() &gt;= boxTop) &#123;
+                    $(&quot;.back&quot;).fadeIn();
+                &#125; else &#123;
+                    $(&quot;.back&quot;).fadeOut();
+                &#125;
+            &#125;);
+            // 返回顶部
+            $(&quot;.back&quot;).click(function() &#123;
+                // $(document).scrollTop(0);
+                $(&quot;body, html&quot;).stop().animate(&#123;
+                    scrollTop: 0
+                &#125;);
+                // $(document).stop().animate(&#123;
+                //     scrollTop: 0
+                // &#125;); 不能是文档而是 html和body元素做动画
+            &#125;)
+        &#125;)
+    &lt;/script&gt;
+&lt;/body&gt;
+</code></pre>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>MySQL中的锁</title>
+    <url>/2020/05/12/MySQL%E4%B8%AD%E7%9A%84%E9%94%81/</url>
+    <content><![CDATA[<h2 id="事务及其ACID属性："><a href="#事务及其ACID属性：" class="headerlink" title="事务及其ACID属性："></a>事务及其ACID属性：</h2><p>   事务是由一组sql语句组成的逻辑处理单元，具有4个属性</p>
+<ul>
+<li><p>原子性：事务是一个原子操作单元，其对数据的修改，要么都执行，要么都不执行</p>
+</li>
+<li><p>一致性：事务开始和完成的时候，数据都必须保持一致。事物的修改必须保持数据的完整性，事务结束后所有的内部数据结构（B+树，双向链表）多必须是正确的</p>
+</li>
+<li><p>隔离性：数据库系统提供一定的隔离机制，保证事务在不受外界并发操作影响的环境中执行。意味着事务处理过程中的中间状态对外部是不可见的</p>
+</li>
+<li><p>持久性：事务完成之后，对数据的修改是永久性的</p>
+</li>
+</ul>
+<h2 id="并发事务处理带来的问题："><a href="#并发事务处理带来的问题：" class="headerlink" title="并发事务处理带来的问题："></a>并发事务处理带来的问题：</h2><ul>
+<li><p>更新丢失：两个或多个事务同时选择一行并更新该行的数据，最后的更新覆盖了由其他事务做的更新。</p>
+</li>
+<li><p>脏读：一个事务正在对一条记录进行修改，在这个事务提交之前，其他事务过来了读取了脏数据并进一步做了处理，就会产生未提交的数据依赖关系。  </p>
+</li>
+<li><p>不可重复读：一个数据在读取某些数据后的某个时间，再次读取以前读过的数据，会发现其读出的数据发生了变化或者被删除</p>
+</li>
+<li><p>幻读：一个事务按相同的查询条件重新读取以前检索过的数据，发现其他事务插入了满足其查询条件的新数据</p>
+</li>
+</ul>
+<h2 id="事务隔离级别："><a href="#事务隔离级别：" class="headerlink" title="事务隔离级别："></a>事务隔离级别：</h2><ul>
+<li><p>更新丢失问题通常是应该完全避免的，并不能只靠数据库的事务控制器解决，需要应用程序对要更新的数据加必要的锁来解决，防止更新丢失是应用的责任</p>
+</li>
+<li><p>脏读，不可重复读，幻读属于数据库读一致性问题，必须由数据库提供一定的事务隔离机制解决</p>
+</li>
+<li><p>1.在读取数据前加锁</p>
+</li>
+<li><p>2.不加锁，通过数据多版本并发控制</p>
+</li>
+</ul>
+<h2 id="四种事务隔离级别："><a href="#四种事务隔离级别：" class="headerlink" title="四种事务隔离级别："></a>四种事务隔离级别：</h2><p><img src="/images/pasted-3.png" alt="upload successful"></p>
+<h2 id="锁"><a href="#锁" class="headerlink" title="锁"></a>锁</h2><ul>
+<li><p>表锁：开销小，加锁快，不会出现死锁，并发度低，容易锁冲突</p>
+</li>
+<li><p>行锁：开销大，加锁慢，会出现死锁，并发度高，不容易锁冲突</p>
+</li>
+</ul>
+<h2 id="InnoDB使用两种类型的行锁："><a href="#InnoDB使用两种类型的行锁：" class="headerlink" title="InnoDB使用两种类型的行锁："></a>InnoDB使用两种类型的行锁：</h2><ul>
+<li><p>共享锁S（锁的是行）：称为读锁，就是说事务1对数据A加了S锁，事务1只能读不能修改A，其他事务也一样只能读不能写，只能加S锁不能加X锁，除非事务1释放S锁</p>
+</li>
+<li><p>排他锁X（du’de锁的是行）：称为写锁，事务1对数据加了X锁，能读能写，其他事务不能读和写，不能加任何锁</p>
+</li>
+<li><p>意向共享锁IS（锁的是表）：通知数据库要加什么表并对表进行加锁，如果需要对A进行加共享锁，先对该表加意向共享锁后再对A加共享锁</p>
+</li>
+<li><p>意向排他锁IX（锁的是表）：同上</p>
+</li>
+<li><p>意向共享锁和意向排他锁都是由数据库加的</p>
+</li>
+<li><p>InnoDB行锁是通过给索引加锁来实现的，只有通过索引条件检索数据才是使用行锁，否则使用表锁</p>
+</li>
+</ul>
+<ul>
+<li><p>间隙锁：</p>
+<p>当我们用范围t条件而不是相等条件检索数据时，并请求了共享锁或者排他锁，InnoDB会给符合条件的已有数据记录的索引项加锁，对于在范围但是不存在的记录，会加间隙锁</p>
+<p>目的：防止幻读，满足相关隔离级别的要求。因为有可能在读的过程其他事务插入了新的数据，就会产生幻读。</p>
+<p>但这会造成严重的锁等待，因此要尽量使用相等条件来访问更新数据，避免使用范围条件</p>
+</li>
+</ul>
+<h2 id="什么时候使用表锁："><a href="#什么时候使用表锁：" class="headerlink" title="什么时候使用表锁："></a>什么时候使用表锁：</h2><ul>
+<li><p>对于InnoDB表，在绝大部分情况下都应该使用行级锁，因为事务和行锁往往是我们之所以选择InnoDB表的理由。但在个别特殊事务中，也可以考虑使用表级锁。</p>
+</li>
+<li><p>第一种情况是：事务需要更新大部分或全部数据，表又比较大，如果使用默认的行锁，不仅这个事务执行效率低，而且可能造成其他事务长时间锁等待和锁冲突，这种情况下可以考虑使用表锁来提高该事务的执行速度。</p>
+</li>
+<li><p>第二种情况是：事务涉及多个表，比较复杂，很可能引起死锁，造成大量事务回滚。这种情况也可以考虑一次性锁定事务涉及的表，从而避免死锁、减少数据库因事务回滚带来的开销。</p>
+</li>
+<li><p>当然，应用中这两种事务不能太多，否则，就应该考虑使用MyISAM表了。</p>
+</li>
+</ul>
+<h2 id="避免死锁的方法："><a href="#避免死锁的方法：" class="headerlink" title="避免死锁的方法："></a>避免死锁的方法：</h2><ul>
+<li><p>（1）在应用中，如果不同的程序会并发存取多个表，应尽量约定以相同的顺序来访问表，这样可以大大降低产生死锁的机会。</p>
+</li>
+<li><p>（2）在程序以批量方式处理数据的时候，如果事先对数据排序，保证每个线程按固定的顺序来处理记录，也可以大大降低出现死锁的可能。</p>
+</li>
+<li><p>（3）在事务中，如果要更新记录，应该直接申请足够级别的锁，即排他锁，而不应先申请共享锁，更新时再申请排他锁，因为当用户申请排他锁时，其他事务可能又已经获得了相同记录的共享锁，从而造成锁冲突，甚至死锁。</p>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>数据库</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>String.trim()理解</title>
+    <url>/2020/05/13/String-trim-%E7%90%86%E8%A7%A3/</url>
+    <content><![CDATA[<h2 id="trim去掉的是什么字符？"><a href="#trim去掉的是什么字符？" class="headerlink" title="trim去掉的是什么字符？"></a>trim去掉的是什么字符？</h2><p> 《Java核心技术》书上说的trim主要是是“返回一个新的字符串。这个字符串将删除了原始字符串头部和尾部的空格。”<br> 但是，有些特殊字符是看不到的</p>
+<pre><code>         public static void main(String[] args) &#123;
+         String str = &quot;abc&quot;;
+         System.out.println(str.length());
+         str = str.trim();
+         System.out.println(str.length());
+    &#125;
+</code></pre>
+<p>比如这段代码，输出的是9和3，但是在eclipse或者idea是看不到的，也就是说trim不只是排掉空格这么简单的作用</p>
+<pre><code>/**
+     * @return  A string whose value is this string, with any leading and trailing white
+     *          space removed, or this string if it has no leading or
+     *          trailing white space.
+     */
+    public String trim() &#123;
+        int len = value.length;
+        int st = 0;
+        char[] val = value;    /* avoid getfield opcode */
+
+        while ((st &lt; len) &amp;&amp; (val[st] &lt;= &#39; &#39;)) &#123;
+            st++;
+        &#125;
+        while ((st &lt; len) &amp;&amp; (val[len - 1] &lt;= &#39; &#39;)) &#123;
+            len--;
+        &#125;
+        return ((st &gt; 0) || (len &lt; value.length)) ? substring(st, len) : this;
+    &#125;
+</code></pre>
+<p> 可以知道，由于空格的Unicode编码是32，trim()方法实际上trim掉了字符串两端Unicode编码小于等于32（\u0020）的所有字符。</p>
+<h2 id="trim返回的对象"><a href="#trim返回的对象" class="headerlink" title="trim返回的对象"></a>trim返回的对象</h2><pre><code>public static void main(String[] args) &#123;
+        String str1 = &quot;abc   &quot;;
+        String str2 = &quot;abc&quot;;
+        String str3 = &quot;abc&quot;;
+        str1 = str1.trim();
+        System.out.println(str1 == str2);  // false
+        System.out.println(str3 == str2);  // true
+   &#125;
+</code></pre>
+<p> str1.trim()返回的字符串为”abc”，而在常量池中已经确定存在这个”abc”这个String对象，那为何str1==str2不成立呢？<br>我们看trim()方法的最后一行：</p>
+<pre><code>return ((st &gt; 0) || (len &lt; value.length)) ? substring(st, len) : this;
+</code></pre>
+<p>也就是说，trim()方法实际上的行为并不是去掉两端的空白字符，而是截取中间的非空白字符</p>
+<pre><code> public String substring(int beginIndex, int endIndex) &#123;
+        if (beginIndex &lt; 0) &#123;
+            throw new StringIndexOutOfBoundsException(beginIndex);
+        &#125;
+        if (endIndex &gt; value.length) &#123;
+            throw new StringIndexOutOfBoundsException(endIndex);
+        &#125;
+        int subLen = endIndex - beginIndex;
+        if (subLen &lt; 0) &#123;
+            throw new StringIndexOutOfBoundsException(subLen);
+        &#125;
+        return ((beginIndex == 0) &amp;&amp; (endIndex == value.length)) ? this
+                : new String(value, beginIndex, subLen);
+    &#125;
+</code></pre>
+<p>当实际发生了”截取“这个动作的时候，因为此处无法直接声明一个String常量，即substring()无法像我们写String str = “abc”这样直接在常量池中创建对象，所以它返回的是一个new出来的对象，这个对象位于Heap内存中。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>HelloWorld</title>
+    <url>/2020/05/05/helloworld/</url>
+    <content><![CDATA[<p>helloHexo</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>http小结</title>
+    <url>/2020/05/19/http%E5%B0%8F%E7%BB%93/</url>
+    <content><![CDATA[<h2 id="http-1-0"><a href="#http-1-0" class="headerlink" title="http 1.0"></a>http 1.0</h2><ul>
+<li><p><strong>HTTP 1.0中，每一个请求都要开一个连接，请求结束，断开连接。这样的协议有两个问题</strong></p>
+<p> （1）性能问题：每次请求都打开一个新的连接，因为连接数有限，而且连接的建立和断开都很耗时（可能一个页面就会有几十个请求）。<br> （2）服务器推送问题：服务器无法主动向客户端推送消息。</p>
+</li>
+<li><p><strong>Keep-Alive机制</strong></p>
+<p> 为了解决一个请求完成后连接立即断开的问题，引入了Keep-Alive（保持心跳）机制。客户端在HTTP请求头部加上一个字段Connection：Keep-Alive。服务器端收到带有这样的字段的请求后，会维护一个Keep-Alive timeout参数，服务器在处理完请求后，不会立即断开连接，而是会保持连接，如果在timeout时间内都没有新的请求，那么服务器才会关闭这个连接。</p>
+</li>
+</ul>
+<h2 id="http-1-1"><a href="#http-1-1" class="headerlink" title="http 1.1"></a>http 1.1</h2><ul>
+<li><p><strong>连接复用机制</strong></p>
+<p>HTTP 1.1将连接复用变成了默认的了，就算不设置字段Connection：Keep-Alive，请求完后也不会立即关闭连接。要想连接不复用，需要设置字段Connection：Close。</p>
+</li>
+<li><p>**Pipeline和Head-of-line Blocking（队头阻塞）问题 **</p>
+<p>为了让请求变为并发，引入了Pipeline机制，使得一个请求发出之后，在未收到响应之前，可以立即发送第二个请求。但是这里有个致命的问题，也就是Head-of-line Blocking（队头阻塞）问题。虽然Pipeline机制可以让请求并发，但是为了让请求和响应能配对，响应并不能并发。返回的响应需要按照先进先出的（类似队列）的顺序，所以如果第一个响应由于某些原因，会导致后面的响应会被阻塞。</p>
+</li>
+<li><p><strong>服务器推送</strong></p>
+<p>客户端定期轮询：客户端每隔一段时间向服务器发送一个请求，如果服务器有消息就返回（效率较低，不建议）。<br>WebSocket：这是一种基于TCP的可全双工通信的协议，可实现服务器主动推送。<br>HTTP长轮询：保持一个HTTP长连接，如果服务器有新消息，就返回。如果在约定的时间还没有消息，服务器就返回一个空消息，然后客户端关闭该连接，再发起一个新的连接。</p>
+</li>
+</ul>
+<h2 id="http-2"><a href="#http-2" class="headerlink" title="http 2"></a>http 2</h2><ul>
+<li><p><strong>与HTTP 1.1兼容</strong></p>
+<p>由于HTTP 1.1的应用已成主流，所以想要替代它几乎不可能，所以只能向它兼容。其实HTTP/2与HTTP1.1并不是平级的，HTTP/2是介于HTTP1.1与TCP之间的一个转换层。</p>
+</li>
+<li><p><strong>二进制分帧</strong></p>
+<p>为了解决队头阻塞的问题，HTTP/2将一个请求的报文转换成二进制并分成多个帧来进行传输。由于请求和响应都可以乱序的发送，所以需要给每个请求或响应带上一个ID，好让他们匹配。二进制分帧其实并没有完全解决队头阻塞的问题，它只是把这个问题转移到了TCP层面（只要使用TCP协议，为了保证可靠性，采用先进先出，就一定会有队头阻塞的问题）。如果想要彻底解决队头阻塞的问题，只能不使用TCP协议，那就是Google提出的QUIC协议。</p>
+</li>
+</ul>
+<h2 id="请求和响应报文"><a href="#请求和响应报文" class="headerlink" title="请求和响应报文"></a>请求和响应报文</h2><p><strong>请求报文</strong></p>
+<p><img src="%5Cimages/pasted-15.png" alt="upload successful"></p>
+<p><strong>响应报文</strong></p>
+<p><img src="%5Cimages/pasted-18.png" alt="upload successful"></p>
+<p><strong>请求行</strong></p>
+<p><img src="%5Cimages/pasted-17.png" alt="upload successful"><br><strong>响应状态行</strong></p>
+<p><strong>响应行</strong>：    HTTP协议    状态码    状态码描述</p>
+<p><strong>头部</strong></p>
+<ul>
+<li>Host：Host 表示的是对象所在的主机</li>
+<li>User-agent: 这是请求头用来告诉 Web 服务器，浏览器使用的类型是 Mozilla/4.0</li>
+<li>Accept-language 告诉 Web 服务器，浏览器想要得到对象的语法版本，前提是服务器需要支持法语类型，否则将会发送服务器的默认版本</li>
+<li>Date：Date 是一个通用标头，它可以出现在请求标头和响应标头中，表示的是格林威治标准时间，这个时间要比北京时间慢八个小时</li>
+<li>Content-Length：实体报头指示实体主体的大小，以字节为单位，发送到接收方。</li>
+<li>Content-Encoding：个实体报头用来压缩媒体类型。Content-Encoding 指示对实体应用了何种编码。常见的内容编码有这几种： gzip、compress、deflate、identity ，这个属性可以应用在请求报文和响应报文中</li>
+</ul>
+<h2 id="HTTP-请求-URL"><a href="#HTTP-请求-URL" class="headerlink" title="HTTP 请求 URL"></a>HTTP 请求 URL</h2><p> HTTP 协议使用 URI 定位互联网上的资源。正是因为 URI 的特定功能，在互联网上任意位置的资源都能访问到。URL 带有请求对象的标识符。在上面的例子中，浏览器正在请求对象 /somedir/page.html 的资源。<br>  比如<a href="http://www.example.com/path/to/myfile.htmlkey1=value1&amp;key2=value2#SomewhereInTheDocument">http://www.example.com:80/path/to/myfile.htmlkey1=value1&amp;key2=value2#SomewhereInTheDocument</a> 这个 URL </p>
+<p><img src="/images/pasted-19.png" alt="upload successful"><br>http://告诉浏览器使用何种协议。对于大部分 Web 资源，通常使用 HTTP 协议或其安全版本，HTTPS 协议。另外，浏览器也知道如何处理其他协议。</p>
+<p><img src="/images/pasted-20.png" alt="upload successful"><br><a href="http://www.example.com/">www.example.com</a> 既是一个域名，也代表管理该域名的机构。它指示了需要向网络上的哪一台主机发起请求。当然，也可以直接向主机的 IP address 地址发起请求。但直接使用 IP 地址的场景并不常见。</p>
+<p><img src="%5Cimages/pasted-21.png" alt="upload successful"><br>我们前面说到，两个主机之间要发起 TCP 连接需要两个条件，主机 + 端口。它表示用于访问 Web 服务器上资源的入口。如果访问的该 Web 服务器使用HTTP协议的标准端口（HTTP为80，HTTPS为443）授予对其资源的访问权限，则通常省略此部分。否则端口就是 URI 必须的部分。</p>
+<p><img src="%5Cimages/pasted-26.png" alt="upload successful"><br>/path/to/myfile.html 是 Web 服务器上资源的路径。以端口后面的第一个 / 开始，到 ? 号之前结束，中间的 每一个/ 都代表了层级（上下级）关系。这个 URL 的请求资源是一个 html 页面。</p>
+<p><img src="%5Cimages/pasted-27.png" alt="upload successful"><br>?key1=value1&amp;key2=value2 是提供给 Web 服务器的额外参数。如果是 GET 请求，一般带有请求 URL 参数，如果是 POST 请求，则不会在路径后面直接加参数。这些参数是用 &amp; 符号分隔的键/值对列表。key1 = value1 是第一对，key2 = value2 是第二对参数</p>
+<p><img src="%5Cimages/pasted-28.png" alt="upload successful"><br>#SomewhereInTheDocument 是资源本身的某一部分的一个锚点。锚点代表资源内的一种“书签”，它给予浏览器显示位于该“加书签”点的内容的指示。 例如，在HTML文档上，浏览器将滚动到定义锚点的那个点上；在视频或音频文档上，浏览器将转到锚点代表的那个时间。值得注意的是 # 号后面的部分，也称为片段标识符，永远不会与请求一起发送到服务器。</p>
+<h1 id="HTTP-优缺点"><a href="#HTTP-优缺点" class="headerlink" title="HTTP 优缺点"></a>HTTP 优缺点</h1><h2 id="HTTP-的优点"><a href="#HTTP-的优点" class="headerlink" title="HTTP 的优点"></a>HTTP 的优点</h2><ul>
+<li><p><strong>简单灵活易扩展</strong><br>HTTP 最重要也是最突出的优点是 简单、灵活、易于扩展。</p>
+<p>HTTP 的协议比较简单，它的主要组成就是 header + body，头部信息也是简单的文本格式，而且 HTTP 的请求报文根据英文也能猜出来个大概的意思，降低学习门槛，能够让更多的人研究和开发 HTTP 应用。</p>
+<p>所以，在简单的基础上，HTTP 协议又多了灵活 和 易扩展 的优点。</p>
+<p>HTTP 协议里的请求方法、URI、状态码、原因短语、头字段等每一个核心组成要素都没有被制定死，允许开发者任意定制、扩充或解释，给予了浏览器和服务器最大程度的信任和自由。</p>
+</li>
+<li><p><strong>应用广泛、环境成熟</strong><br>因为过于简单，普及，因此应用很广泛。因为 HTTP 协议本身不属于一种语言，它并不限定某种编程语言或者操作系统，所以天然具有跨语言、跨平台的优越性。而且，因为本身的简单特性很容易实现，所以几乎所有的编程语言都有 HTTP 调用库和外围的开发测试工具。</p>
+<p>随着移动互联网的发展， HTTP 的触角已经延伸到了世界的每一个角落，从简单的 Web 页面到复杂的 JSON、XML 数据，从台式机上的浏览器到手机上的各种 APP、新闻、论坛、购物、手机游戏，你很难找到一个没有使用 HTTP 的地方。</p>
+</li>
+<li><p><strong>无状态</strong><br>无状态其实既是优点又是缺点。因为服务器没有记忆能力，所以就不需要额外的资源来记录状态信息，不仅实现上会简单一些，而且还能减轻服务器的负担，能够把更多的 CPU 和内存用来对外提供服务。</p>
+</li>
+</ul>
+<h2 id="HTTP-的缺点"><a href="#HTTP-的缺点" class="headerlink" title="HTTP 的缺点"></a>HTTP 的缺点</h2><ul>
+<li><p><strong>无状态</strong><br>既然服务器没有记忆能力，它就无法支持需要连续多个步骤的事务操作。每次都得问一遍身份信息，不仅麻烦，而且还增加了不必要的数据传输量。由此出现了 Cookie 技术。</p>
+</li>
+<li><p><strong>明文</strong><br>HTTP 协议里还有一把优缺点一体的双刃剑，就是明文传输。明文意思就是协议里的报文（准确地说是 header 部分）不使用二进制数据，而是用简单可阅读的文本形式。</p>
+<p>对比 TCP、UDP 这样的二进制协议，它的优点显而易见，不需要借助任何外部工具，用浏览器、Wireshark 或者 tcpdump 抓包后，直接用肉眼就可以很容易地查看或者修改，为我们的开发调试工作带来极大的便利。</p>
+<p>当然缺点也是显而易见的，就是不安全，可以被监听和被窥探。因为无法判断通信双方的身份，不能判断报文是否被更改过。</p>
+</li>
+<li><p><strong>性能</strong><br>HTTP 的性能不算差，但不完全适应现在的互联网，还有很大的提升空间。</p>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>java</title>
+    <url>/2020/05/11/java/</url>
+    <content><![CDATA[<p>java是最好的语言</p>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>letcode 65 不用加减乘除做加法</title>
+    <url>/2020/07/24/letcode-65-%E4%B8%8D%E7%94%A8%E5%8A%A0%E5%87%8F%E4%B9%98%E9%99%A4%E5%81%9A%E5%8A%A0%E6%B3%95/</url>
+    <content><![CDATA[<h3 id="题目描述"><a href="#题目描述" class="headerlink" title="题目描述"></a>题目描述</h3><p>写一个函数，求两个整数之和，要求在函数体内不得使用 “+”、“-”、“*”、“/” 四则运算符号。</p>
+<p>思路 通过a&amp;b之后左移一位算出进位<br>      即a&amp;b&lt;&lt;1<br>      可以得到进位<br>      通过a^b得到非进位的和</p>
+<pre><code>     class Solution &#123;
+    public int add(int a, int b) &#123;
+     while(b!=0)&#123;//进位为0停滞循环
+     int c=(a&amp;b)&lt;&lt;1;//进位
+     a^=b;//非进位和
+     b=c;
+    &#125;
+    return a;
+    &#125;
+    
+&#125;
+</code></pre>
+<p>感觉跟以前学的微机原理很像！</p>
+]]></content>
+      <categories>
+        <category>数据结构</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>letcode58反转单词顺序</title>
+    <url>/2020/05/13/letcode58/</url>
+    <content><![CDATA[<ul>
+<li>输入一个英文句子，翻转句子中单词的顺序，但单词内字符的顺序不变。为简单起见，标点符号和普通字母一样处理。例如输入字符串”I am a student. “，则输出”student. a am I”。</li>
+</ul>
+<p><img src="/images/pasted-14.png" alt="upload successful"></p>
+<h2 id="双指针"><a href="#双指针" class="headerlink" title="双指针"></a>双指针</h2><pre><code>class Solution &#123;
+    public String reverseWords(String s) &#123;
+        //去空格
+        s=s.trim();
+        //可变字符串
+        StringBuilder res=new StringBuilder();
+        int j=s.length()-1;
+        int i=j;
+        while(i&gt;=0)&#123;
+            //找到完整的单词    
+            while(i&gt;=0 &amp;&amp; s.charAt(i)!=&#39; &#39;) i--;
+            res.append(s.substring(i+1,j+1)+&#39; &#39;);
+            while(i&gt;=0 &amp;&amp; s.charAt(i)==&#39; &#39;) i--;
+            j=i;
+        &#125; 
+        return res.toString().trim();
+    &#125;
+&#125;
+</code></pre>
+<ul>
+<li>倒序遍历字符串，遇到空格则停下，即一个单词，j充当边界</li>
+<li>注意trim不是单纯的去掉空格，而是截取中间的非空白字符串，返回的是一个new出来的对象，这就联系到substring的源码，我的另一篇博客有写</li>
+</ul>
+]]></content>
+      <categories>
+        <category>数据结构</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>mysql错误代码2003的解决办法</title>
+    <url>/2020/05/12/mysql%E9%94%99%E8%AF%AF%E4%BB%A3%E7%A0%812003%E7%9A%84%E8%A7%A3%E5%86%B3%E5%8A%9E%E6%B3%95/</url>
+    <content><![CDATA[<p><img src="/images/pasted-12.png" alt="upload successful"><br>启动即可</p>
+<p>除此之外我还遇到一个问题 idea连接数据库的时候报错</p>
+<p>Server returns invalid timezone. Go to ‘Advanced’ tab and set ‘serverTimezon</p>
+<p>一般是时区的问题</p>
+<p>进入命令窗口（Win + R），连接数据库 mysql -hlocalhost -uroot -p，回车，输入密码，回车，</p>
+<p>输入set global time_zone = ‘+8:00’;     回车</p>
+]]></content>
+      <categories>
+        <category>数据库</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>主从复制</title>
+    <url>/2020/05/12/%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6/</url>
+    <content><![CDATA[<h2 id="什么是主从复制"><a href="#什么是主从复制" class="headerlink" title="什么是主从复制?"></a>什么是主从复制?</h2><ul>
+<li>主从复制，是用来建立一个和主数据库完全一样的数据库环境，称为从数据库，主数据库一般是准实时的业务数据库。您看，像在mysql数据库中，支持单项、异步赋值。在赋值过程中，一个服务器充当主服务器，而另外一台服务器充当从服务器。此时主服务器会将更新信息写入到一个特定的二进制文件中。并会维护文件的一个索引用来跟踪日志循环。这个日志可以记录并发送到从服务器的更新中去。当一台从服务器连接到主服务器时，从服务器会通知主服务器从服务器的日志文件中读取最后一次成功更新的位置。然后从服务器会接收从哪个时刻起发生的任何更新，然后锁住并等到主服务器通知新的更新</li>
+</ul>
+<h2 id="主从复制的作用（好处，或者说为什么要做主从）重点？"><a href="#主从复制的作用（好处，或者说为什么要做主从）重点？" class="headerlink" title="主从复制的作用（好处，或者说为什么要做主从）重点？"></a>主从复制的作用（好处，或者说为什么要做主从）重点？</h2><ul>
+<li><p>做数据的热备，作为后备数据库，主数据库服务器故障后，可切换到从数据库继续工作，避免数据丢失。</p>
+</li>
+<li><p>架构的扩展。业务量越来越大,I/O访问频率过高，单机无法满足，此时做多库的存储，降低磁盘I/O访问的评率，提高单个机器的I/O性能。</p>
+</li>
+<li><p>读写分离，使数据库能支持更大的并发。在报表中尤其重要。由于部分报表sql语句非常的慢，导致锁表，影响前台服务。如果前台使用master，报表使用slave，那么报表sql将不会造成前台锁，保证了前台速度。<br>```<br>1在从服务器可以执行查询工作(即我们常说的读功能)，降低主服务器压力;（主库写，从库读，降压）</p>
+</li>
+</ul>
+<p> 2在从主服务器进行备份，避免备份期间影响主服务器服务;（确保数据安全）</p>
+<p> 3当主服务器出现问题时，可以切换到从服务器。（提升性能）</p>
+<pre><code>## 主从复制的原理？
+
+- 1.数据库有个bin-log二进制文件，记录了所有sql语句。
+
+- 2.我们的目标就是把主数据库的bin-log文件的sql语句复制过来。
+
+- 3.让其在从数据的relay-log重做日志文件中再执行一次这些sql语句即可。
+
+- 4.下面的主从配置就是围绕这个原理配置
+
+- 5.具体需要三个线程来操作：
+
+   a.binlog输出线程:每当有从库连接到主库的时候，主库都会创建一个线程然后发送binlog内容到从库。在从库里，当复制开始的时候，从库就会创建两个线程进行处理：
+
+   b.从库I/O线程:当START SLAVE语句在从库开始执行之后，从库创建一个I/O线程，该线程连接到主库并请求主库发送binlog里面的更新记录到从库上。从库I/O线程读取主库的binlog输出线程发送的更新并拷贝这些更新到本地文件，其中包括relay log文件。
+
+   c.从库的SQL线程:从库创建一个SQL线程，这个线程读取从库I/O线程写到relay log的更新事件并执行。
+
+
+
+可以知道，对于每一个主从复制的连接，都有三个线程。拥有多个从库的主库为每一个连接到主库的从库创建一个binlog输出线程，每一个从库都有它自己的I/O线程和SQL线程。
+
+主从复制如图  帮助理解：
+
+![upload successful](/images/pasted-4.png)
+
+![upload successful](/images/pasted-5.png)
+## 主从复制的好处？
+
+- 做数据的热备，作为后备数据库，主数据库服务器故障后，可切换到从数据库继续工作，避免数据丢失。
+
+- 架构的扩展。业务量越来越大,I/O访问频率过高，单机无法满足，此时做多库的存储，降低磁盘I/O访问的评率，提高单个机器的I/O性能。
+
+- 读写分离，使数据库能支持更大的并发。在报表中尤其重要。由于部分报表sql语句非常的慢，导致锁表，影响前台服务。如果前台使用master，报表使用slave，那么报表sql将不会造成前台锁，保证了前台速度。
+
+
+
+- 好处一:实现服务器负载均衡
+
+  通过服务器复制功能，可以在主服务器和从服务器之间实现负载均衡。即可以通过在主服务器和从服务器之间切分处理客户查询的负荷，从而得到更好地客户相应时间。通常情况下，数据库管理员会有两种思路。
+  
+  一是在主服务器上只实现数据的更新操作。包括数据记录的更新、删除、新建等等作业。而不关心数据的查询作业。数据库管理员将数据的查询请求全部 转发到从服务器中。这在某些应用中会比较有用。如某些应用，像基金净值预测的网站。其数据的更新都是有管理员更新的，即更新的用户比较少。而查询的用户数 量会非常的多。此时就可以设置一台主服务器，专门用来数据的更新。同时设置多台从服务器，用来负责用户信息的查询。将数据更新与查询分别放在不同的服务器 上进行，即可以提高数据的安全性，同时也缩短应用程序的响应时间、提高系统的性能。
+
+  二是在主服务器上与从服务器切分查询的作业。在这种思路下，主服务器不单单要完成数据的更新、删除、插入等作业，同时也需要负担一部分查询作 业。而从服务器的话，只负责数据的查询。当主服务器比较忙时，部分查询请求会自动发送到从服务器重，以降低主服务器的工作负荷。当然，像修改数据、插入数 据、删除数据等语句仍然会发送到主服务器中，以便主服务器和从服务器数据的同步。
+
+
+
+- 好处二：通过复制实现数据的异地备份
+
+   可以定期的将数据从主服务器上复制到从服务器上，这无疑是先了数据的异地备份。在传统的备份体制下，是将数据备份在本地。此时备份 作业与数据库服务器运行在同一台设备上，当备份作业运行时就会影响到服务器的正常运行。有时候会明显的降低服务器的性能。同时，将备份数据存放在本地，也 不是很安全。如硬盘因为电压等原因被损坏或者服务器被失窃，此时由于备份文件仍然存放在硬盘上，数据库管理员无法使用备份文件来恢复数据。这显然会给企业 带来比较大的损失。
+
+   而如果使用复制来实现对数据的备份，就可以在从服务器上对数据进行备份。此时不仅不会干扰主服务气的正常运行，而且在备份过程中主服务器可以继 续处理相关的更新作业。同时在数据复制的同时，也实现了对数据的异地备份。除非主服务器和从服务器的两块硬盘同时损坏了，否则的话数据库管理员就可以在最 短时间内恢复数据，减少企业的由此带来的损失。
+
+
+
+- 好处三：提高数据库系统的可用性
+
+  数据库复制功能实现了主服务器与从服务器之间数据的同步，增加了数据库系统的可用性。当主服务器出现问题时，数据库管理员可以马上让从服务器作为主服务器，用来数据的更新与查询服务。然后回过头来再仔细的检查主服务器的问题。此时一般数据库管理员也会采用两种手段。
+
+  一是主服务器故障之后，虽然从服务器取代了主服务器的位置，但是对于主服务器可以采取的操作仍然做了一些限制。如仍然只能够进行数据的查询，而 不能够进行数据的更新、删除等操作。这主要是从数据的安全性考虑。如现在一些银行系统的升级，在升级的过程中，只能够查询余额而不能够取钱。这是同样的道理。
+
+  二是从服务器真正变成了主服务器。当从服务器切换为主服务器之后，其地位完全与原先的主服务器相同。此时可以实现对数据的查询、更新、删除等操 作。为此就需要做好数据的安全性工作。即数据的安全策略，要与原先的主服务器完全相同。否则的话，就可能会留下一定的安全隐患。
+
+
+
+##  从数据库的读的延迟问题了解吗？如何解决？
+
+- 主库宕机后，数据可能丢失
+
+  从库只有一个sql Thread，主库写压力大，复制很可能延时
+
+- 解决方法：
+
+  半同步复制—解决数据丢失的问题
+
+  并行复制—-解决从库复制延迟的问题
+      https://blog.csdn.net/darkangel1228/article/details/80003967
+
+## 主从复制和主主复制区别？
+
+- 最大区别是 主从是对主操作数据，从会实时同步数据。反之对从操作，主不会同步数据，还有可能造成数据紊乱，导致主从失效。 主主则是无论对那一台操作，另一个都会同步数据。一般用作高容灾方案 
+</code></pre>
+]]></content>
+      <categories>
+        <category>数据库</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>letcode67二叉树的最近公共祖先</title>
+    <url>/2020/08/04/%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E6%9C%80%E8%BF%91%E5%85%AC%E5%85%B1%E7%A5%96%E5%85%88/</url>
+    <content><![CDATA[<h2 id="I-二叉搜索树的最近公共祖先"><a href="#I-二叉搜索树的最近公共祖先" class="headerlink" title="I. 二叉搜索树的最近公共祖先"></a>I. 二叉搜索树的最近公共祖先</h2><p>给定一个二叉搜索树, 找到该树中两个指定节点的最近公共祖先。</p>
+<p>百度百科中最近公共祖先的定义为：“对于有根树 T 的两个结点 p、q，最近公共祖先表示为一个结点 x，满足 x 是 p、q 的祖先且 x 的深度尽可能大（一个节点也可以是它自己的祖先）。”</p>
+<p>例如，给定如下二叉搜索树:  root = [6,2,8,0,4,7,9,null,null,3,5]</p>
+<p><img src="/images/pasted-29.png" alt="upload successful"></p>
+<pre><code>class Solution &#123;
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) &#123;
+        if(root.val&lt;p.val&amp;&amp;root.val&lt;q.val)return lowestCommonAncestor(root.right,p,q);
+        if(root.val&gt;p.val&amp;&amp;root.val&gt;q.val)return lowestCommonAncestor(root.left,p,q);
+        return root;
+    &#125;
+&#125;
+</code></pre>
+<ul>
+<li><p>根据以上定义，若root是p,q的最近公共祖先则只可能为以下情况之一：</p>
+<ul>
+<li>p和 q 在 root 的子树中，且分列 root 的 异侧（即分别在左、右子树中）；</li>
+<li>p=root，且 q 在 root 的左或右子树中；</li>
+<li>q=root，且 p 在 root的左或右子树中；</li>
+</ul>
+</li>
+<li><p>递推工作：</p>
+<pre><code>- 当 p,q都在root的右子树中则开启递归 root.right并返回；
+- 否则,当p,q都在root的左子树中，则开启递归 root.left并返回；
+- 返回值： 最近公共祖先 rootrootroot 。
+</code></pre>
+</li>
+<li><p>复杂度分析：</p>
+<ul>
+<li>时间复杂度 O(N)： 其中N为二叉树节点数；每循环一轮排除一层，二叉搜索树的层数最小为 log⁡N（满二叉树），最大为 N（退化为链表）。</li>
+<li> 空间复杂度O(N)：最差情况下，即树退化为链表时，递归深度达到树的层数 N。</li>
+</ul>
+</li>
+</ul>
+<h2 id="II-二叉树的最近公共祖先"><a href="#II-二叉树的最近公共祖先" class="headerlink" title="II. 二叉树的最近公共祖先"></a>II. 二叉树的最近公共祖先</h2><p>给定一个二叉树, 找到该树中两个指定节点的最近公共祖先。</p>
+<p>百度百科中最近公共祖先的定义为：“对于有根树 T 的两个结点 p、q，最近公共祖先表示为一个结点 x，满足 x 是 p、q 的祖先且 x 的深度尽可能大（一个节点也可以是它自己的祖先）。”</p>
+<p>例如，给定如下二叉树:  root = [3,5,1,6,2,0,8,null,null,7,4]</p>
+<p><img src="/images/pasted-30.png" alt="upload successful"></p>
+<pre><code>class Solution &#123;
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) &#123;
+        if(root == null) return null; // 如果树为空，直接返回null
+        if(root == p || root == q) return root; // 如果 p和q中有等于 root的，那么它们的最近公共祖先即为root（一个节点也可以是它自己的祖先）
+        TreeNode left = lowestCommonAncestor(root.left, p, q); // 递归遍历左子树，只要在左子树中找到了p或q，则先找到谁就返回谁
+        TreeNode right = lowestCommonAncestor(root.right, p, q); // 递归遍历右子树，只要在右子树中找到了p或q，则先找到谁就返回谁
+        if(left == null) return right; // 如果在左子树中 p和 q都找不到，则 p和 q一定都在右子树中，右子树中先遍历到的那个就是最近公共祖先（一个节点也可以是它自己的祖先）
+        else if(right == null) return left; // 否则，如果 left不为空，在左子树中有找到节点（p或q），这时候要再判断一下右子树中的情况，如果在右子树中，p和q都找不到，则 p和q一定都在左子树中，左子树中先遍历到的那个就是最近公共祖先（一个节点也可以是它自己的祖先）
+        else return root; //否则，当 left和 right均不为空时，说明 p、q节点分别在 root异侧, 最近公共祖先即为 root
+    &#125;
+&#125;
+</code></pre>
+<p>递归解析：</p>
+<ul>
+<li>终止条件：<br>   当越过叶节点，则直接返回 null ；<br>   当 root 等于 p,q ，则直接返回root；</li>
+<li>递推工作：<br>   开启递归左子节点，返回值记为 left ；<br>   开启递归右子节点，返回值记为 right ；</li>
+<li>返回值:根据 left和 right ，可展开为四种情况；<ul>
+<li>1.当 left 和 right 同时为空 ：说明 root 的左/右子树中都不包含 p,q ，返回 null；</li>
+<li>2.当 left 和 right 同时不为空 ：说明 p,q 分列在 root的 异侧（分别在 左 / 右子树），因此 root为最近公共祖先，返回 root ；</li>
+<li>3.当 left 为空 ，right不为空 ：p,q 都不在 root 的左子树中，直接返回 right。具体可分为两种情况：<ul>
+<li> p,q 其中一个在 root 的右子树中，此时right指向 p（假设为p）；</li>
+<li> p,q 两节点都在 root 的右子树中，此时的right指向最近公共祖先节点 ；</li>
+</ul>
+</li>
+<li>4.当 left为空，right为空 ：与情况3.同理；</li>
+</ul>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>数据结构</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>关于git提交方面的报错</title>
+    <url>/2020/07/24/%E5%85%B3%E4%BA%8Egit%E6%8F%90%E4%BA%A4%E6%96%B9%E9%9D%A2%E7%9A%84%E6%8A%A5%E9%94%99/</url>
+    <content><![CDATA[<p>今天在公司搭hexo环境，发现了hexo d的时候一直报错，查找了很多相关的资料发现是公钥的问题，以下是解决方案</p>
+<h1 id="只适用于只有一个git环境"><a href="#只适用于只有一个git环境" class="headerlink" title="只适用于只有一个git环境"></a>只适用于只有一个git环境</h1><ul>
+<li>如果你的电脑只有一个git环境，那么极大多数情况是由于 GitHub 账号没有设置 ssh 公钥信息所致。 前往 GitHub 网站的”account settings”依次点击”Setting -&gt; SSH Keys”-&gt;”New SSH key”Title处填写“id_rsa.pub”或其他任意信息。 </li>
+<li>key处原样拷贝下面命令的打印 ~/.ssh/id_rsa.pub 文件的内容：</li>
+</ul>
+<pre><code>cat ~/.ssh/id_rsa.pub      # 控制台上输出内容
+pbcopy &lt; ~/.ssh/id_rsa.pub # 自动拷贝到粘贴板
+</code></pre>
+<ul>
+<li>如没有则按下述方法<br>生成： ssh-keygen -t rsa输入文件名的地方输入可以输入自定义文件名，默认是id_rsa，然后一路回车…… 注意如果自定义文件名的话，需要加一个config文件，下文有介绍。最后，输入ssh -T <a href="mailto:&#x67;&#105;&#116;&#64;&#x67;&#105;&#116;&#x68;&#x75;&#x62;&#46;&#99;&#x6f;&#109;">&#x67;&#105;&#116;&#64;&#x67;&#105;&#116;&#x68;&#x75;&#x62;&#46;&#99;&#x6f;&#109;</a>如果没有报错，再尝试输出就应该有了```<br>cat ~/.ssh/id_rsa.pub      # 控制台上输出内容<br>pbcopy &lt; ~/.ssh/id_rsa.pub # 自动拷贝到粘贴板</li>
+</ul>
+<p> ```</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>内部类</title>
+    <url>/2020/05/12/%E5%86%85%E9%83%A8%E7%B1%BB/</url>
+    <content><![CDATA[<h3 id="什么是内部类？"><a href="#什么是内部类？" class="headerlink" title="什么是内部类？###"></a>什么是内部类？###</h3><hr>
+<p>定义在其它类内部中的类叫做内部类。</p>
+<p>内部类成员可以直接访问外部类的私有数据，因为内部类是外部类的成员。</p>
+<p>编译过后会生成两个或者多个class文件（取决于内部类的数量，中间用￥符号隔开）</p>
+<hr>
+<h3 id="内部类分为"><a href="#内部类分为" class="headerlink" title="内部类分为?"></a>内部类分为?</h3><p>（成员内部类）非静态内部类，静态内部类：算是类成员</p>
+<p>局部内部类，匿名内部类。</p>
+<ul>
+<li>非静态内部类：</li>
+</ul>
+<p> 1.在其内部方法找一个变量，会先在该方法找，再去内部类找，最后再去外部类找</p>
+<p> 2.不允许外部类的静态成员调用非静态内部类，常识</p>
+<p> 3.非静态内部类中不能定义静态成员</p>
+<p> 4.非静态内部类普通初始化块的作用与外部类完全相同</p>
+<ul>
+<li>静态内部类：</li>
+</ul>
+<p> 1.这个内部类属于外部类本身，不属于外部类的对象</p>
+<p> 2.可以包含静态成员和非静态成员</p>
+<p> 3.外部类的上一级是包，所以不能用static修饰，内部类的上一级是外部类，用static修饰成<br> 为外部类相关</p>
+<ul>
+<li><p>局部内部类：</p>
+<p>把一个内部类放在方法内定义，就是局部内部类。不能用访问控制符和static</p>
+</li>
+</ul>
+<p>修饰。</p>
+<ul>
+<li><p>匿名内部类：</p>
+<p> 只需要使用一次的类。</p>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>垃圾回收</title>
+    <url>/2020/05/12/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6/</url>
+    <content><![CDATA[<h2 id="如何识别垃圾？"><a href="#如何识别垃圾？" class="headerlink" title="如何识别垃圾？"></a>如何识别垃圾？</h2><ul>
+<li><p>引用计数法：对象每被引用一次，就在该对象的对象头加上一次引用次数，如果引用次数为0，则此对象可以回收</p>
+</li>
+<li><p>可达性算法：以GC Root的对象为起点，如果相关对象不在任意一个以GC Root为起点的引用链中，则会被回收。</p>
+</li>
+<li><p>发生GC的时候，会先判断对象是否执行了finalize方法，如果没有则先执行finalize方法，（在这个方法中对象还有一次逃出死亡的机会，如果跟GC Root关联起来就不会被清理）执行finalize方法之后，再判断对象是否可达，不可达则回收。<br>finalize方法只会被执行一次，也就是只有一次机会，以后再被GC会直接回收，不再进入finalize。</p>
+</li>
+</ul>
+<h2 id="GC-Root有哪几类？"><a href="#GC-Root有哪几类？" class="headerlink" title="GC Root有哪几类？"></a>GC Root有哪几类？</h2><ul>
+<li><p>虚拟机栈中引用的对象</p>
+</li>
+<li><p>本地方法栈INJ引用的对象</p>
+</li>
+<li><p>方法区中类静态属性引用的对象</p>
+</li>
+<li><p>方法区中常量应用的对象</p>
+</li>
+</ul>
+<p>   垃圾回收的方法：标记清除法，复制算法，标记整理法，</p>
+<p>   对象晋生老年代：</p>
+<p>   1.次数超过15（默认）</p>
+<p>   2.大对象，减少开销</p>
+<p>   3.在S区中相同年龄的对象大小之和大于空间一半以上，则年龄大于该年龄的对象也会晋升到老年代</p>
+<h2 id="Stop-The-World"><a href="#Stop-The-World" class="headerlink" title="Stop The World"></a>Stop The World</h2><ul>
+<li><p>GC的时候会触发STW，只有垃圾回收器线程在工作，其他工作线程被挂起。</p>
+</li>
+<li><p>Full GC导致的STW会更长，所以要尽可能避免对象过早进入老年去，尽可能晚的触发FullGC</p>
+</li>
+<li><p>新生代和老年代空间大小1：2也是这个原因</p>
+<p>因为Full GC影响性能，一般要选择合适的时机进行，也就是safa Point</p>
+<p>safe Point：<br>循环的末尾<br>方法返回前<br>调用方法的call之后<br>抛出异常的位置</p>
+</li>
+</ul>
+<h2 id="垃圾收集器种类"><a href="#垃圾收集器种类" class="headerlink" title="垃圾收集器种类"></a>垃圾收集器种类</h2><ul>
+<li><p>新生代：Serial<br>  ParNew<br>  Parallel Scavenge</p>
+</li>
+<li><p>老年代：Serial Old<br>  CMS<br>  Parallel Old</p>
+</li>
+<li><p>通吃：G1</p>
+<p>   Serial：单线程的垃圾回收器</p>
+<p>   ParNew：上面的多线程版本（复制算法）减少了STW的时间，只有它能和CMS收集器配合工作</p>
+<p>   Parallel Scavenge：和上面的差不多，能控制最大垃圾回收时间参数和直接设置吞吐量大小</p>
+<p>   Serial Old：工作在老年区的单线程的垃圾回收器</p>
+<p>   Parallel Old：多线程，也是吞吐量优先</p>
+<p>   CMS：以实现最短STW为目标的收集器，并发收集器，垃圾收集器线程和用户线程同时工作</p>
+</li>
+</ul>
+<h2 id="采用标记清除法有四个步骤："><a href="#采用标记清除法有四个步骤：" class="headerlink" title="采用标记清除法有四个步骤："></a>采用标记清除法有四个步骤：</h2><ul>
+<li>初始标记：（STW）只标记GC Root关联的对象</li>
+<li>并发标记：GC Root Tracing，找出不可达的对象</li>
+<li>重新标记 ：（STW）修正并发标记中有一些重新被引用了的对象</li>
+<li>并发清除：</li>
+</ul>
+<h2 id="CMS三个缺点："><a href="#CMS三个缺点：" class="headerlink" title="CMS三个缺点："></a>CMS三个缺点：</h2><ul>
+<li>1.吞吐量比较低</li>
+<li>2.无法处理浮动垃圾，清理的同时有新的垃圾产生，得等到下一次GC，也就是得留下足够的空间确保线程正常运行</li>
+<li>3.标记清除法，大量内存碎片</li>
+</ul>
+<h2 id="G1："><a href="#G1：" class="headerlink" title="G1："></a>G1：</h2><ul>
+<li><p>1.和CMS一样，并发收集器</p>
+</li>
+<li><p>2.整理控件空间更   </p>
+</li>
+<li><p>3.不会牺牲大量的吞吐性能</p>
+</li>
+<li><p>4.不需要更大java 堆空间</p>
+</li>
+<li><p>5.需要GC停顿时间更好预测</p>
+</li>
+<li><p>对比CMS：<br> 1.不会产生内存碎片，G1从整体上看是标记整理法，局部上是复制算法，都不会产生内存碎片<br> 2.可以设定停顿时间<br> G1各代的存储地址不是连续的，每一代都使用了n个不连续的大小相同的Region，除了新老生代，还有个H区，放大对象，防止反复拷贝移动。<br> 可以根据价值大小维护一个优先列表，优先收集回收价值的Region，避免了整个老年代的回收，减少了STW</p>
+<p> 初始标记，并发标记，最终标记，筛选回收</p>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>排序</title>
+    <url>/2020/05/20/%E6%8E%92%E5%BA%8F/</url>
+    <content><![CDATA[<h2 id="1-选择排序（O-N-2-）"><a href="#1-选择排序（O-N-2-）" class="headerlink" title="1.选择排序（O(N^2)）"></a>1.选择排序（<code>O(N^2)</code>）</h2><pre><code>//选择排序
+public static int[] selectionSort(int[] in) &#123;
+    int lastIndex = in.length - 1;  //即：循环遍历次数
+    for (int i = 0; i &lt;= lastIndex; i++) &#123;  //每次遍历，将最小元素浮动到最左边
+        //0~i是已排序序列，i~lastIndex是未排序序列，将未排序中的最小元素放在i位置
+        for(int j = i; j &lt;= lastIndex; j++) &#123;
+            //默认in[i]是最小元素，如果in[j]小于in[i]，则交换
+            if (in[j] &lt; in[i]) &#123;    //如果i=j，那么in[i]=in[j]
+                //所以可以保证in[i]、in[j]是不同对象，可以通过异或进行交换
+                in[i] = in[i] ^ in[j];
+                in[j] = in[i] ^ in[j];
+                in[i] = in[i] ^ in[j];
+            &#125;
+        &#125;
+    &#125;
+    return in;
+&#125;
+</code></pre>
+<h2 id="2-冒泡排序（O-N-2-）"><a href="#2-冒泡排序（O-N-2-）" class="headerlink" title="2.冒泡排序（O(N^2)）"></a>2.冒泡排序（<code>O(N^2)</code>）</h2><pre><code>
+//冒泡排序
+public static int[] bubbleSort(int[] in) &#123;
+    int lastIndex = in.length - 1;
+    for (int i = 0; i &lt;= lastIndex; i++) &#123;
+        //[lastIndex - i,lastIndex]是排好序的序列
+        //[0,lastIndex - i)是未排好序的序列
+        for(int j = 0; j &lt;= lastIndex - i - 1; j++) &#123;
+            //与选择排序不同，冒泡排序是两两相邻元素比较后交换
+            //将较大的交换到后面
+            if (in[j + 1] &lt; in[j]) &#123;    //不同元素异或交换
+                in[j + 1] = in[j] ^ in[j + 1];
+                in[j] = in[j] ^ in[j + 1];
+                in[j + 1] = in[j] ^ in[j + 1];
+            &#125;
+        &#125;
+    &#125;
+    return in;
+&#125;
+</code></pre>
+<h3 id="2-1冒泡排序优化"><a href="#2-1冒泡排序优化" class="headerlink" title="2.1冒泡排序优化"></a>2.1冒泡排序优化</h3><pre><code>//优化冒泡排序——加入交换标志位
+public static int[] flagBubbleSort(int[] in) &#123;
+    //标志位：本趟排序是否进行了交换
+    //如果本趟排序没有进行元素交换，说明已经有序了，可以提前结束循环
+    boolean exchange;
+    int lastIndex = in.length - 1;
+    for (int i = 0; i &lt;= lastIndex; i++) &#123;
+        exchange = false;
+        //[lastIndex - i,lastIndex]是排好序的序列
+        //[0,lastIndex - i)是未排好序的序列
+        for(int j = 0; j &lt;= lastIndex - i - 1; j++) &#123;
+            //与选择排序不同，冒泡排序是两两相邻元素比较后交换
+            //将较大的交换到后面
+            if (in[j + 1] &lt; in[j]) &#123;    //不同元素异或交换
+                in[j + 1] = in[j] ^ in[j + 1];
+                in[j] = in[j] ^ in[j + 1];
+                in[j + 1] = in[j] ^ in[j + 1];
+                exchange = true;    //发生了交换
+            &#125;
+        &#125;
+        if(!exchange) break;    //无交换直接退出循环
+    &#125;
+    return in;
+&#125;
+</code></pre>
+<h2 id="3-插入排序（O-N-2-）"><a href="#3-插入排序（O-N-2-）" class="headerlink" title="3.插入排序（O(N^2)）"></a>3.插入排序（<code>O(N^2)</code>）</h2><pre><code> //插入排序
+    public static int[] insertionSort(int[] in) &#123;
+        int lastIndex = in.length - 1;
+        //从1开始遍历，是默认最开始的已排序序列就是第一个元素，index=0
+        for (int i = 1; i &lt;= lastIndex; i++) &#123;
+            int temp = in[i];   //待比较元素
+            //注意i不能比1小，否则就会数组越界
+            while (i &gt;= 1 &amp;&amp; in[i - 1] &gt; temp) &#123;  //已排序序列[0,i)，最大下标i - 1
+                //i - 1位置元素大于待比较元素，i - 1位置元素后移
+                in[i] = in[i - 1];
+                i--;
+            &#125;
+            //退出循环说明找到了合适的位置
+            in[i] = temp;
+        &#125;
+        return in;
+    &#125;
+</code></pre>
+<h3 id="3-1希尔排序（O-NlogN-）-缩小增量排序"><a href="#3-1希尔排序（O-NlogN-）-缩小增量排序" class="headerlink" title="3.1希尔排序（O(NlogN)）/缩小增量排序"></a>3.1希尔排序（<code>O(NlogN)</code>）/缩小增量排序</h3><pre><code>/希尔排序
+public static int[] shellSort(int[] in) &#123;
+    int gap = in.length &gt;&gt; 1;   //初始值，gap = len / 2
+    while (gap &gt; 0) &#123;
+        //从gap开始是因为默认[0,gap)是排好序的
+        //即每个子序列第一个元素是排好序的，一共gap个元素
+        //将序列分为gap组，对子序列进行插入排序
+        for (int i = gap; i &lt; in.length; i++) &#123;     
+            int temp = in[i];
+            //限制了gap&gt;0，所以只需要 i-gap&gt;=0 而非 1
+            while ((i - gap &gt;= 0) &amp;&amp; (in[i - gap] &gt; temp) ) &#123;   
+                in[i] = in[i - gap];
+                i -= gap;   //每次跨度为一个gap
+            &#125;
+            //退出循环说明找到了合适位置
+            in[i] = temp;
+        &#125;
+        gap = gap &gt;&gt; 1; //gap = gap / 2
+    &#125;
+    return in;
+&#125;
+</code></pre>
+<h2 id="4-归并排序（O-NlogN-）"><a href="#4-归并排序（O-NlogN-）" class="headerlink" title="4.归并排序（O(NlogN)）"></a>4.归并排序（<code>O(NlogN)</code>）</h2><p><strong>合并</strong></p>
+<pre><code>//合并两个有序子序列
+//@params: left[]   左子序列
+//@params: right[]  右子序列
+public static void merge(int[] left, int[] right) &#123;
+  //结果序列，用于合并两个子有序序列
+  int[] rst = new int[left.length + right.length];
+  //左子序列、右子序列、总序列当前位置
+  int l = 0, r = 0, curr = 0;
+  //遍历，直到某个子序列被遍历完，将较小的放前面
+    while (l &lt; left.length &amp;&amp; r &lt; right.length) &#123;
+        if (left[l] &lt; right[r]) &#123;
+            rst[curr] = left[l];
+            l++;
+            curr++;
+        &#125;else&#123;
+            rst[curr] = right[r];
+            r++;
+            curr++;
+        &#125;
+    &#125;
+    //剩余序列直接加入结果序列
+    while(l &lt; left.length) &#123;
+        rst[curr] = left[l];
+        l++;
+        curr++;
+    &#125;
+    while (r &lt; right.length) &#123;
+        rst[curr] = right[r];
+        r++;
+        curr++;
+    &#125;
+    return rst;
+&#125;
+</code></pre>
+<p><strong>归并</strong></p>
+<pre><code>//归并排序：递归地使用二分法，将一个序列分解为两个子序列，直到子序列只剩下一个元素
+//@params:  in[]
+public static int[] mergeSort(int[] in) &#123;
+    //退出递归的条件：子序列只剩下一个元素
+    if(in == null || in.length &lt; 2) return in;
+    int mid = in.length &gt;&gt; 1;   //从中间将序列切分
+    //Arrays.copyOfRange(int[] a, int from, int to);    复制范围[from,to)
+    int[] left = Arrays.copyOfRange(in, 0, mid);    //不包括mid
+    int[] right = Arrays.copyOfRange(in, mid, in.length);
+    //递归调用mergeSort，然后将结果merge合并
+    return merge(mergeSort(left), mergeSort(right) );
+&#125;
+</code></pre>
+<p><strong>测试</strong></p>
+<pre><code>int[] in = &#123;999, 1, 2, 4, 3, -1, 0, 0&#125;;
+System.out.println(&quot;归并排序： &quot; + Arrays.toString(mergeSort(in)));
+//归并排序： [-1, 0, 0, 1, 2, 3, 4, 999]
+</code></pre>
+<h2 id="5-快速排序（O-NlogN-）"><a href="#5-快速排序（O-NlogN-）" class="headerlink" title="5.快速排序（O(NlogN)）"></a>5.快速排序（<code>O(NlogN)</code>）</h2><pre><code>public static void quickSort(int[] in, int low, int high) &#123;
+    //退出递归条件：子序列只有一个元素，此时low = high
+    if(low &gt; high) return;
+    int pivot = in[low];    //基准值，选最左边元素
+    int quick = high;   //快指针，比慢指针先走一步，从右往左
+    int slow = low;     //慢指针，从左往右
+    //当quick遇到了比pivot小的元素，
+    //同时slow遇到了比pivot大的元素，那么就交换两个元素
+    while (slow &lt; quick) &#123;
+        //快指针要先走一步
+        //快指针向左，直到找到比pivot小的元素
+        while (in[quick] &gt;= pivot &amp;&amp; slow &lt; quick) &#123;
+            quick--;
+        &#125;
+        //慢指针往右，直到找到比pivot大的元素
+        while (in[slow] &lt;= pivot &amp;&amp; slow &lt; quick) &#123;
+            slow++;
+        &#125;
+        //需要再次判断slow是否已经遇到或超过了quick
+        if (slow &lt; quick) &#123;
+            //交换两个元素 —— 可以肯定slow!=quick，是不同元素，
+            //所以可以用异或交换两个元素
+            in[slow] = in[slow] ^ in[quick];
+            in[quick] = in[slow] ^ in[quick];
+            in[slow] = in[slow] ^ in[quick];
+        &#125;
+    &#125;
+    //将快慢指针所在位置元素与基准值进行交换
+    //slow与quick相遇的位置，就是基准值指针应该在的位置
+    in[low] = in[slow];
+    in[slow] = pivot;
+    //slow或者quick就是新的pivot，左边元素都比它小，右边元素都比它大
+    //递归对pivot的左右序列进行快排
+    quickSort(in, low, slow - 1);   //基准值不需要再排序，所以是slow-1
+    quickSort(in, slow + 1, high);  //基准值不需要再排序，所以是slow+1
+&#125;
+</code></pre>
+<p><strong>测试</strong></p>
+<pre><code>int[] in = &#123;999, 1, 2, 4, 3, -1, 0, 0&#125;;
+quickSort(in, 0, in.length - 1);
+System.out.println(Arrays.toString(in));
+//结果为：[-1, 0, 0, 1, 2, 3, 4, 999]
+</code></pre>
+<h2 id="6-堆排序（O-N-KlogN-，K是排序序列长度）"><a href="#6-堆排序（O-N-KlogN-，K是排序序列长度）" class="headerlink" title="6.堆排序（O(N + KlogN)，K是排序序列长度）"></a>6.堆排序（<code>O(N + KlogN)</code>，K是排序序列长度）</h2><pre><code>//heapify：将满二叉树构建为堆
+//@param: tree[]    表示堆的数组
+//@param: n         节点总数
+//@param: i         对哪个节点进行heapify
+public static void heapify(int[] tree, int n, int i) &#123;
+  if(i &gt;= n) return; //结束递归条件：建堆节点下标超过节点总数，i&gt;=n
+  //根据满二叉树的特点，有：
+  int left = 2 * i + 1; //左子树
+  int right = 2 * i + 2;  //右子树
+  //将父亲、左右子树3者中最大的数替换到父亲节点
+  int max = i;
+  //注意left 和 right不能越界
+  if(left &lt; n &amp;&amp; tree[left] &gt; tree[max]) max = left;
+  if (right &lt; n &amp;&amp; tree[right] &gt; tree[max]) max = right;
+  if(max != i) &#123;  //如果父亲节点就是最大节点，就不需要重新建堆了
+    //交换max和i的元素
+    tree[max] = tree[max] ^ tree[i];
+    tree[i] = tree[max] ^ tree[i];
+    tree[max] = tree[max] ^ tree[i];
+    //对替换下去的节点重新建堆
+    heapify(tree, n, max);
+  &#125;
+&#125;
+</code></pre>
+]]></content>
+      <categories>
+        <category>数据结构</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>数据结构</title>
+    <url>/2020/05/11/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/</url>
+    <content><![CDATA[<p>秃头的数据结构</p>
+]]></content>
+      <categories>
+        <category>数据结构</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>树的按层遍历</title>
+    <url>/2020/05/12/%E6%A0%91%E7%9A%84%E6%8C%89%E5%B1%82%E9%81%8D%E5%8E%86/</url>
+    <content><![CDATA[<ul>
+<li>从上到下打印出二叉树的每个节点，同一层的节点按照从左到右的顺序打印。<br>即从左到右按层放入数组</li>
+</ul>
+<p><img src="/images/pasted-7.png" alt="upload successful"><br><a href="https://www.cnblogs.com/cat520/p/10299879.html"> Java中List, Integer, int的相互转换</a></p>
+<hr>
+<ul>
+<li>上面的升级版，每层放进一个数组</li>
+</ul>
+<p><img src="/images/pasted-8.png" alt="upload successful"></p>
+<p><img src="/images/pasted-9.png" alt="upload successful"></p>
+<hr>
+<ul>
+<li>Z字输出</li>
+</ul>
+<p><img src="/images/pasted-10.png" alt="upload successful"></p>
+<p><img src="/images/pasted-11.png" alt="upload successful"></p>
+]]></content>
+      <categories>
+        <category>数据结构</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>测试类博客</title>
+    <url>/2020/05/11/%E6%B5%8B%E8%AF%95%E7%B1%BB%E5%8D%9A%E5%AE%A2/</url>
+    <content><![CDATA[<p>QAQ测试哦</p>
+]]></content>
+      <categories>
+        <category>数据库</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>测试背景图</title>
+    <url>/2020/05/11/%E6%B5%8B%E8%AF%95%E8%83%8C%E6%99%AF%E5%9B%BE/</url>
+    <content><![CDATA[<p>真让人无语呀</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>Letcode57 滑动窗口</title>
+    <url>/2020/05/13/%E6%BB%91%E5%8A%A8%E7%AA%97%E5%8F%A3/</url>
+    <content><![CDATA[<h2 id="和为S的连续正数序列"><a href="#和为S的连续正数序列" class="headerlink" title="和为S的连续正数序列"></a>和为S的连续正数序列</h2><ul>
+<li><p>输入一个正整数 target ，输出所有和为 target 的连续正整数序列（至少含有两个数）。</p>
+<p>  序列内的数字由小到大排列，不同序列按照首个数字从小到大排列。</p>
+</li>
+</ul>
+<p> </p>
+<p><img src="/images/pasted-13.png" alt="upload successful"></p>
+<h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><pre><code>class Solution &#123;
+    public int[][] findContinuousSequence(int target) &#123;
+        int i=1;
+        int j=1;
+        int sum=0;
+        List&lt;int[]&gt; res =new ArrayList&lt;&gt;();
+        while(i&lt;=target/2)&#123;
+            if(sum&lt;target)&#123;
+                sum+=j;
+                j++;
+            &#125;else if(sum&gt;target)&#123;
+                sum-=i;
+                i++;
+            &#125;else&#123;
+                int []arr=new int[j-i];
+                for(int a=i;a&lt;j;a++)&#123;
+                    arr[a-i]=a;
+                &#125;
+                res.add(arr);
+                sum-=i;
+                i++;
+            &#125;  
+        &#125;
+        return res.toArray(new int[res.size()][]);
+    &#125;
+&#125;
+</code></pre>
+<ul>
+<li><p>思路的话首先是确认两端，左闭右开</p>
+<ul>
+<li>当窗口中的sum小于target时，证明右端j要往右移动，由于是开区间，sum需要+j，然后再移动j</li>
+<li>当窗口中的sum大于target时，则左端i要往右移动，因为是闭区间，sum需要先-i，然后再移动i</li>
+<li>当窗口大小sum等于target时，把窗口中的数字放入数组，继续右移i</li>
+<li>循环终止的条件是i&lt;=target/2，因为是连续的正数序列，如果i比target的一半大的话，那窗口则不存在了，因为一定会大于target</li>
+</ul>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>数据结构</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>索引</title>
+    <url>/2020/05/12/%E7%B4%A2%E5%BC%95/</url>
+    <content><![CDATA[<h2 id="索引是什么"><a href="#索引是什么" class="headerlink" title="索引是什么?"></a>索引是什么?</h2><p>   索引是一种帮助MySql高效获取数据的一种数据结构（B+Tree索引和Hash索引），一般默认是B+树   </p>
+<ul>
+<li><p>优点 :</p>
+<p>   1.提高查询效率，降低IO使用率<br>   2.降低CPU的使用率（B树本身就是一个排序好的结构，排序的时候直接使用）</p>
+</li>
+<li><p>缺点： </p>
+<p>   1.本身占用内存，一般存在于硬盘<br>   2.降低增删改的效率</p>
+</li>
+<li><p>索引快的原因</p>
+<p>   因为用的是B+树，查找的时候通过索引列表迅速定位到数据存放的位置</p>
+</li>
+</ul>
+<h2 id="索引选择的原则？"><a href="#索引选择的原则？" class="headerlink" title="索引选择的原则？"></a>索引选择的原则？</h2><ul>
+<li><p>原则</p>
+<p> 1.占用存储空间少以及存储空间固定的字段</p>
+<p> 2.经常使用的字段，如where子句中的</p>
+<p> 3.更新频繁的字段不适合做索引</p>
+<p> 4.最左前缀原则</p>
+</li>
+</ul>
+<ul>
+<li><p>最左前缀原则？</p>
+<p>   mysql联合索引的时候，最左优先。如果是abc三列索引，则a，ab，abc都能建立索引，否则会索引失效</p>
+</li>
+</ul>
+<ul>
+<li><p>索引覆盖：</p>
+<p>   不读取源文件，只从索引文件中获取数据（不需要回表查询）using index</p>
+</li>
+</ul>
+<ul>
+<li><p>索引的优化：</p>
+<p>   1.根据sql解析的顺序，调整索引的顺序</p>
+<p>   2.范围查询in有时候会导致索引失效，可以交换索引顺序，把in放在最后面</p>
+<p>   3.最佳左前缀，保证顺序一致性</p>
+<p>   4.小表驱动大表</p>
+<p>   5.建立在经常使用的字段</p>
+</li>
+</ul>
+<ul>
+<li><p>优化sql的方法：</p>
+<p>   1.exist和in（联表查询中）：如果主查询的数据集大，用in,如果子查询的数据集大，用exist</p>
+<p>   2.order by的优化：双路排序和单路排序</p>
+</li>
+<li><p>索引的失效：</p>
+<p>   1.复合索引没有按照最左前缀原则</p>
+<p>   2.在索引上进行操作（计算，函数，类型转换）</p>
+<p>   3.复合索引不能使用！= &lt;&gt;或者is null，否则会失效</p>
+<p>   4.like尽量以常量开头，%开头会导致索引失效</p>
+<p>   5.类型转换会导致索引失效</p>
+<p>   6.使用or</p>
+</li>
+</ul>
+<h2 id="慢查询优化思路："><a href="#慢查询优化思路：" class="headerlink" title="慢查询优化思路："></a>慢查询优化思路：</h2><pre><code> 1.开启慢查询日志功能，把慢sql找出来
+
+ 2.选用合适的字段类型做索引，节省空间
+
+ 3.子查询的exist和in
+
+ 4.使用join代替子查询：这样就不用创建临时表了，但是也不是很高效,可以对关联查询进行分解， 就是对每个表进行一次单表查询，把查询结果关联起来
+
+ 5.不用select * 
+
+ 6. 给where子句和order by子句涉及到的列创建索引
+
+ 7.保证最左前缀原则
+</code></pre>
+]]></content>
+      <categories>
+        <category>数据库</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>配置</title>
+    <url>/2020/05/11/%E9%85%8D%E7%BD%AE/</url>
+    <content><![CDATA[<h2 id="mybatis-config-xml"><a href="#mybatis-config-xml" class="headerlink" title="mybatis-config.xml"></a>mybatis-config.xml</h2><pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
+
+&lt;!DOCTYPE configuration
+
+        PUBLIC &quot;-//mybatis.org//DTD Config 3.0//EN&quot;
+
+        &quot;http://mybatis.org/dtd/mybatis-3-config.dtd&quot;&gt;
+
+        &lt;package name=&quot;com.fhl.pojo&quot;/&gt;
+
+        &lt;mapper class=&quot;com.fhl.dao.BookMapper&quot;/&gt;
+
+&lt;/configuration
+</code></pre>
+<h2 id="database-properties"><a href="#database-properties" class="headerlink" title="database.properties"></a>database.properties</h2><pre><code>jdbc.driver=com.mysql.jdbc.Driver
+
+jdbc.url=jdbc:mysql://localhost:3306/ssmbuild?useSSL=false&amp;useUnicode=true&amp;characterEncoding=utf8
+
+jdbc.username=root
+
+jdbc.password=123456
+</code></pre>
+<h2 id="spring-dao-xml-整合mybatis以及连接数据库"><a href="#spring-dao-xml-整合mybatis以及连接数据库" class="headerlink" title="spring-dao.xml  整合mybatis以及连接数据库"></a>spring-dao.xml  整合mybatis以及连接数据库</h2><pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+
+&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+
+      xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+
+      xmlns:context=&quot;http://www.springframework.org/schema/context&quot;
+
+      xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans
+
+http://www.springframework.org/schema/beans/spring-beans.xsd
+
+http://www.springframework.org/schema/context
+
+      https://www.springframework.org/schema/context/spring-context.xsd&quot;&gt;
+
+    &lt;!-- 配置整合mybatis --&gt;
+
+    &lt;!-- 1.关联数据库文件 --&gt;
+
+    &lt;context:property-placeholder location=&quot;classpath:database.properties&quot;/&gt;
+
+    &lt;!-- 2.数据库连接池 --&gt;
+
+    &lt;!--数据库连接池        dbcp 半自动化操作 不能自动连接        c3p0 自动化操作（自动的加载配置文件 并且设置到对象里面）
+
+    --&gt;
+
+    &lt;bean id=&quot;dataSource&quot; class=&quot;com.mchange.v2.c3p0.ComboPooledDataSource&quot;&gt;
+
+        &lt;!-- 配置连接池属性 --&gt;
+
+        &lt;property name=&quot;driverClass&quot; value=&quot;$&#123;jdbc.driver&#125;&quot;/&gt;
+
+        &lt;property name=&quot;jdbcUrl&quot; value=&quot;$&#123;jdbc.url&#125;&quot;/&gt;
+
+        &lt;property name=&quot;user&quot; value=&quot;$&#123;jdbc.username&#125;&quot;/&gt;
+
+        &lt;property name=&quot;password&quot; value=&quot;$&#123;jdbc.password&#125;&quot;/&gt;
+
+        &lt;!-- c3p0连接池的私有属性 --&gt;
+
+        &lt;property name=&quot;maxPoolSize&quot; value=&quot;30&quot;/&gt;
+
+        &lt;property name=&quot;minPoolSize&quot; value=&quot;10&quot;/&gt;
+
+        &lt;!-- 关闭连接后不自动commit --&gt;
+
+        &lt;property name=&quot;autoCommitOnClose&quot; value=&quot;false&quot;/&gt;
+
+        &lt;!-- 获取连接超时时间 --&gt;
+
+        &lt;property name=&quot;checkoutTimeout&quot; value=&quot;10000&quot;/&gt;
+
+        &lt;!-- 当获取连接失败重试次数 --&gt;
+
+        &lt;property name=&quot;acquireRetryAttempts&quot; value=&quot;2&quot;/&gt;
+
+    &lt;!-- 3.配置SqlSessionFactory对象 --&gt;
+
+    &lt;bean id=&quot;sqlSessionFactory&quot; class=&quot;org.mybatis.spring.SqlSessionFactoryBean&quot;&gt;
+
+        &lt;!-- 注入数据库连接池 --&gt;
+
+        &lt;property name=&quot;dataSource&quot; ref=&quot;dataSource&quot;/&gt;
+
+        &lt;!-- 配置MyBaties全局配置文件:mybatis-config.xml --&gt;
+
+        &lt;property name=&quot;configLocation&quot; value=&quot;classpath:mybatis-config.xml&quot;/&gt;
+
+    &lt;!-- 4.配置扫描Dao接口包，动态实现Dao接口注入到spring容器中 --&gt;
+
+    &lt;!--解释 ：https://www.cnblogs.com/jpfss/p/7799806.html--&gt;
+
+    &lt;bean class=&quot;org.mybatis.spring.mapper.MapperScannerConfigurer&quot;&gt;
+
+        &lt;!-- 注入sqlSessionFactory --&gt;
+
+        &lt;property name=&quot;sqlSessionFactoryBeanName&quot; value=&quot;sqlSessionFactory&quot;/&gt;
+
+        &lt;!-- 给出需要扫描Dao接口包 --&gt;
+
+        &lt;property name=&quot;basePackage&quot; value=&quot;com.fhl.dao&quot;/&gt;
+
+&lt;/beans&gt;
+</code></pre>
+<h2 id="spring-service-xml-spring注入相关"><a href="#spring-service-xml-spring注入相关" class="headerlink" title="spring-service.xml    spring注入相关"></a>spring-service.xml    spring注入相关</h2><pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+
+&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+
+      xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+
+      xmlns:context=&quot;http://www.springframework.org/schema/context&quot;
+
+      xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans
+
+http://www.springframework.org/schema/beans/spring-beans.xsd
+
+http://www.springframework.org/schema/context
+
+  http://www.springframework.org/schema/context/spring-context.xsd&quot;&gt;
+
+    &lt;!-- 扫描service相关的bean --&gt;
+
+    &lt;context:component-scan base-package=&quot;com.fhl.service&quot; /&gt;
+
+    &lt;!--BookServiceImpl注入到IOC容器中--&gt;
+
+    &lt;bean id=&quot;BookServiceImpl&quot; class=&quot;com.fhl.service.BookServiceImpl&quot;&gt;
+
+        &lt;property name=&quot;bookMapper&quot; ref=&quot;bookMapper&quot;/&gt;
+
+    &lt;!-- 配置事务管理器 --&gt;
+
+    &lt;bean id=&quot;transactionManager&quot; class=&quot;org.springframework.jdbc.datasource.DataSourceTransactionManager&quot;&gt;
+
+        &lt;!-- 注入数据库连接池 --&gt;
+
+        &lt;property name=&quot;dataSource&quot; ref=&quot;dataSource&quot; /&gt;
+
+&lt;/beans&gt;
+</code></pre>
+<h2 id="web-xml"><a href="#web-xml" class="headerlink" title="web.xml"></a>web.xml</h2><pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+
+&lt;web-app xmlns=&quot;http://xmlns.jcp.org/xml/ns/javaee&quot;
+
+        xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+
+        xsi:schemaLocation=&quot;http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd&quot;
+
+        version=&quot;4.0&quot;&gt;
+
+
+
+   
+
+        &lt;servlet-name&gt;DispatcherServlet
+
+        &lt;servlet-class&gt;org.springframework.web.servlet.DispatcherServlet
+
+            &lt;param-name&gt;contextConfigLocation
+
+            &lt;!--一定要注意:我们这里加载的是总的配置文件，之前被这里坑了！--&gt;
+
+            &lt;param-value&gt;classpath:applicationContext.xml
+
+        &lt;load-on-startup&gt;1
+
+        &lt;servlet-name&gt;DispatcherServlet
+
+        &lt;url-pattern&gt;/
+
+
+
+   
+
+        &lt;filter-name&gt;encodingFilter
+
+            org.springframework.web.filter.CharacterEncodingFilter
+
+            &lt;param-name&gt;encoding
+
+            &lt;param-value&gt;utf-8
+
+        &lt;filter-name&gt;encodingFilter
+
+        &lt;url-pattern&gt;/*
+
+    &lt;!--Session过期时间--&gt;
+
+   
+
+        &lt;session-timeout&gt;15
+
+&lt;/web-app&gt;
+</code></pre>
+<h2 id="spring-mvc-xml："><a href="#spring-mvc-xml：" class="headerlink" title="spring-mvc.xml："></a>spring-mvc.xml：</h2><pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+
+&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+
+      xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+
+      xmlns:context=&quot;http://www.springframework.org/schema/context&quot;
+
+      xmlns:mvc=&quot;http://www.springframework.org/schema/mvc&quot;
+
+      xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans
+
+http://www.springframework.org/schema/beans/spring-beans.xsd
+
+http://www.springframework.org/schema/context
+
+http://www.springframework.org/schema/context/spring-context.xsd
+
+http://www.springframework.org/schema/mvc
+
+  https://www.springframework.org/schema/mvc/spring-mvc.xsd&quot;&gt;
+
+    &lt;!-- 配置SpringMVC --&gt;
+
+    &lt;!-- 1.开启SpringMVC注解驱动 --&gt;
+
+    &lt;mvc:annotation-driven /&gt;
+
+    &lt;!-- 2.静态资源默认servlet配置--&gt;
+
+    &lt;mvc:default-servlet-handler/&gt;
+
+    &lt;!-- 3.配置jsp 显示ViewResolver视图解析器 --&gt;
+
+    &lt;bean class=&quot;org.springframework.web.servlet.view.InternalResourceViewResolver&quot;&gt;
+
+        &lt;property name=&quot;viewClass&quot; value=&quot;org.springframework.web.servlet.view.JstlView&quot; /&gt;
+
+        &lt;property name=&quot;prefix&quot; value=&quot;/WEB-INF/jsp/&quot; /&gt;
+
+        &lt;property name=&quot;suffix&quot; value=&quot;.jsp&quot; /&gt;
+
+    &lt;!-- 4.扫描web相关的bean --&gt;
+
+    &lt;context:component-scan base-package=&quot;com.fhl.controller&quot; /&gt;
+
+&lt;/beans&gt;
+</code></pre>
+<h2 id="applicationContext-xml-最后把三个spring相关导入里面-整合到一起"><a href="#applicationContext-xml-最后把三个spring相关导入里面-整合到一起" class="headerlink" title="applicationContext.xml  最后把三个spring相关导入里面 整合到一起"></a>applicationContext.xml  最后把三个spring相关导入里面 整合到一起</h2><pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+
+&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+
+      xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+
+      xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans
+
+      http://www.springframework.org/schema/beans/spring-beans.xsd&quot;&gt;
+
+    &lt;import resource=&quot;spring-dao.xml&quot;/&gt;
+
+    &lt;import resource=&quot;spring-service.xml&quot;/&gt;
+
+    &lt;import resource=&quot;spring-mvc.xml&quot;/&gt;
+
+&lt;/beans&gt;
+</code></pre>
+]]></content>
+      <categories>
+        <category>配置</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>Redis相关配置</title>
+    <url>/2020/08/12/8-12-1/</url>
+    <content><![CDATA[<p>最近在学习Redis，把可以复用的配置放这里。</p>
+<h2 id="Redis序列化配置"><a href="#Redis序列化配置" class="headerlink" title="Redis序列化配置"></a>Redis序列化配置</h2><pre><code>package com.sanwan.config;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+@Configuration
+public class RedisConfig &#123;
+
+  @Bean
+  @SuppressWarnings(&quot;all&quot;)
+  public RedisTemplate&lt;String, Object&gt; redisTemplate(RedisConnectionFactory factory) &#123;
+      RedisTemplate&lt;String, Object&gt; template = new RedisTemplate&lt;String, Object&gt;();
+      template.setConnectionFactory(factory);
+      Jackson2JsonRedisSerializer jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer(Object.class);
+      ObjectMapper om = new ObjectMapper();
+      om.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
+      om.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
+      jackson2JsonRedisSerializer.setObjectMapper(om);
+      StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+
+      // key采用String的序列化方式
+      template.setKeySerializer(stringRedisSerializer);
+      // hash的key也采用String的序列化方式
+      template.setHashKeySerializer(stringRedisSerializer);
+      // value序列化方式采用jackson
+      template.setValueSerializer(jackson2JsonRedisSerializer);
+      // hash的value序列化方式采用jackson
+      template.setHashValueSerializer(jackson2JsonRedisSerializer);
+      template.afterPropertiesSet();
+
+      return template;
+  &#125;
+
+
+&#125;
+</code></pre>
+<h2 id="RedisUtil"><a href="#RedisUtil" class="headerlink" title="RedisUtil"></a>RedisUtil</h2><pre><code>package com.sanwan.utils;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+@Component
+public final class RedisUtil &#123;
+
+    @Autowired
+    private RedisTemplate&lt;String, Object&gt; redisTemplate;
+
+    // =============================common============================
+    /**
+     * 指定缓存失效时间
+     * @param key  键
+     * @param time 时间(秒)
+     */
+    public boolean expire(String key, long time) &#123;
+        try &#123;
+            if (time &gt; 0) &#123;
+                redisTemplate.expire(key, time, TimeUnit.SECONDS);
+            &#125;
+            return true;
+        &#125; catch (Exception e) &#123;
+            e.printStackTrace();
+            return false;
+        &#125;
+    &#125;
+
+    /**
+     * 根据key 获取过期时间
+     * @param key 键 不能为null
+     * @return 时间(秒) 返回0代表为永久有效
+     */
+    public long getExpire(String key) &#123;
+        return redisTemplate.getExpire(key, TimeUnit.SECONDS);
+    &#125;
+
+
+    /**
+     * 判断key是否存在
+     * @param key 键
+     * @return true 存在 false不存在
+     */
+    public boolean hasKey(String key) &#123;
+        try &#123;
+            return redisTemplate.hasKey(key);
+        &#125; catch (Exception e) &#123;
+            e.printStackTrace();
+            return false;
+        &#125;
+    &#125;
+
+
+    /**
+     * 删除缓存
+     * @param key 可以传一个值 或多个
+     */
+    @SuppressWarnings(&quot;unchecked&quot;)
+    public void del(String... key) &#123;
+        if (key != null &amp;&amp; key.length &gt; 0) &#123;
+            if (key.length == 1) &#123;
+                redisTemplate.delete(key[0]);
+            &#125; else &#123;
+                redisTemplate.delete(CollectionUtils.arrayToList(key));
+            &#125;
+        &#125;
+    &#125;
+
+
+    // ============================String=============================
+
+    /**
+     * 普通缓存获取
+     * @param key 键
+     * @return 值
+     */
+    public Object get(String key) &#123;
+        return key == null ? null : redisTemplate.opsForValue().get(key);
+    &#125;
+
+    /**
+     * 普通缓存放入
+     * @param key   键
+     * @param value 值
+     * @return true成功 false失败
+     */
+
+    public boolean set(String key, Object value) &#123;
+        try &#123;
+            redisTemplate.opsForValue().set(key, value);
+            return true;
+        &#125; catch (Exception e) &#123;
+            e.printStackTrace();
+            return false;
+        &#125;
+    &#125;
+
+
+    /**
+     * 普通缓存放入并设置时间
+     * @param key   键
+     * @param value 值
+     * @param time  时间(秒) time要大于0 如果time小于等于0 将设置无限期
+     * @return true成功 false 失败
+     */
+
+    public boolean set(String key, Object value, long time) &#123;
+        try &#123;
+            if (time &gt; 0) &#123;
+                redisTemplate.opsForValue().set(key, value, time, TimeUnit.SECONDS);
+            &#125; else &#123;
+                set(key, value);
+            &#125;
+            return true;
+        &#125; catch (Exception e) &#123;
+            e.printStackTrace();
+            return false;
+        &#125;
+    &#125;
+
+
+    /**
+     * 递增
+     * @param key   键
+     * @param delta 要增加几(大于0)
+     */
+    public long incr(String key, long delta) &#123;
+        if (delta &lt; 0) &#123;
+            throw new RuntimeException(&quot;递增因子必须大于0&quot;);
+        &#125;
+        return redisTemplate.opsForValue().increment(key, delta);
+    &#125;
+
+
+    /**
+     * 递减
+     * @param key   键
+     * @param delta 要减少几(小于0)
+     */
+    public long decr(String key, long delta) &#123;
+        if (delta &lt; 0) &#123;
+            throw new RuntimeException(&quot;递减因子必须大于0&quot;);
+        &#125;
+        return redisTemplate.opsForValue().increment(key, -delta);
+    &#125;
+
+
+    // ================================Map=================================
+
+    /**
+     * HashGet
+     * @param key  键 不能为null
+     * @param item 项 不能为null
+     */
+    public Object hget(String key, String item) &#123;
+        return redisTemplate.opsForHash().get(key, item);
+    &#125;
+
+    /**
+     * 获取hashKey对应的所有键值
+     * @param key 键
+     * @return 对应的多个键值
+     */
+    public Map&lt;Object, Object&gt; hmget(String key) &#123;
+        return redisTemplate.opsForHash().entries(key);
+    &#125;
+
+    /**
+     * HashSet
+     * @param key 键
+     * @param map 对应多个键值
+     */
+    public boolean hmset(String key, Map&lt;String, Object&gt; map) &#123;
+        try &#123;
+            redisTemplate.opsForHash().putAll(key, map);
+            return true;
+        &#125; catch (Exception e) &#123;
+            e.printStackTrace();
+            return false;
+        &#125;
+    &#125;
+
+
+    /**
+     * HashSet 并设置时间
+     * @param key  键
+     * @param map  对应多个键值
+     * @param time 时间(秒)
+     * @return true成功 false失败
+     */
+    public boolean hmset(String key, Map&lt;String, Object&gt; map, long time) &#123;
+        try &#123;
+            redisTemplate.opsForHash().putAll(key, map);
+            if (time &gt; 0) &#123;
+                expire(key, time);
+            &#125;
+            return true;
+        &#125; catch (Exception e) &#123;
+            e.printStackTrace();
+            return false;
+        &#125;
+    &#125;
+
+
+    /**
+     * 向一张hash表中放入数据,如果不存在将创建
+     *
+     * @param key   键
+     * @param item  项
+     * @param value 值
+     * @return true 成功 false失败
+     */
+    public boolean hset(String key, String item, Object value) &#123;
+        try &#123;
+            redisTemplate.opsForHash().put(key, item, value);
+            return true;
+        &#125; catch (Exception e) &#123;
+            e.printStackTrace();
+            return false;
+        &#125;
+    &#125;
+
+    /**
+     * 向一张hash表中放入数据,如果不存在将创建
+     *
+     * @param key   键
+     * @param item  项
+     * @param value 值
+     * @param time  时间(秒) 注意:如果已存在的hash表有时间,这里将会替换原有的时间
+     * @return true 成功 false失败
+     */
+    public boolean hset(String key, String item, Object value, long time) &#123;
+        try &#123;
+            redisTemplate.opsForHash().put(key, item, value);
+            if (time &gt; 0) &#123;
+                expire(key, time);
+            &#125;
+            return true;
+        &#125; catch (Exception e) &#123;
+            e.printStackTrace();
+            return false;
+        &#125;
+    &#125;
+
+
+    /**
+     * 删除hash表中的值
+     *
+     * @param key  键 不能为null
+     * @param item 项 可以使多个 不能为null
+     */
+    public void hdel(String key, Object... item) &#123;
+        redisTemplate.opsForHash().delete(key, item);
+    &#125;
+
+
+    /**
+     * 判断hash表中是否有该项的值
+     *
+     * @param key  键 不能为null
+     * @param item 项 不能为null
+     * @return true 存在 false不存在
+     */
+    public boolean hHasKey(String key, String item) &#123;
+        return redisTemplate.opsForHash().hasKey(key, item);
+    &#125;
+
+
+    /**
+     * hash递增 如果不存在,就会创建一个 并把新增后的值返回
+     *
+     * @param key  键
+     * @param item 项
+     * @param by   要增加几(大于0)
+     */
+    public double hincr(String key, String item, double by) &#123;
+        return redisTemplate.opsForHash().increment(key, item, by);
+    &#125;
+
+
+    /**
+     * hash递减
+     *
+     * @param key  键
+     * @param item 项
+     * @param by   要减少记(小于0)
+     */
+    public double hdecr(String key, String item, double by) &#123;
+        return redisTemplate.opsForHash().increment(key, item, -by);
+    &#125;
+
+
+    // ============================set=============================
+
+    /**
+     * 根据key获取Set中的所有值
+     * @param key 键
+     */
+    public Set&lt;Object&gt; sGet(String key) &#123;
+        try &#123;
+            return redisTemplate.opsForSet().members(key);
+        &#125; catch (Exception e) &#123;
+            e.printStackTrace();
+            return null;
+        &#125;
+    &#125;
+
+
+    /**
+     * 根据value从一个set中查询,是否存在
+     *
+     * @param key   键
+     * @param value 值
+     * @return true 存在 false不存在
+     */
+    public boolean sHasKey(String key, Object value) &#123;
+        try &#123;
+            return redisTemplate.opsForSet().isMember(key, value);
+        &#125; catch (Exception e) &#123;
+            e.printStackTrace();
+            return false;
+        &#125;
+    &#125;
+
+
+    /**
+     * 将数据放入set缓存
+     *
+     * @param key    键
+     * @param values 值 可以是多个
+     * @return 成功个数
+     */
+    public long sSet(String key, Object... values) &#123;
+        try &#123;
+            return redisTemplate.opsForSet().add(key, values);
+        &#125; catch (Exception e) &#123;
+            e.printStackTrace();
+            return 0;
+        &#125;
+    &#125;
+
+
+    /**
+     * 将set数据放入缓存
+     *
+     * @param key    键
+     * @param time   时间(秒)
+     * @param values 值 可以是多个
+     * @return 成功个数
+     */
+    public long sSetAndTime(String key, long time, Object... values) &#123;
+        try &#123;
+            Long count = redisTemplate.opsForSet().add(key, values);
+            if (time &gt; 0)
+                expire(key, time);
+            return count;
+        &#125; catch (Exception e) &#123;
+            e.printStackTrace();
+            return 0;
+        &#125;
+    &#125;
+
+
+    /**
+     * 获取set缓存的长度
+     *
+     * @param key 键
+     */
+    public long sGetSetSize(String key) &#123;
+        try &#123;
+            return redisTemplate.opsForSet().size(key);
+        &#125; catch (Exception e) &#123;
+            e.printStackTrace();
+            return 0;
+        &#125;
+    &#125;
+
+
+    /**
+     * 移除值为value的
+     *
+     * @param key    键
+     * @param values 值 可以是多个
+     * @return 移除的个数
+     */
+
+    public long setRemove(String key, Object... values) &#123;
+        try &#123;
+            Long count = redisTemplate.opsForSet().remove(key, values);
+            return count;
+        &#125; catch (Exception e) &#123;
+            e.printStackTrace();
+            return 0;
+        &#125;
+    &#125;
+
+    // ===============================list=================================
+
+    /**
+     * 获取list缓存的内容
+     *
+     * @param key   键
+     * @param start 开始
+     * @param end   结束 0 到 -1代表所有值
+     */
+    public List&lt;Object&gt; lGet(String key, long start, long end) &#123;
+        try &#123;
+            return redisTemplate.opsForList().range(key, start, end);
+        &#125; catch (Exception e) &#123;
+            e.printStackTrace();
+            return null;
+        &#125;
+    &#125;
+
+
+    /**
+     * 获取list缓存的长度
+     *
+     * @param key 键
+     */
+    public long lGetListSize(String key) &#123;
+        try &#123;
+            return redisTemplate.opsForList().size(key);
+        &#125; catch (Exception e) &#123;
+            e.printStackTrace();
+            return 0;
+        &#125;
+    &#125;
+
+
+    /**
+     * 通过索引 获取list中的值
+     *
+     * @param key   键
+     * @param index 索引 index&gt;=0时， 0 表头，1 第二个元素，依次类推；index&lt;0时，-1，表尾，-2倒数第二个元素，依次类推
+     */
+    public Object lGetIndex(String key, long index) &#123;
+        try &#123;
+            return redisTemplate.opsForList().index(key, index);
+        &#125; catch (Exception e) &#123;
+            e.printStackTrace();
+            return null;
+        &#125;
+    &#125;
+
+
+    /**
+     * 将list放入缓存
+     *
+     * @param key   键
+     * @param value 值
+     */
+    public boolean lSet(String key, Object value) &#123;
+        try &#123;
+            redisTemplate.opsForList().rightPush(key, value);
+            return true;
+        &#125; catch (Exception e) &#123;
+            e.printStackTrace();
+            return false;
+        &#125;
+    &#125;
+
+
+    /**
+     * 将list放入缓存
+     * @param key   键
+     * @param value 值
+     * @param time  时间(秒)
+     */
+    public boolean lSet(String key, Object value, long time) &#123;
+        try &#123;
+            redisTemplate.opsForList().rightPush(key, value);
+            if (time &gt; 0)
+                expire(key, time);
+            return true;
+        &#125; catch (Exception e) &#123;
+            e.printStackTrace();
+            return false;
+        &#125;
+
+    &#125;
+
+
+    /**
+     * 将list放入缓存
+     *
+     * @param key   键
+     * @param value 值
+     * @return
+     */
+    public boolean lSet(String key, List&lt;Object&gt; value) &#123;
+        try &#123;
+            redisTemplate.opsForList().rightPushAll(key, value);
+            return true;
+        &#125; catch (Exception e) &#123;
+            e.printStackTrace();
+            return false;
+        &#125;
+
+    &#125;
+
+
+    /**
+     * 将list放入缓存
+     *
+     * @param key   键
+     * @param value 值
+     * @param time  时间(秒)
+     * @return
+     */
+    public boolean lSet(String key, List&lt;Object&gt; value, long time) &#123;
+        try &#123;
+            redisTemplate.opsForList().rightPushAll(key, value);
+            if (time &gt; 0)
+                expire(key, time);
+            return true;
+        &#125; catch (Exception e) &#123;
+            e.printStackTrace();
+            return false;
+        &#125;
+    &#125;
+
+
+    /**
+     * 根据索引修改list中的某条数据
+     *
+     * @param key   键
+     * @param index 索引
+     * @param value 值
+     * @return
+     */
+
+    public boolean lUpdateIndex(String key, long index, Object value) &#123;
+        try &#123;
+            redisTemplate.opsForList().set(key, index, value);
+            return true;
+        &#125; catch (Exception e) &#123;
+            e.printStackTrace();
+            return false;
+        &#125;
+    &#125;
+
+
+    /**
+     * 移除N个值为value
+     *
+     * @param key   键
+     * @param count 移除多少个
+     * @param value 值
+     * @return 移除的个数
+     */
+
+    public long lRemove(String key, long count, Object value) &#123;
+        try &#123;
+            Long remove = redisTemplate.opsForList().remove(key, count, value);
+            return remove;
+        &#125; catch (Exception e) &#123;
+            e.printStackTrace();
+            return 0;
+        &#125;
+
+    &#125;
+
+&#125;
+</code></pre>
+]]></content>
+      <categories>
+        <category>配置</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>java序列化</title>
+    <url>/2020/08/15/8-12-2/</url>
+    <content><![CDATA[<h2 id="一、序列化的含义、意义及使用场景"><a href="#一、序列化的含义、意义及使用场景" class="headerlink" title="一、序列化的含义、意义及使用场景"></a>一、序列化的含义、意义及使用场景</h2><ul>
+<li>序列化：将对象写入到IO流中</li>
+<li>反序列化：从IO流中恢复对象</li>
+<li>意义：序列化机制允许将实现序列化的Java对象转换位字节序列，这些字节序列可以保存在磁盘上，或通过网络传输，以达到以后恢复成原来的对象。序列化机制使得对象可以脱离程序的运行而独立存在。</li>
+<li>使用场景：所有可在网络上传输的对象都必须是可序列化的，比如RMI（remote method invoke,即远程方法调用），传入的参数或返回的对象都是可序列化的，否则会出错；所有需要保存到磁盘的java对象都必须是可序列化的。通常建议：程序创建的每个JavaBean类都实现Serializeable接口。</li>
+</ul>
+<h2 id="二、序列化实现的方式"><a href="#二、序列化实现的方式" class="headerlink" title="二、序列化实现的方式"></a>二、序列化实现的方式</h2><p>如果需要将某个对象保存到磁盘上或者通过网络传输，那么这个类应该实现<strong>Serializable</strong>接口或者<strong>Externalizable</strong>接口之一。</p>
+<h3 id="1、Serializable"><a href="#1、Serializable" class="headerlink" title="1、Serializable"></a>1、Serializable</h3><h4 id="1-1-普通序列化"><a href="#1-1-普通序列化" class="headerlink" title="1.1 普通序列化"></a>1.1 普通序列化</h4><p><strong>Serializable</strong>接口是一个标记接口，不用实现任何方法。一旦实现了此接口，该类的对象就是可序列化的。</p>
+<p>   <strong>序列化步骤：</strong></p>
+<p>   步骤一：创建一个<strong>ObjectOutputStream</strong>输出流；</p>
+<p>   步骤二：调用<strong>ObjectOutputStream</strong>对象的<strong>writeObject</strong>输出可序列化对象。</p>
+<pre><code>public class Person implements Serializable &#123;
+  private String name;
+  private int age;
+   //我不提供无参构造器
+   public Person(String name, int age) &#123;
+      this.name = name;
+      this.age = age;
+   &#125;
+   
+@Override
+public String toString() &#123;
+      return &quot;Person&#123;&quot; +
+              &quot;name=&#39;&quot; + name + &#39;\&#39;&#39; +
+              &quot;, age=&quot; + age +
+              &#39;&#125;&#39;;
+   &#125;
+ &#125;
+
+public class WriteObject &#123;
+   public static void main(String[] args) &#123;
+       try (//创建一个ObjectOutputStream输出流
+            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(&quot;object.txt&quot;))) &#123;
+           //将对象序列化到文件s
+           Person person = new Person(&quot;序列化&quot;, 23);
+           oos.writeObject(person);
+       &#125; catch (Exception e) &#123;
+           e.printStackTrace();
+       &#125;
+   &#125;
+ &#125;
+</code></pre>
+<p>   <strong>反序列化步骤：</strong></p>
+<p>   步骤一：创建一个<strong>ObjectInputStream</strong>输入流；</p>
+<p>   步骤二：调用<strong>ObjectInputStream</strong>对象的readObject()得到序列化的对象。<br>    我们将上面序列化到person.txt的person对象反序列化回来</p>
+<pre><code>public class Person implements Serializable &#123;
+     private String name;
+     private int age;
+     //我不提供无参构造器
+     public Person(String name, int age) &#123;
+         System.out.println(&quot;反序列化，你调用我了吗？&quot;);
+         this.name = name;
+         this.age = age;
+     &#125;
+
+  @Override
+     public String toString() &#123;
+         return &quot;Person&#123;&quot; +
+                 &quot;name=&#39;&quot; + name + &#39;\&#39;&#39; +
+                 &quot;, age=&quot; + age +
+                 &#39;&#125;&#39;;
+     &#125;
+   &#125;
+
+  public class ReadObject &#123;
+     public static void main(String[] args) &#123;
+         try (//创建一个ObjectInputStream输入流
+              ObjectInputStream ois = new ObjectInputStream(new FileInputStream(&quot;person.txt&quot;))) &#123;
+             Person brady = (Person) ois.readObject();
+             System.out.println(brady);
+         &#125; catch (Exception e) &#123;
+             e.printStackTrace();
+         &#125;
+     &#125;
+   &#125;
+   //输出结果
+   //Person&#123;name=&#39;序列化&#39;, age=23&#125;
+</code></pre>
+<p> 输出告诉我们，反序列化并不会调用构造方法。反序列的对象是由JVM自己生成的对象，不通过构造方法生成。</p>
+<h4 id="1-2-成员是引用的序列化"><a href="#1-2-成员是引用的序列化" class="headerlink" title="1.2 成员是引用的序列化"></a>1.2 成员是引用的序列化</h4><p>如果一个可序列化的类的成员不是基本类型，也不是String类型，那这个引用类型也必须是可序列化的；否则，会导致此类不能序列化。</p>
+<p>看例子，我们新增一个Teacher类。将Person去掉实现Serializable接口代码。</p>
+<pre><code>
+public class Person&#123;
+    //省略相关属性与方法
+&#125;
+public class Teacher implements Serializable &#123;
+
+   private String name;
+   private Person person;
+   
+   public Teacher(String name, Person person) &#123;
+        this.name = name;
+        this.person = person;
+    &#125;
+
+   public static void main(String[] args) throws Exception &#123;
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(&quot;teacher.txt&quot;))) &#123;
+            Person person = new Person(&quot;路飞&quot;, 20);
+            Teacher teacher = new Teacher(&quot;雷利&quot;, person);
+            oos.writeObject(teacher);
+        &#125;
+    &#125;
+&#125;
+</code></pre>
+<p>我们看到程序直接报错，因为Person类的对象是不可序列化的，这导致了Teacher的对象不可序列化</p>
+<h4 id="1-3-同一对象序列化多次的机制"><a href="#1-3-同一对象序列化多次的机制" class="headerlink" title="1.3 同一对象序列化多次的机制"></a>1.3 同一对象序列化多次的机制</h4><p>同一对象序列化多次，会将这个对象序列化多次吗？答案是否定的。</p>
+<pre><code>
+public class WriteTeacher &#123;
+    public static void main(String[] args) throws Exception &#123;
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(&quot;teacher.txt&quot;))) &#123;
+            Person person = new Person(&quot;路飞&quot;, 20);
+            Teacher t1 = new Teacher(&quot;雷利&quot;, person);
+            Teacher t2 = new Teacher(&quot;红发香克斯&quot;, person);
+            //依次将4个对象写入输入流
+            oos.writeObject(t1);
+            oos.writeObject(t2);
+            oos.writeObject(person);
+            oos.writeObject(t2);
+        &#125;
+    &#125;
+&#125;
+</code></pre>
+<p>依次将t1、t2、person、t2对象序列化到文件teacher.txt文件中。</p>
+<p>注意：反序列化的顺序与序列化时的顺序一致。</p>
+<pre><code>
+public class ReadTeacher &#123;
+    public static void main(String[] args) &#123;
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(&quot;teacher.txt&quot;))) &#123;
+            Teacher t1 = (Teacher) ois.readObject();
+            Teacher t2 = (Teacher) ois.readObject();
+            Person p = (Person) ois.readObject();
+            Teacher t3 = (Teacher) ois.readObject();
+            System.out.println(t1 == t2);
+            System.out.println(t1.getPerson() == p);
+            System.out.println(t2.getPerson() == p);
+            System.out.println(t2 == t3);
+            System.out.println(t1.getPerson() == t2.getPerson());
+        &#125; catch (Exception e) &#123;
+            e.printStackTrace();
+        &#125;
+    &#125;
+&#125;
+//输出结果
+//false
+//true
+//true
+//true
+//true
+</code></pre>
+<p>从输出结果可以看出，Java序列化同一对象，并不会将此对象序列化多次得到多个对象。</p>
+<p>   Java序列化算法</p>
+<p>   所有保存到磁盘的对象都有一个序列化编码号</p>
+<p>   当程序试图序列化一个对象时，会先检查此对象是否已经序列化过，只有此对象从未（在此虚拟机）被序列化过，才会将此对象序列化为字节序列输出。</p>
+<p>   如果此对象已经序列化过，则直接输出编号即可。</p>
+<h4 id="1-4-java序列化算法潜在的问题"><a href="#1-4-java序列化算法潜在的问题" class="headerlink" title="1.4 java序列化算法潜在的问题"></a>1.4 java序列化算法潜在的问题</h4><p>由于java序利化算法不会重复序列化同一个对象，只会记录已序列化对象的编号。如果序列化一个可变对象（对象内的内容可更改）后，更改了对象内容，再次序列化，并不会再次将此对象转换为字节序列，而只是保存序列化编号。</p>
+<pre><code>
+public class WriteObject &#123;
+    public static void main(String[] args) &#123;
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(&quot;person.txt&quot;));
+             ObjectInputStream ios = new ObjectInputStream(new FileInputStream(&quot;person.txt&quot;))) &#123;
+            //第一次序列化person
+            Person person = new Person(&quot;序列化&quot;, 23);
+            oos.writeObject(person);
+            System.out.println(person);
+            //修改name
+            person.setName(&quot;海贼王&quot;);
+            System.out.println(person);
+            //第二次序列化person
+            oos.writeObject(person);
+            //依次反序列化出p1、p2
+            Person p1 = (Person) ios.readObject();
+            Person p2 = (Person) ios.readObject();
+            System.out.println(p1 == p2);
+            System.out.println(p1.getName().equals(p2.getName()));
+        &#125; catch (Exception e) &#123;
+            e.printStackTrace();
+        &#125;
+    &#125;
+&#125;
+//输出结果
+//Person&#123;name=&#39;序列化&#39;, age=23&#125;
+//Person&#123;name=&#39;海贼王&#39;, age=23&#125;
+//true
+//true
+</code></pre>
+<h4 id="1-5-可选的自定义序列化"><a href="#1-5-可选的自定义序列化" class="headerlink" title="1.5 可选的自定义序列化"></a>1.5 可选的自定义序列化</h4><p>  有些时候，我们有这样的需求，某些属性不需要序列化。使用<strong>transient</strong>关键字选择不需要序列化的字段。</p>
+<pre><code>    public class Person implements Serializable &#123;
+       //不需要序列化名字与年龄
+       private transient String name;
+       private transient int age;
+       private int height;
+       private transient boolean singlehood;
+       public Person(String name, int age) &#123;
+           this.name = name;
+           this.age = age;
+       &#125;
+       //省略get,set方法
+    &#125;
+
+    public class TransientTest &#123;
+       public static void main(String[] args) throws Exception &#123;
+           try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(&quot;person.txt&quot;));
+                ObjectInputStream ios = new ObjectInputStream(new FileInputStream(&quot;person.txt&quot;))) &#123;
+               Person person = new Person(&quot;序列化&quot;, 23);
+               person.setHeight(185);
+               System.out.println(person);
+               oos.writeObject(person);
+               Person p1 = (Person)ios.readObject();
+               System.out.println(p1);
+           &#125;
+       &#125;
+    &#125;
+    //输出结果
+    //Person&#123;name=&#39;序列化&#39;, age=23&#39;, singlehood=true&#39;, height=185cm&#125;
+    //Person&#123;name=&#39;null&#39;, age=0&#39;, singlehood=false&#39;, height=185cm&#125;
+</code></pre>
+<p>   从输出我们看到，使用<strong>transient</strong>修饰的属性，java序列化时，会忽略掉此字段，所以反序列化出的对象，被<strong>transient</strong>修饰的属性是默认值。对于引用类型，值是null；基本类型，值是0；boolean类型，值是false。<br>    使用<strong>transient</strong>虽然简单，但将此属性完全隔离在了序列化之外。java提供了可选的自定义序列化。可以进行控制序列化的方式，或者对序列化数据进行编码加密等。</p>
+<pre><code>    private void writeObject(java.io.ObjectOutputStream out) throws IOException；
+    private void readObject(java.io.ObjectIutputStream in) throws IOException,ClassNotFoundException;
+    private void readObjectNoData() throws ObjectStreamException;
+    
+</code></pre>
+<p>   通过重写<strong>writeObject</strong>与<strong>readObject</strong>方法，可以自己选择哪些属性需要序列化， 哪些属性不需要。如果<strong>writeObject</strong>使用某种规则序列化，则相应的<strong>readObject</strong>需要相反的规则反序列化，以便能正确反序列化出对象。这里展示对名字进行反转加密。</p>
+<pre><code>    public class Person implements Serializable &#123;
+       private String name;
+       private int age;
+       //省略构造方法，get及set方法
+
+       private void writeObject(ObjectOutputStream out) throws IOException &#123;
+           //将名字反转写入二进制流
+           out.writeObject(new StringBuffer(this.name).reverse());
+           out.writeInt(age);
+       &#125;
+
+       private void readObject(ObjectInputStream ins) throws IOException,ClassNotFoundException&#123;
+           //将读出的字符串反转恢复回来
+           this.name = ((StringBuffer)ins.readObject()).reverse().toString();
+           this.age = ins.readInt();
+       &#125;
+    &#125;
+</code></pre>
+<p>   当序列化流不完整时，<strong>readObjectNoData()方法</strong>可以用来正确地初始化反序列化的对象。例如，使用不同类接收反序列化对象，或者序列化流被篡改时，系统都会调用<strong>readObjectNoData()方法</strong>来初始化反序列化的对象。</p>
+<p>   更彻底的自定义序列化</p>
+<p>   ANY-ACCESS-MODIFIER Object writeReplace() throws ObjectStreamException;<br>   ANY-ACCESS-MODIFIER Object readResolve() throws ObjectStreamException;</p>
+<p>   <strong>writeReplace</strong>：在序列化时，会先调用此方法，再调用<strong>writeObject方法</strong>。此方法可将任意对象代替目标序列化对象</p>
+<pre><code>        public class Person implements Serializable &#123;
+          private String name;
+          private int age;
+          //省略构造方法，get及set方法
+
+          private Object writeReplace() throws ObjectStreamException &#123;
+              ArrayList&lt;Object&gt; list = new ArrayList&lt;&gt;(2);
+              list.add(this.name);
+              list.add(this.age);
+              return list;
+          &#125;
+
+           public static void main(String[] args) throws Exception &#123;
+              try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(&quot;person.txt&quot;));
+                   ObjectInputStream ios = new ObjectInputStream(new FileInputStream(&quot;person.txt&quot;))) &#123;
+                  Person person = new Person(&quot;序列化&quot;, 23);
+                  oos.writeObject(person);
+                  ArrayList list = (ArrayList)ios.readObject();
+                  System.out.println(list);
+              &#125;
+          &#125;
+        &#125;
+        //输出结果
+        //[序列化, 23]
+
+        readResolve：反序列化时替换反序列化出的对象，反序列化出来的对象被立即丢弃。此方法在readeObject后调用。
+
+        public class Person implements Serializable &#123;
+            private String name;
+            private int age;
+            //省略构造方法，get及set方法
+             private Object readResolve() throws ObjectStreamException&#123;
+                return new (&quot;brady&quot;, 23);
+            &#125;
+            public static void main(String[] args) throws Exception &#123;
+                try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(&quot;person.txt&quot;));
+                     ObjectInputStream ios = new ObjectInputStream(new FileInputStream(&quot;person.txt&quot;))) &#123;
+                    Person person = new Person(&quot;序列化&quot;, 23);
+                    oos.writeObject(person);
+                    HashMap map = (HashMap)ios.readObject();
+                    System.out.println(map);
+                &#125;
+            &#125;
+        &#125;
+        //输出结果
+        //&#123;brady=23&#125;
+</code></pre>
+<p>   <strong>readResolve</strong>常用来反序列单例类，保证单例类的唯一性。<br>   注意：<strong>readResolve</strong>与<strong>writeReplace</strong>的访问修饰符可以是private、protected、public，如果父类重写了这两个方法，子类都需要根据自身需求重写，这显然不是一个好的设计。通常建议对于final修饰的类重写readResolve方法没有问题；否则，重写readResolve使用private修饰。</p>
+<h3 id="2、Externalizable：强制自定义序列化"><a href="#2、Externalizable：强制自定义序列化" class="headerlink" title="2、Externalizable：强制自定义序列化"></a>2、Externalizable：强制自定义序列化</h3><p>通过实现<strong>Externalizable</strong>接口，必须实现<strong>writeExternal、readExternal</strong>方法。</p>
+<pre><code>
+public interface Externalizable extends java.io.Serializable &#123;
+     void writeExternal(ObjectOutput out) throws IOException;
+     void readExternal(ObjectInput in) throws IOException, ClassNotFoundException;
+&#125;
+
+public class ExPerson implements Externalizable &#123;
+
+    private String name;
+    private int age;
+    //注意，必须加上pulic 无参构造器
+    public ExPerson() &#123;
+    &#125;
+
+    public ExPerson(String name, int age) &#123;
+        this.name = name;
+        this.age = age;
+    &#125;
+
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException &#123;
+        //将name反转后写入二进制流
+        StringBuffer reverse = new StringBuffer(name).reverse();
+        System.out.println(reverse.toString());
+        out.writeObject(reverse);
+        out.writeInt(age);
+    &#125;
+
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException &#123;
+        //将读取的字符串反转后赋值给name实例变量
+        this.name = ((StringBuffer) in.readObject()).reverse().toString();
+        System.out.println(name);
+        this.age = in.readInt();
+    &#125;
+
+    public static void main(String[] args) throws IOException, ClassNotFoundException &#123;
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(&quot;ExPerson.txt&quot;));
+             ObjectInputStream ois = new ObjectInputStream(new FileInputStream(&quot;ExPerson.txt&quot;))) &#123;
+            oos.writeObject(new ExPerson(&quot;brady&quot;, 23));
+            ExPerson ep = (ExPerson) ois.readObject();
+            System.out.println(ep);
+        &#125;
+    &#125;
+&#125;
+//输出结果
+//ydarb
+//brady
+//ExPerson&#123;name=&#39;brady&#39;, age=23&#125;
+</code></pre>
+<p>注意：<strong>Externalizable</strong>接口不同于<strong>Serializable</strong>接口，实现此接口必须实现接口中的两个方法实现自定义序列化，这是强制性的；特别之处是必须提供pulic的无参构造器，因为在反序列化的时候需要反射创建对象。</p>
+<h3 id="3、两种序列化对比"><a href="#3、两种序列化对比" class="headerlink" title="3、两种序列化对比"></a>3、两种序列化对比</h3><table>
+<thead>
+<tr>
+<th align="left">实现Serializable接口</th>
+<th align="left">实现Externalizable接口</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">系统自动存储必要的信息</td>
+<td align="left">程序员决定存储哪些信息</td>
+</tr>
+<tr>
+<td align="left">Java内建支持，易于实现，只需要实现该接口即可，无需任何代码支持</td>
+<td align="left">必须实现接口内的两个方法</td>
+</tr>
+<tr>
+<td align="left">性能略差</td>
+<td align="left">性能略好</td>
+</tr>
+</tbody></table>
+<p><strong>虽然Externalizable接口带来了一定的性能提升，但变成复杂度也提高了，所以一般通过实现Serializable接口进行序列化。</strong></p>
+<h2 id="三、序列化版本号serialVersionUID"><a href="#三、序列化版本号serialVersionUID" class="headerlink" title="三、序列化版本号serialVersionUID"></a>三、序列化版本号serialVersionUID</h2><p>我们知道，反序列化必须拥有class文件，但随着项目的升级，class文件也会升级，序列化怎么保证升级前后的兼容性呢？</p>
+<p>java序列化提供了一个private static final long serialVersionUID 的序列化版本号，只有版本号相同，即使更改了序列化属性，对象也可以正确被反序列化回来。</p>
+<p>public class Person implements Serializable {<br>    //序列化版本号<br>    private static final long serialVersionUID = 1111013L;<br>    private String name;<br>    private int age;<br>    //省略构造方法及get,set<br>}</p>
+<p>如果反序列化使用的class的版本号与序列化时使用的不一致，反序列化会报InvalidClassException异常。</p>
+<p>序列化版本号可自由指定，如果不指定，JVM会根据类信息自己计算一个版本号，这样随着class的升级，就无法正确反序列化；不指定版本号另一个明显隐患是，不利于jvm间的移植，可能class文件没有更改，但不同jvm可能计算的规则不一样，这样也会导致无法反序列化。</p>
+<p>什么情况下需要修改serialVersionUID呢？分三种情况。</p>
+<ul>
+<li> 如果只是修改了方法，反序列化不容影响，则无需修改版本号；</li>
+<li> 如果只是修改了静态变量，瞬态变量（transient修饰的变量），反序列化不受影响，无需修改版本号；</li>
+<li> 如果修改了非瞬态变量，则可能导致反序列化失败。如果新类中实例变量的类型与序列化时类的类型不一致，则会反序列化失败，这时候需要更改serialVersionUID。如果只是新增了实例变量，则反序列化回来新增的是默认值；如果减少了实例变量，反序列化时会忽略掉减少的实例变量。</li>
+</ul>
+<h2 id="四、总结"><a href="#四、总结" class="headerlink" title="四、总结"></a>四、总结</h2><ul>
+<li>所有需要网络传输的对象都需要实现序列化接口，通过建议所有的javaBean都实现Serializable接口。</li>
+<li>对象的类名、实例变量（包括基本类型，数组，对其他对象的引用）都会被序列化；方法、类变量、transient实例变量都不会被序列化。</li>
+<li>如果想让某个变量不被序列化，使用transient修饰。</li>
+<li>序列化对象的引用类型成员变量，也必须是可序列化的，否则，会报错。</li>
+<li>反序列化时必须有序列化对象的class文件。</li>
+<li>当通过文件、网络来读取序列化后的对象时，必须按照实际写入的顺序读取。</li>
+<li>单例类序列化，需要重写readResolve()方法；否则会破坏单例原则。</li>
+<li>同一对象序列化多次，只有第一次序列化为二进制流，以后都只是保存序列化编号，不会重复序列化。</li>
+<li>建议所有可序列化的类加上serialVersionUID 版本号，方便项目升级。</li>
+</ul>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>关于HashMap几个问题</title>
+    <url>/2020/08/17/8-17/</url>
+    <content><![CDATA[<h2 id="1、为什么要使用HashMap"><a href="#1、为什么要使用HashMap" class="headerlink" title="1、为什么要使用HashMap?"></a>1、为什么要使用HashMap?</h2><p>我们在使用一种工具的时候，肯定是因为其的某种特性很符合我们的需求，能够快速准确的解决我们的问题。<strong>那我们为什么要使用HashMap呢？</strong><br>**<br>This implementation provides constant-time performance for the basic operations (get and put), assuming the hash function disperses the elements properly among the buckets.</p>
+<p>源码注释里有这样一句话，这就是我们使用HashMap的原因。</p>
+<p>意为：<strong>HashMap为基本操作(get和put)提供了常数时间性能（即O(1)），假设散列函数将元素适当地分散到各个bucket中。</strong></p>
+<p>我们可以这样理解，如果当你需要快速存储并查询值，可以使用HashMap，它可以保证在O(1)的时间复杂度完成。前提是你键的hashCode要足够不同。</p>
+<p><strong>Map还有一个特性就是key不允许重复</strong>。下面我们就来看看HashMap如何保证O(1)进行get和put。</p>
+<h2 id="2、关于HashMap主要参数"><a href="#2、关于HashMap主要参数" class="headerlink" title="2、关于HashMap主要参数"></a>2、关于HashMap主要参数</h2><h3 id="2-1、静态常量"><a href="#2-1、静态常量" class="headerlink" title="2.1、静态常量"></a>2.1、静态常量</h3><pre><code>//默认的初始化桶容量，必须是2的幂次方（后面会说为什么）
+static final int DEFAULT_INITIAL_CAPACITY = 1 &lt;&lt; 4;
+//最大桶容量
+static final int MAXIMUM_CAPACITY = 1 &lt;&lt; 30;
+//默认的负载因子
+static final float DEFAULT_LOAD_FACTOR = 0.75f;
+//判断是否将链表转化为树的阈值
+static final int TREEIFY_THRESHOLD = 8;
+//判断是否将树转化为链表的阈值
+static final int UNTREEIFY_THRESHOLD = 6;
+//判断是否可以执行将链表转化为树，如果当前桶的容量小于此值，则进行resize()。避免表容量过小，较容易产生hash碰撞。
+static final int MIN_TREEIFY_CAPACITY = 64;
+</code></pre>
+<h3 id="2-2、字段"><a href="#2-2、字段" class="headerlink" title="2.2、字段"></a>2.2、字段</h3><pre><code>//hash表
+transient Node&lt;K,V&gt;[] table;
+//缓存的EntrySet，便与迭代使用
+transient Set&lt;Map.Entry&lt;K,V&gt;&gt; entrySet;
+//记录HashMap中键值对的数量
+transient int size;
+//当对hashMap进行一次结构上的变更，会进行加1。结构变更指的是对Hash表的增删操作。
+transient int modCount;
+//判断是否扩容的阈值。threshold = capacity * load factor
+int threshold;
+//负载因子，用于计算threshold，可以在构造函数时指定。
+final float loadFactor;
+</code></pre>
+<h2 id="3、谈谈HashMap数据结构"><a href="#3、谈谈HashMap数据结构" class="headerlink" title="3、谈谈HashMap数据结构"></a>3、谈谈HashMap数据结构</h2><p>上面我们看到一个Node&lt;K,V&gt;[] table的Node数组。</p>
+<p><strong>为什么要使用数组呢？</strong></p>
+<p>答：为了能快速访问元素。追问，<strong>为什么数组能快速访问元素了？</strong></p>
+<p>   数组只需对 [首地址+元素大小*k] 就能找到第k个元素的地址，对其取地址就能获得该元素。<br>   CPU缓存会把一片连续的内存空间读入，因为数组结构是连续的内存地址，所以数组全部或者部分元素被连续存在CPU缓存里面。</p>
+<p>让我们看看Node的结构。</p>
+<pre><code>   static class Node&lt;K,V&gt; implements Map.Entry&lt;K,V&gt; &#123;
+    final int hash;    //key 的hash
+    final K key;    //key对象
+    V value;        //value对象
+    Node&lt;K,V&gt; next;    //链接的下一个节点
+
+   Node(int hash, K key, V value, Node&lt;K,V&gt; next) &#123;
+        this.hash = hash;
+        this.key = key;
+        this.value = value;
+        this.next = next;
+    &#125;
+&#125;
+</code></pre>
+<p>我们看到，Node节点内部保留了一个next节点的引用，太熟悉了，这不就是链表嘛。</p>
+<p>到这，我们知道了HashMap的底层数据结构是基于数组+链表。但是，这就完了吗？在jdk1.7确实只是这样，jdk1.8为了提高hash碰撞时链表查询效率低的问题，在hash碰撞达到8次之后会将链表转化为红黑树，以至于将链表查询的时间复杂度从O(N)提高到O(logN)。</p>
+<p>到这我们就可以明白，<strong>HashMap如果能够均匀的将Node节点放置到table数组中，我们只要能够通过某种方式知道指定key的Node所在数组中的索引，基于数组，我们就可以很快查找到所需的值。</strong></p>
+<p>接着我们就要看看如何定位到table数组中。</p>
+<h2 id="4、了解HashMap构造函数"><a href="#4、了解HashMap构造函数" class="headerlink" title="4、了解HashMap构造函数"></a>4、了解HashMap构造函数</h2><p>有了上面的基础知识，知道字段含义及数据结构，我们就有一点信心可以正式进入源码阅读。我觉得了解一个类，得从构造函数入手，知道构造对象的时候做了哪些初始化工作，其次再深入常用的方法，抽丝剥茧。</p>
+<pre><code>public HashMap(int initialCapacity) &#123;
+    //如果只传入初始值，则负载因子使用默认的0.75
+    this(initialCapacity, DEFAULT_LOAD_FACTOR);
+&#125;
+
+public HashMap(int initialCapacity, float loadFactor) &#123;
+    if (initialCapacity &lt; 0)
+        throw new IllegalArgumentException(&quot;Illegal initial capacity: &quot; +
+                                           initialCapacity);
+   //保证初始容量最大为2^30
+    if (initialCapacity &gt; MAXIMUM_CAPACITY)
+        initialCapacity = MAXIMUM_CAPACITY;
+    if (loadFactor &lt;= 0 || Float.isNaN(loadFactor))
+        throw new IllegalArgumentException(&quot;Illegal load factor: &quot; +
+                                           loadFactor);
+   //使用指定的值初始化负载因子及判断是否扩容的阈值。
+    this.loadFactor = loadFactor;
+    this.threshold = tableSizeFor(initialCapacity);
+&#125;
+</code></pre>
+<p>我们可以看到，构造函数主要是为了初始化负载因子及hash表的容量。可能大家会疑问，这不是初始化的是threshold吗？不要被表面所欺骗，这只是临时将hash表的容量存储在threshold上，我想是因为HashMap不想增加多余的字段来保存hash表的容量，因为数组的length就可以表示，只是暂时数组还未初始化，所以容量暂先保存在threshold。</p>
+<p>我们看到<strong>将用户指定的initialCapacity传入tableSizeFor方法返回了一个值，返回的值才是真正初始化的容量。</strong></p>
+<pre><code>/**
+ * Returns a power of two size for the given target capacity.
+ */
+static final int tableSizeFor(int cap) &#123;
+        int n = cap - 1;
+        n |= n &gt;&gt;&gt; 1;
+        n |= n &gt;&gt;&gt; 2;
+        n |= n &gt;&gt;&gt; 4;
+        n |= n &gt;&gt;&gt; 8;
+        n |= n &gt;&gt;&gt; 16;
+        return (n &lt; 0) ? 1 : (n &gt;= MAXIMUM_CAPACITY) ? MAXIMUM_CAPACITY : n + 1;
+    &#125;
+</code></pre>
+<p>我们从jdk给的方法注释看出，该方法返回一个目标值的2的幂次方,译为：<strong>返回大于或等于目标值的第一个数，该数必须是2的幂次方。</strong></p>
+<p>举例说一下：</p>
+<p>如果输入10，大于等于10的第一个数，又是2的幂次方的数是16；</p>
+<p>如果输入7，大于等于7的第一个数，又是2的幂次方的数是8；</p>
+<p>如果输入20；大于等于20的第一个数，又是2的幂次方的是32；</p>
+<p>到这我们又得问自己，为什么hash表的容量必须是2的幂次方呢？</p>
+<h2 id="5、解剖HashMap主要方法"><a href="#5、解剖HashMap主要方法" class="headerlink" title="5、解剖HashMap主要方法"></a>5、解剖HashMap主要方法</h2><h3 id="5-1、put"><a href="#5-1、put" class="headerlink" title="5.1、put"></a>5.1、put</h3><p>当我们new出HashMa的对象，都会调用put方法进行添加键值对.</p>
+<pre><code>public V put(K key, V value) &#123;
+    return putVal(hash(key), key, value, false, true);
+&#125;
+
+static final int hash(Object key) &#123;
+        int h;
+    //将key的高16位与低16位异或，减小hash碰撞的机率
+        return (key == null) ? 0 : (h = key.hashCode()) ^ (h &gt;&gt;&gt; 16);
+    &#125;
+</code></pre>
+<p>让我们看看putVal干了什么。</p>
+<pre><code>    /**
+     * 此方法用于将(k,v)键值对存储到HashMap中
+     *
+     * @param hash key的hash
+     * @param key key对象
+     * @param value key对应的value对象
+     * @param onlyIfAbsent 如果是true,则不覆盖原值。
+     * @param evict if false, the table is in creation mode.
+     * @return 返回旧值，如果没有，则返回null。
+     */
+    final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
+                   boolean evict) &#123;
+        Node&lt;K,V&gt;[] tab; Node&lt;K,V&gt; p; int n, i;
+        //在第一次put的时候，此时Node表还未初始化，上面我们已经知道，构造HashMap对象时只是初始化了负载因子及初始容量，但并没有初始化hash表。在这里会进行第一次的初始化操作。
+        if ((tab = table) == null || (n = tab.length) == 0)
+            n = (tab = resize()).length;
+        //如果得到了一个hash值，并且hash值在很少相同的情况下，如何均匀的分布到table数组里呢？最容易想到的就是用hash%n，n为table数组的长度。但是%运算是很慢的，我们知道位运算才是最快的，计算机识别的都是二进制。所以如果保证n为2的幂次方，hash%n 与 hash&amp;(n-1)的结果就是相同的。这就是为什么初始容量要是2的幂次方的原因。
+        //当找到的hash桶位没有值时，直接构建一个Node进行插入
+        if ((p = tab[i = (n - 1) &amp; hash]) == null)
+            tab[i] = newNode(hash, key, value, null);
+        else &#123;
+            //否则，表明hash碰撞产生。
+            Node&lt;K,V&gt; e; K k;
+            //判断hash是否与桶槽的节点hash是否相同并且key的equals方法也为true,表明是重复的key，则记录下当前节点
+            if (p.hash == hash &amp;&amp;
+                ((k = p.key) == key || (key != null &amp;&amp; key.equals(k))))
+                e = p;
+            //如果桶槽节点是树节点，则放置到树中，并返回旧值
+            else if (p instanceof TreeNode)
+                e = ((TreeNode&lt;K,V&gt;)p).putTreeVal(this, tab, hash, key, value);
+            else &#123;
+                //表明是链表，还未转换为红黑树。
+                for (int binCount = 0; ; ++binCount) &#123;
+                    //如果节点的next索引是null，表明后面没有节点，则使用尾插法进行插入
+                    if ((e = p.next) == null) &#123;
+                        p.next = newNode(hash, key, value, null);
+                        //此时链表长度为9，即hash碰撞8次，会将链表转化为红黑树
+                        if (binCount &gt;= TREEIFY_THRESHOLD - 1) // -1 for 1st
+                            treeifyBin(tab, hash);
+                        break;
+                    &#125;
+                    //如果key是同一个key,则跳出循环链表
+                    if (e.hash == hash &amp;&amp;
+                        ((k = e.key) == key || (key != null &amp;&amp; key.equals(k))))
+                        break;
+                    p = e;
+                &#125;
+            &#125;
+            //判断是否是重复的key
+            if (e != null) &#123; // existing mapping for key
+                //拿到旧值
+                V oldValue = e.value;
+                //因为put操作默认的onlyIfAbsent为false，所以，默认都是使用新值覆盖旧值
+                if (!onlyIfAbsent || oldValue == null)
+                    e.value = value;
+                afterNodeAccess(e);
+                //返回旧值
+                return oldValue;
+            &#125;
+        &#125;
+        //到这里，表明有新数据插入到Hash表中，则将modCount进行自增
+        ++modCount;
+        //判断当前键值对容量是否满足扩容条件，满足则进行扩容
+        if (++size &gt; threshold)
+            resize();
+        afterNodeInsertion(evict);
+        return null;
+    &#125;
+</code></pre>
+<p><img src="%5Cimages/pasted-31.png" alt="upload successful"><br>总结一下：</p>
+<ol>
+<li>put方法先通过计算key的hash值；</li>
+<li>如果hash表没有初始化，则进行初始化；</li>
+<li>然后计算该hash应该处于hash桶的哪个位置；</li>
+<li>如果该位置没有值，则直接插入；</li>
+<li>如果有值，判断是否为树节点，是的话插入到红黑树中；</li>
+<li>否则则是链表，使用尾插法进行插入，插入后判断hash碰撞是否满足8次，如果满足，则将链表转化为红黑树；</li>
+<li>插入后判断key是否相同，相同则使用新值覆盖旧值；</li>
+<li>进行++modCount，表明插入了新键值对；再判断是否进行扩容。</li>
+</ol>
+<p><strong>灵魂拷问：真的hash碰撞8次一定会转换为红黑树吗？？？</strong></p>
+<p>其实不然，在put中，如果hash碰撞8次会调用此方法将链表转换为红黑树，但不一定调用就会真正转换。需要tab.length大于等于64才会真正的执行转换操作。<strong>因为在表容量过小的时候，hash碰撞才会比较明显，但不是说表越大越好。</strong></p>
+<pre><code> final void treeifyBin(Node&lt;K,V&gt;[] tab, int hash) &#123;
+        int n, index; Node&lt;K,V&gt; e;
+     //如果表的长度小于64，是先扩容
+        if (tab == null || (n = tab.length) &lt; MIN_TREEIFY_CAPACITY)
+            resize();
+        else if ((e = tab[index = (n - 1) &amp; hash]) != null) &#123;
+            //只有大于等于64才会真正的转换
+            TreeNode&lt;K,V&gt; hd = null, tl = null;
+            do &#123;
+                TreeNode&lt;K,V&gt; p = replacementTreeNode(e, null);
+                if (tl == null)
+                    hd = p;
+                else &#123;
+                    p.prev = tl;
+                    tl.next = p;
+                &#125;
+                tl = p;
+            &#125; while ((e = e.next) != null);
+            if ((tab[index] = hd) != null)
+                hd.treeify(tab);
+        &#125;
+    &#125;
+</code></pre>
+<h3 id="5-2、resize"><a href="#5-2、resize" class="headerlink" title="5.2、resize()"></a>5.2、resize()</h3><p>put方法中用到了两次resize()方法，现在让我们来品一品resize()的具体实现逻辑。</p>
+<pre><code>final Node&lt;K,V&gt;[] resize() &#123;
+        Node&lt;K,V&gt;[] oldTab = table;
+        int oldCap = (oldTab == null) ? 0 : oldTab.length;
+        int oldThr = threshold;
+        int newCap, newThr = 0;
+        //如果旧table中有数据
+        if (oldCap &gt; 0) &#123;
+            //当表的长度达到定义的最大值时，不再进行扩容，只是将判断扩容的阈值改为Integer.MAX_VALUE。
+            if (oldCap &gt;= MAXIMUM_CAPACITY) &#123;
+                threshold = Integer.MAX_VALUE;
+                return oldTab;
+            &#125;
+            //先将新容量为原来的2倍，如果结果小于MAXIMUM_CAPACITY并且旧的容量大于等于默认值16，则也将新的阈值为原来的2倍
+            else if ((newCap = oldCap &lt;&lt; 1) &lt; MAXIMUM_CAPACITY &amp;&amp;
+                     oldCap &gt;= DEFAULT_INITIAL_CAPACITY)
+                newThr = oldThr &lt;&lt; 1; // double threshold
+        &#125;
+    //oldCap等于0 如果旧阈值大于0,则将旧阈值赋值给新容量。这一步对应于指定的容量构造器，指定容量时，赋值给了阈值
+        else if (oldThr &gt; 0) // initial capacity was placed in threshold
+            newCap = oldThr;
+    //这一步对应于无参构造器，这时使用默认值
+        else &#123;               // zero initial threshold signifies using defaults
+            newCap = DEFAULT_INITIAL_CAPACITY;
+            newThr = (int)(DEFAULT_LOAD_FACTOR * DEFAULT_INITIAL_CAPACITY);
+        &#125;
+    //这里是因为在oldCap大于0但没有大于默认的16，不会更改newThr的值，还是0。这时候需要根据newCap的值计算newThr。
+        if (newThr == 0) &#123;
+            float ft = (float)newCap * loadFactor;
+            newThr = (newCap &lt; MAXIMUM_CAPACITY &amp;&amp; ft &lt; (float)MAXIMUM_CAPACITY ?
+                      (int)ft : Integer.MAX_VALUE);
+        &#125;
+    //将新阈值覆盖threshold
+        threshold = newThr;
+        @SuppressWarnings(&#123;&quot;rawtypes&quot;,&quot;unchecked&quot;&#125;)
+    //使用newCap初始化新表。这里的newCap是oldCap的2倍
+        Node&lt;K,V&gt;[] newTab = (Node&lt;K,V&gt;[])new Node[newCap];
+        table = newTab;
+    //至此，完成了新表容量的计算及新阈值的计算，并且创建了新表。下面开始将旧表数据移至新表
+        if (oldTab != null) &#123;
+            //从表的前往后迁移
+            for (int j = 0; j &lt; oldCap; ++j) &#123;
+                Node&lt;K,V&gt; e;
+                //如果下标j对应的位置有值，拿到引用赋值给e
+                if ((e = oldTab[j]) != null) &#123;
+                    //因为已经有了引用e,可以将原数组的赋值为null, help gc
+                    oldTab[j] = null;
+                    //如果e.next没有指向，则证明当前槽位只有一个节点，直接计算在新表的位置赋值即可
+                    if (e.next == null)
+                        newTab[e.hash &amp; (newCap - 1)] = e;
+                    //证明当前槽位不止一个节点，判断e是否为TreeNode，如果是，则使用树的迁移方法
+                    else if (e instanceof TreeNode)
+                        ((TreeNode&lt;K,V&gt;)e).split(this, newTab, j, oldCap);
+                    else &#123; // preserve order
+                        //因为扩容后的节点不是在j处，就在j + oldCap处。
+                        //loHead节点记录了j处的链表的头指针，loTail记录j处尾指针
+                        //hiHead节点记录了j+oldCap处链表的头指针，hiTail记录了j+oldCap处的尾指针
+                        Node&lt;K,V&gt; loHead = null, loTail = null;
+                        Node&lt;K,V&gt; hiHead = null, hiTail = null;
+                        Node&lt;K,V&gt; next;
+                        do &#123;
+                            next = e.next;
+                            //判断是否还处于j处（后面会详细解释）
+                            if ((e.hash &amp; oldCap) == 0) &#123;
+                                if (loTail == null)
+                                    //记录j的头指针
+                                    loHead = e;
+                                else
+                                    //链接节点
+                                    loTail.next = e;
+                                loTail = e;
+                            &#125;
+                            //否则在[j+oldCap]处
+                            else &#123;
+                                if (hiTail == null)
+                                    //记录j+oldCap的头指针
+                                    hiHead = e;
+                                else
+                                    //链接节点
+                                    hiTail.next = e;
+                                hiTail = e;
+                            &#125;
+                        &#125; while ((e = next) != null);
+                        if (loTail != null) &#123;
+                            loTail.next = null;
+                            //将位置没变的链表放在j处
+                            newTab[j] = loHead;
+                        &#125;
+                        if (hiTail != null) &#123;
+                            hiTail.next = null;
+                            //将位置改变的链表放在[j+oldCap]处
+                            newTab[j + oldCap] = hiHead;
+                        &#125;
+                    &#125;
+                &#125;
+            &#125;
+        &#125;
+    //返回新链表
+        return newTab;
+    &#125;
+</code></pre>
+<p>现在我们仔细分析e.hash &amp; oldCap。二话不说，直接上图。</p>
+<p><img src="%5Cimages/pasted-32.png" alt="upload successful"></p>
+<p>resize()中我们看到如果是树节点，调用了((TreeNode&lt;K,V&gt;)e).split(this, newTab, j, oldCap)方法。有了上面的知识，其实这个方法干的事情是一样的。将红黑树拆分为两棵子树，还是分别放置于原来位置和原来位置+oldCap位置。但要注意，<strong>这个方法在树的节点小于等于6的时候会将红黑树转换回链表。</strong></p>
+<pre><code>final void split(HashMap&lt;K,V&gt; map, Node&lt;K,V&gt;[] tab, int index, int bit) &#123;
+            TreeNode&lt;K,V&gt; b = this;
+            // Relink into lo and hi lists, preserving order
+            TreeNode&lt;K,V&gt; loHead = null, loTail = null;
+            TreeNode&lt;K,V&gt; hiHead = null, hiTail = null;
+            int lc = 0, hc = 0;
+            for (TreeNode&lt;K,V&gt; e = b, next; e != null; e = next) &#123;
+                next = (TreeNode&lt;K,V&gt;)e.next;
+                e.next = null;
+                //判断位置是否更改
+                if ((e.hash &amp; bit) == 0) &#123;
+                    if ((e.prev = loTail) == null)
+                        loHead = e;
+                    else
+                        loTail.next = e;
+                    loTail = e;
+                    ++lc;
+                &#125;
+                else &#123;
+                    if ((e.prev = hiTail) == null)
+                        hiHead = e;
+                    else
+                        hiTail.next = e;
+                    hiTail = e;
+                    ++hc;
+                &#125;
+            &#125;
+
+            if (loHead != null) &#123;
+                //数量小于等于6，转换回链表
+                if (lc &lt;= UNTREEIFY_THRESHOLD)
+                    tab[index] = loHead.untreeify(map);
+                else &#123;
+                    tab[index] = loHead;
+                    if (hiHead != null) // (else is already treeified)
+                        loHead.treeify(tab);
+                &#125;
+            &#125;
+            if (hiHead != null) &#123;
+                if (hc &lt;= UNTREEIFY_THRESHOLD)
+                    tab[index + bit] = hiHead.untreeify(map);
+                else &#123;
+                    tab[index + bit] = hiHead;
+                    if (loHead != null)
+                        hiHead.treeify(tab);
+                &#125;
+            &#125;
+        &#125;
+</code></pre>
+<p>到此，resize()方法结束。</p>
+<h3 id="5-2、get"><a href="#5-2、get" class="headerlink" title="5.2、get"></a>5.2、get</h3><p>知道了HashMap的数据结构及如何以常数时间将键值对put保存管理的，那get这不是很容易吗？请大家尝尝这道小菜。我们保存的是键值对，存储的时候都是以key作为条件存储的，所以在我们取值的时候也是通过key获取值。</p>
+<pre><code>    public V get(Object key) &#123;
+        Node&lt;K,V&gt; e;
+        //计算key的hash，用于定位桶的位置
+        return (e = getNode(hash(key), key)) == null ? null : e.value;
+    &#125;
+     final Node&lt;K,V&gt; getNode(int hash, Object key) &#123;
+        Node&lt;K,V&gt;[] tab; Node&lt;K,V&gt; first, e; int n; K k;
+         //如果hash桶有值，并且基于hash继续的桶位置也存在值
+        if ((tab = table) != null &amp;&amp; (n = tab.length) &gt; 0 &amp;&amp;
+            (first = tab[(n - 1) &amp; hash]) != null) &#123;
+            //先检查第一个节点是否匹配，找到则返回
+            if (first.hash == hash &amp;&amp; // always check first node
+                ((k = first.key) == key || (key != null &amp;&amp; key.equals(k))))
+                return first;
+            //如果第一个不匹配，则判断next是否存在
+            if ((e = first.next) != null) &#123;
+                //如果存在，判断桶节点是否为树节点，如果是树节点，则从红黑树查找返回
+                if (first instanceof TreeNode)
+                    return ((TreeNode&lt;K,V&gt;)first).getTreeNode(hash, key);
+                do &#123;
+                    //不是树节点，从链表的表头向表尾依次判断是否匹配
+                    if (e.hash == hash &amp;&amp;
+                        ((k = e.key) == key || (key != null &amp;&amp; key.equals(k))))
+                        //找到则返回
+                        return e;
+                &#125; while ((e = e.next) != null);
+            &#125;
+        &#125;
+         //没有找到，则返回null
+        return null;
+    &#125;
+</code></pre>
+<p>总结一下get流程：</p>
+<ol>
+<li>更加key计算hash值</li>
+<li>使用hash&amp;(n-1)判断hash桶位是否有值，如果没有值，则返回null</li>
+<li>如果有值，判断第一个是否匹配。（匹配指：hash值相同并且equals方法返回结果为true），匹配则返回</li>
+<li>如果第一个不匹配，判断是否为树节点，是树节点则从红黑树查找</li>
+<li>如果不是树节点，则是链表，则从表头到表尾依次查找。</li>
+</ol>
+<h2 id="6、简述modCount"><a href="#6、简述modCount" class="headerlink" title="6、简述modCount"></a>6、简述modCount</h2><p>这个字段并不是map独有的，Collection集合（List、Set）也有。<strong>此字段用于迭代时的快速失败，也就是在迭代的过程中，如果调用了put、clear、remove等会对容器内部数据的数量产生增加或减少的操作时，抛出ConcurrentModificationException异常。</strong></p>
+<p>HashMap有三个迭代器，分别是<strong>KeyIterator、ValueIterator、EntryIterator，</strong>它们分别对应于<strong>KeySet、Values、EntrySet</strong>内部类中，当用户调用其对应的iterator()方法时都会new一个对应的迭代器。</p>
+<p>这里我就不贴代码了，太多，有兴趣的可以去看一看。这里主要讲解为什么快速失败。</p>
+<pre><code>final class KeyIterator extends HashIterator
+    implements Iterator&lt;K&gt; &#123;
+    public final K next() &#123; return nextNode().key; &#125;
+&#125;
+
+final class ValueIterator extends HashIterator
+    implements Iterator&lt;V&gt; &#123;
+    public final V next() &#123; return nextNode().value; &#125;
+&#125;
+
+final class EntryIterator extends HashIterator
+    implements Iterator&lt;Map.Entry&lt;K,V&gt;&gt; &#123;
+    public final Map.Entry&lt;K,V&gt; next() &#123; return nextNode(); &#125;
+&#125;
+</code></pre>
+<p>使用者可以根据自己的需求选择使用的迭代器。每一个都继承自HashIterator，我们来看一看。</p>
+<pre><code> abstract class HashIterator &#123;
+    Node&lt;K,V&gt; next;        // next entry to return
+    Node&lt;K,V&gt; current;     // current entry
+    int expectedModCount;  // for fast-fail
+    int index;             // current slot
+
+    HashIterator() &#123;
+        //关键在这里，当每一次使用迭代器的时候，会将modCount赋值给内部类的expectedModCount
+        expectedModCount = modCount;
+        Node&lt;K,V&gt;[] t = table;
+        current = next = null;
+        index = 0;
+        if (t != null &amp;&amp; size &gt; 0) &#123; // advance to first entry
+            do &#123;&#125; while (index &lt; t.length &amp;&amp; (next = t[index++]) == null);
+        &#125;
+    &#125;
+
+    public final boolean hasNext() &#123;
+        return next != null;
+    &#125;
+
+    final Node&lt;K,V&gt; nextNode() &#123;
+        Node&lt;K,V&gt;[] t;
+        Node&lt;K,V&gt; e = next;
+        //每次取值之前会判断modCount和expectedModCount是否相等，如果不等则表明在迭代过程中有其他线程或当前线程调用了put、remove等方法。
+        if (modCount != expectedModCount)
+            throw new ConcurrentModificationException();
+        if (e == null)
+            throw new NoSuchElementException();
+        if ((next = (current = e).next) == null &amp;&amp; (t = table) != null) &#123;
+            do &#123;&#125; while (index &lt; t.length &amp;&amp; (next = t[index++]) == null);
+        &#125;
+        return e;
+    &#125;
+
+     //如果想删除，只能调用迭代器自己的remove方法，但是，它删除的是调用nextNode()拿到的节点
+    public final void remove() &#123;
+        Node&lt;K,V&gt; p = current;
+        if (p == null)
+            throw new IllegalStateException();
+        //删除之前也会判断modCount是否被修改
+        if (modCount != expectedModCount)
+            throw new ConcurrentModificationException();
+        current = null;
+        K key = p.key;
+        removeNode(hash(key), key, null, false, false);
+        expectedModCount = modCount;
+    &#125;
+&#125;
+</code></pre>
+<p>所以，<strong>在迭代过程中对HashMap进行增删操作会抛出ConcurrentModificationException异常。</strong>还记得一开始提出的一个问题吗？对的，就是它。你可以去看看List等的源码，modCount也存在，而且实现都是一样的。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>Jquery01</title>
+    <url>/2020/07/24/Jquery/</url>
+    <content><![CDATA[<p>来公司实习摸鱼了一周了，最近组长给我分配了个任务让我写h5的页面，前段相关的内容没怎么深入了解，最近在看jquery的视频，记录下相关笔记。</p>
+<h2 id="1-1-jQuery-介绍"><a href="#1-1-jQuery-介绍" class="headerlink" title="1.1. jQuery 介绍"></a>1.1. jQuery 介绍</h2><h3 id="1-1-1-JavaScript-库"><a href="#1-1-1-JavaScript-库" class="headerlink" title="1.1.1 JavaScript 库"></a>1.1.1 JavaScript 库</h3><p>​    JavaScript库：即 library，是一个封装好的特定的集合（方法和函数）。从封装一大堆函数的角度理解库，就是在这个库中，封装了很多预先定义好的函数在里面，比如动画animate、hide、show，比如获取元素等。</p>
+<blockquote>
+<p>简单理解： 就是一个JS 文件，里面对我们原生js代码进行了封装，存放到里面。这样我们可以快速高效的使用这些封装好的功能了。</p>
+<p>比如 jQuery，就是为了快速方便的操作DOM，里面基本都是函数（方法）。</p>
+</blockquote>
+<p>​    常见的JavaScript 库：jQuery、Prototype、YUI、Dojo、Ext JS、移动端的zepto等，这些库都是对原生 JavaScript 的封装，内部都是用 JavaScript 实现的</p>
+<h3 id="1-1-2-jQuery的概念"><a href="#1-1-2-jQuery的概念" class="headerlink" title="1.1.2 jQuery的概念"></a>1.1.2 jQuery的概念</h3><p>​    jQuery总体概况如下 :</p>
+<ul>
+<li><p>jQuery 是一个快速、简洁的 JavaScript 库，其设计的宗旨是“write Less，Do More”，即倡导写更少的代码，做更多的事情。</p>
+</li>
+<li><p>j 就是 JavaScript；   Query 查询； 意思就是查询js，把js中的DOM操作做了封装，我们可以快速的查询使用里面的功能。</p>
+</li>
+<li><p>jQuery 封装了 JavaScript 常用的功能代码，优化了 DOM 操作、事件处理、动画设计和 Ajax 交互。</p>
+</li>
+<li><p>学习jQuery本质： 就是学习调用这些函数（方法）。</p>
+</li>
+<li><p>jQuery 出现的目的是加快前端人员的开发速度，我们可以非常方便的调用和使用它，从而提高开发效率。</p>
+</li>
+</ul>
+<h2 id="1-2-jQuery-的基本使用"><a href="#1-2-jQuery-的基本使用" class="headerlink" title="1.2. jQuery 的基本使用"></a>1.2. jQuery 的基本使用</h2><h3 id="1-2-1-jQuery-的下载"><a href="#1-2-1-jQuery-的下载" class="headerlink" title="1.2.1 jQuery 的下载"></a>1.2.1 jQuery 的下载</h3><p>​    jQuery的官网地址： <a href="https://jquery.com/%EF%BC%8C%E5%AE%98%E7%BD%91%E5%8D%B3%E5%8F%AF%E4%B8%8B%E8%BD%BD%E6%9C%80%E6%96%B0%E7%89%88%E6%9C%AC%E3%80%82">https://jquery.com/，官网即可下载最新版本。</a></p>
+<blockquote>
+<p> 各个版本的下载：<a href="https://code.jquery.com/">https://code.jquery.com/</a></p>
+</blockquote>
+<p>​    版本介绍：</p>
+<blockquote>
+<p>1x ：兼容 IE 678 等低版本浏览器， 官网不再更新</p>
+<p>2x ：不兼容 IE 678 等低版本浏览器， 官网不再更新</p>
+<p>3x ：不兼容 IE 678 等低版本浏览器， 是官方主要更新维护的版本</p>
+</blockquote>
+<h3 id="1-2-2-体验jQuery"><a href="#1-2-2-体验jQuery" class="headerlink" title="1.2.2. 体验jQuery"></a>1.2.2. 体验jQuery</h3><p>​    步骤：</p>
+<ul>
+<li>引入jQuery文件。</li>
+<li>在文档最末尾插入 script 标签，书写体验代码。</li>
+<li>$(‘div’).hide() 可以隐藏盒子。</li>
+</ul>
+<h3 id="1-2-3-jQuery的入口函数"><a href="#1-2-3-jQuery的入口函数" class="headerlink" title="1.2.3. jQuery的入口函数"></a>1.2.3. jQuery的入口函数</h3><p>​    jQuery中常见的两种入口函数：</p>
+<pre><code class="javascript">// 第一种: 简单易用。
+$(function () &#123;   
+    ...  // 此处是页面 DOM 加载完成的入口
+&#125;) ; 
+
+// 第二种: 繁琐，但是也可以实现
+$(document).ready(function()&#123;
+   ...  //  此处是页面DOM加载完成的入口
+&#125;);
+</code></pre>
+<p>​    总结：</p>
+<ol>
+<li>等着 DOM 结构渲染完毕即可执行内部代码，不必等到所有外部资源加载完成，jQuery 帮我们完成了封装。</li>
+<li>相当于原生 js 中的 DOMContentLoaded。</li>
+<li>不同于原生 js 中的 load 事件是等页面文档、外部的 js 文件、css文件、图片加载完毕才执行内部代码。</li>
+<li>更推荐使用第一种方式。</li>
+</ol>
+<h3 id="1-2-4-jQuery中的顶级对象"><a href="#1-2-4-jQuery中的顶级对象" class="headerlink" title="1.2.4. jQuery中的顶级对象$"></a>1.2.4. jQuery中的顶级对象$</h3><ol>
+<li> $是 jQuery 的别称，在代码中可以使用 jQuery 代替，但一般为了方便，通常都直接使用 $ 。</li>
+<li> $是jQuery的顶级对象，相当于原生JavaScript中的 window。把元素利用$包装成jQuery对象，就可以调用jQuery 的方法。</li>
+</ol>
+<h3 id="1-2-5-jQuery-对象和-DOM-对象"><a href="#1-2-5-jQuery-对象和-DOM-对象" class="headerlink" title="1.2.5.  jQuery 对象和 DOM 对象"></a>1.2.5.  jQuery 对象和 DOM 对象</h3><p>​    使用 jQuery 方法和原生JS获取的元素是不一样的，总结如下 : </p>
+<ol>
+<li>用原生 JS 获取来的对象就是 DOM 对象</li>
+<li>jQuery 方法获取的元素就是 jQuery 对象。</li>
+<li>jQuery 对象本质是： 利用$对DOM 对象包装后产生的对象（伪数组形式存储）。</li>
+</ol>
+<blockquote>
+<p>注意：</p>
+<p>只有 jQuery 对象才能使用 jQuery 方法，DOM 对象则使用原生的 JavaScirpt 方法。</p>
+</blockquote>
+<p><img src="images/jQuery%E5%AF%B9%E8%B1%A1%E5%92%8CDOM%E5%AF%B9%E8%B1%A1.png" alt="jQuery对象和DOM对象"></p>
+<h3 id="1-2-6-jQuery-对象和-DOM-对象转换"><a href="#1-2-6-jQuery-对象和-DOM-对象转换" class="headerlink" title="1.2.6.  jQuery 对象和 DOM 对象转换"></a>1.2.6.  jQuery 对象和 DOM 对象转换</h3><p>​    DOM 对象与 jQuery 对象之间是可以相互转换的。因为原生js 比 jQuery 更大，原生的一些属性和方法 jQuery没有给我们封装. 要想使用这些属性和方法需要把jQuery对象转换为DOM对象才能使用。</p>
+<pre><code class="javascript">// 1.DOM对象转换成jQuery对象，方法只有一种
+var box = document.getElementById(&#39;box&#39;);  // 获取DOM对象
+var jQueryObject = $(box);  // 把DOM对象转换为 jQuery 对象
+
+// 2.jQuery 对象转换为 DOM 对象有两种方法：
+//   2.1 jQuery对象[索引值]
+var domObject1 = $(&#39;div&#39;)[0]
+
+//   2.2 jQuery对象.get(索引值)
+var domObject2 = $(&#39;div&#39;).get(0)
+ 
+</code></pre>
+<p>总结：实际开发比较常用的是把DOM对象转换为jQuery对象，这样能够调用功能更加强大的jQuery中的方法。</p>
+<h2 id="1-3-jQuery-选择器"><a href="#1-3-jQuery-选择器" class="headerlink" title="1.3. jQuery 选择器"></a>1.3. jQuery 选择器</h2><p>​    原生 JS 获取元素方式很多，很杂，而且兼容性情况不一致，因此 jQuery 给我们做了封装，使获取元素统一标准。</p>
+<h3 id="1-3-1-基础选择器"><a href="#1-3-1-基础选择器" class="headerlink" title="1.3.1. 基础选择器"></a>1.3.1. 基础选择器</h3><pre><code class="js">$(&quot;选择器&quot;)   //  里面选择器直接写 CSS 选择器即可，但是要加引号 
+</code></pre>
+<p>​    <img src="images/%E5%9F%BA%E7%A1%80%E9%80%89%E6%8B%A9%E5%99%A8.png" alt="基础选择器"></p>
+<h3 id="1-3-2-层级选择器"><a href="#1-3-2-层级选择器" class="headerlink" title="1.3.2. 层级选择器"></a>1.3.2. 层级选择器</h3><p>​    层级选择器最常用的两个分别为：后代选择器和子代选择器。</p>
+<p>​    <img src="images/%E5%B1%82%E7%BA%A7%E9%80%89%E6%8B%A9%E5%99%A8.png" alt="层级选择器"></p>
+<p><strong>基础选择器和层级选择器案例代码</strong></p>
+<pre><code class="javascript">&lt;body&gt;
+    &lt;div&gt;我是div&lt;/div&gt;
+    &lt;div class=&quot;nav&quot;&gt;我是nav div&lt;/div&gt;
+    &lt;p&gt;我是p&lt;/p&gt;
+    &lt;ul&gt;
+        &lt;li&gt;我是ul 的&lt;/li&gt;
+        &lt;li&gt;我是ul 的&lt;/li&gt;        
+        &lt;li&gt;我是ul 的&lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;script&gt;
+        $(function() &#123;
+            console.log($(&quot;.nav&quot;));
+            console.log($(&quot;ul li&quot;));
+        &#125;)
+    &lt;/script&gt;
+&lt;/body&gt;
+</code></pre>
+<h3 id="1-3-3-筛选选择器"><a href="#1-3-3-筛选选择器" class="headerlink" title="1.3.3. 筛选选择器"></a>1.3.3. 筛选选择器</h3><p>​    筛选选择器，顾名思义就是在所有的选项中选择满足条件的进行筛选选择。常见如下 :</p>
+<p><img src="images/%E7%AD%9B%E9%80%89%E9%80%89%E6%8B%A9%E5%99%A8.png" alt="筛选选择器"></p>
+<p><strong>案例代码</strong></p>
+<pre><code class="js">&lt;body&gt;
+    &lt;ul&gt;
+        &lt;li&gt;多个里面筛选几个&lt;/li&gt;
+        &lt;li&gt;多个里面筛选几个&lt;/li&gt;
+        &lt;li&gt;多个里面筛选几个&lt;/li&gt;
+        &lt;li&gt;多个里面筛选几个&lt;/li&gt;
+        &lt;li&gt;多个里面筛选几个&lt;/li&gt;
+        &lt;li&gt;多个里面筛选几个&lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;ol&gt;
+        &lt;li&gt;多个里面筛选几个&lt;/li&gt;
+        &lt;li&gt;多个里面筛选几个&lt;/li&gt;
+        &lt;li&gt;多个里面筛选几个&lt;/li&gt;
+        &lt;li&gt;多个里面筛选几个&lt;/li&gt;
+        &lt;li&gt;多个里面筛选几个&lt;/li&gt;
+        &lt;li&gt;多个里面筛选几个&lt;/li&gt;
+    &lt;/ol&gt;
+    &lt;script&gt;
+        $(function() &#123;
+            $(&quot;ul li:first&quot;).css(&quot;color&quot;, &quot;red&quot;);
+            $(&quot;ul li:eq(2)&quot;).css(&quot;color&quot;, &quot;blue&quot;);
+            $(&quot;ol li:odd&quot;).css(&quot;color&quot;, &quot;skyblue&quot;);
+            $(&quot;ol li:even&quot;).css(&quot;color&quot;, &quot;pink&quot;);
+        &#125;)
+    &lt;/script&gt;
+&lt;/body&gt;
+</code></pre>
+<p>另:  jQuery中还有一些筛选方法，类似DOM中的通过一个节点找另外一个节点，父、子、兄以外有所加强。</p>
+<p><img src="images/relation.png" alt="筛选方法"></p>
+<p>偏重于记忆，演示代码略。</p>
+<h3 id="1-3-4-知识铺垫"><a href="#1-3-4-知识铺垫" class="headerlink" title="1.3.4 知识铺垫"></a>1.3.4 知识铺垫</h3><ul>
+<li>jQuery 设置样式</li>
+</ul>
+<pre><code class="javascript">$(&#39;div&#39;).css(&#39;属性&#39;, &#39;值&#39;)    
+</code></pre>
+<ul>
+<li>jQuery 里面的排他思想</li>
+</ul>
+<pre><code class="javascript">// 想要多选一的效果，排他思想：当前元素设置样式，其余的兄弟元素清除样式。
+$(this).css(“color”,”red”);
+$(this).siblings(). css(“color”,””);
+</code></pre>
+<ul>
+<li>隐式迭代</li>
+</ul>
+<pre><code class="javascript">// 遍历内部 DOM 元素（伪数组形式存储）的过程就叫做隐式迭代。
+// 简单理解：给匹配到的所有元素进行循环遍历，执行相应的方法，而不用我们再进行循环，简化我们的操作，方便我们调用。
+$(&#39;div&#39;).hide();  // 页面中所有的div全部隐藏，不用循环操作
+</code></pre>
+<ul>
+<li>链式编程</li>
+</ul>
+<pre><code class="javascript">// 链式编程是为了节省代码量，看起来更优雅。
+$(this).css(&#39;color&#39;, &#39;red&#39;).sibling().css(&#39;color&#39;, &#39;&#39;); 
+</code></pre>
+<h2 id="1-4-jQuery-样式操作"><a href="#1-4-jQuery-样式操作" class="headerlink" title="1.4.  jQuery 样式操作"></a>1.4.  jQuery 样式操作</h2><p>​    jQuery中常用的样式操作有两种：css() 和 设置类样式方法</p>
+<h3 id="1-4-1-方法1-操作-css-方法"><a href="#1-4-1-方法1-操作-css-方法" class="headerlink" title="1.4.1. 方法1: 操作 css 方法"></a>1.4.1. 方法1: 操作 css 方法</h3><p>​    jQuery 可以使用 css 方法来修改简单元素样式； 也可以操作类，修改多个样式。</p>
+<p>​    常用以下三种形式 : </p>
+<pre><code class="javascript">// 1.参数只写属性名，则是返回属性值
+var strColor = $(this).css(&#39;color&#39;);
+
+// 2.  参数是属性名，属性值，逗号分隔，是设置一组样式，属性必须加引号，值如果是数字可以不用跟单位和引号
+$(this).css(&#39;&#39;color&#39;&#39;, &#39;&#39;red&#39;&#39;);
+
+// 3.  参数可以是对象形式，方便设置多组样式。属性名和属性值用冒号隔开， 属性可以不用加引号
+$(this).css(&#123; &quot;color&quot;:&quot;white&quot;,&quot;font-size&quot;:&quot;20px&quot;&#125;);
+</code></pre>
+<p>​    注意：css() 多用于样式少时操作，多了则不太方便。</p>
+<h3 id="1-4-2-方法2-设置类样式方法"><a href="#1-4-2-方法2-设置类样式方法" class="headerlink" title="1.4.2. 方法2: 设置类样式方法"></a>1.4.2. 方法2: 设置类样式方法</h3><p>​    作用等同于以前的 classList，可以操作类样式， 注意操作类里面的参数不要加点。</p>
+<p>​    常用的三种设置类样式方法：</p>
+<pre><code class="javascript">// 1.添加类
+$(&quot;div&quot;).addClass(&quot;current&quot;);
+
+// 2.删除类
+$(&quot;div&quot;).removeClass(&quot;current&quot;);
+
+// 3.切换类
+$(&quot;div&quot;).toggleClass(&quot;current&quot;);
+</code></pre>
+<p>​    注意：</p>
+<ol>
+<li>设置类样式方法比较适合样式多时操作，可以弥补css()的不足。</li>
+<li>原生 JS 中 className 会覆盖元素原先里面的类名，jQuery 里面类操作只是对指定类进行操作，不影响原先的类名。</li>
+</ol>
+<h2 id="1-5-jQuery-效果"><a href="#1-5-jQuery-效果" class="headerlink" title="1.5. jQuery 效果"></a>1.5. jQuery 效果</h2><p>​    jQuery 给我们封装了很多动画效果，最为常见的如下：</p>
+<ul>
+<li>显示隐藏：show() / hide() / toggle() ;</li>
+<li>划入画出：slideDown() / slideUp() / slideToggle() ; </li>
+<li>淡入淡出：fadeIn() / fadeOut() / fadeToggle() / fadeTo() ; </li>
+<li>自定义动画：animate() ;</li>
+</ul>
+<blockquote>
+<p>注意：</p>
+<p>动画或者效果一旦触发就会执行，如果多次触发，就造成多个动画或者效果排队执行。</p>
+<p>jQuery为我们提供另一个方法，可以停止动画排队：stop() ;</p>
+</blockquote>
+<h3 id="1-5-1-显示隐藏"><a href="#1-5-1-显示隐藏" class="headerlink" title="1.5.1. 显示隐藏"></a>1.5.1. 显示隐藏</h3><p>​    显示隐藏动画，常见有三个方法：show() / hide() / toggle() ;</p>
+<p>​    语法规范如下:</p>
+<p><img src="images/show.png" alt="show"></p>
+<p><img src="images/hide.png" alt="hide"></p>
+<p><img src="images/toggle.png" alt="toggle"></p>
+<p><strong>代码演示</strong></p>
+<pre><code class="javascript">&lt;body&gt;
+    &lt;button&gt;显示&lt;/button&gt;
+    &lt;button&gt;隐藏&lt;/button&gt;
+    &lt;button&gt;切换&lt;/button&gt;
+    &lt;div&gt;&lt;/div&gt;
+    &lt;script&gt;
+        $(function() &#123;
+            $(&quot;button&quot;).eq(0).click(function() &#123;
+                $(&quot;div&quot;).show(1000, function() &#123;
+                    alert(1);
+                &#125;);
+            &#125;)
+            $(&quot;button&quot;).eq(1).click(function() &#123;
+                $(&quot;div&quot;).hide(1000, function() &#123;
+                    alert(1);
+                &#125;);
+            &#125;)
+            $(&quot;button&quot;).eq(2).click(function() &#123;
+              $(&quot;div&quot;).toggle(1000);
+            &#125;)
+            // 一般情况下，我们都不加参数直接显示隐藏就可以了
+        &#125;);
+    &lt;/script&gt;
+&lt;/body&gt;
+</code></pre>
+<h3 id="1-5-2-滑入滑出"><a href="#1-5-2-滑入滑出" class="headerlink" title="1.5.2. 滑入滑出"></a>1.5.2. 滑入滑出</h3><p>​    滑入滑出动画，常见有三个方法：slideDown() / slideUp() / slideToggle() ; </p>
+<p>​    语法规范如下:</p>
+<p><img src="images/slideDown.png" alt="slideDown"></p>
+<p><img src="images/slideUp.png" alt="slideUp"></p>
+<p><img src="images/slideToggle.png" alt="slideToggle"></p>
+<p><strong>代码演示</strong></p>
+<pre><code class="javascript">&lt;body&gt;
+    &lt;button&gt;下拉滑动&lt;/button&gt;
+    &lt;button&gt;上拉滑动&lt;/button&gt;
+    &lt;button&gt;切换滑动&lt;/button&gt;
+    &lt;div&gt;&lt;/div&gt;
+    &lt;script&gt;
+        $(function() &#123;
+            $(&quot;button&quot;).eq(0).click(function() &#123;
+                // 下滑动 slideDown()
+                $(&quot;div&quot;).slideDown();
+            &#125;)
+            $(&quot;button&quot;).eq(1).click(function() &#123;
+                // 上滑动 slideUp()
+                $(&quot;div&quot;).slideUp(500);
+            &#125;)
+            $(&quot;button&quot;).eq(2).click(function() &#123;
+                // 滑动切换 slideToggle()
+                $(&quot;div&quot;).slideToggle(500);
+            &#125;);
+        &#125;);
+    &lt;/script&gt;
+&lt;/body&gt;
+</code></pre>
+<blockquote>
+<p>小案例：下拉菜单略（详情参看源码）。</p>
+</blockquote>
+<h3 id="1-5-3-淡入淡出"><a href="#1-5-3-淡入淡出" class="headerlink" title="1.5.3 淡入淡出"></a>1.5.3 淡入淡出</h3><p>​    淡入淡出动画，常见有四个方法：fadeIn() / fadeOut() / fadeToggle() / fadeTo() ; </p>
+<p>​    语法规范如下:</p>
+<p><img src="images/fadeIn.png" alt="fadeIn"></p>
+<p><img src="images/fadeOut.png" alt="fadeOut"></p>
+<p><img src="images/fadeToggle.png" alt="fadeToggle"></p>
+<p><img src="images/fadeTo.png" alt="fadeTo"></p>
+<p><strong>代码演示</strong></p>
+<pre><code class="javascript">&lt;body&gt;
+    &lt;button&gt;淡入效果&lt;/button&gt;
+    &lt;button&gt;淡出效果&lt;/button&gt;
+    &lt;button&gt;淡入淡出切换&lt;/button&gt;
+    &lt;button&gt;修改透明度&lt;/button&gt;
+    &lt;div&gt;&lt;/div&gt;
+    &lt;script&gt;
+        $(function() &#123;
+            $(&quot;button&quot;).eq(0).click(function() &#123;
+                // 淡入 fadeIn()
+                $(&quot;div&quot;).fadeIn(1000);
+            &#125;)
+            $(&quot;button&quot;).eq(1).click(function() &#123;
+                // 淡出 fadeOut()
+                $(&quot;div&quot;).fadeOut(1000);
+            &#125;)
+            $(&quot;button&quot;).eq(2).click(function() &#123;
+                // 淡入淡出切换 fadeToggle()
+                $(&quot;div&quot;).fadeToggle(1000);
+            &#125;);
+            $(&quot;button&quot;).eq(3).click(function() &#123;
+                //  修改透明度 fadeTo() 这个速度和透明度要必须写
+                $(&quot;div&quot;).fadeTo(1000, 0.5);
+            &#125;);
+        &#125;);
+    &lt;/script&gt;
+&lt;/body&gt;
+</code></pre>
+<h3 id="1-5-4-自定义动画"><a href="#1-5-4-自定义动画" class="headerlink" title="1.5.4 自定义动画"></a>1.5.4 自定义动画</h3><p>​    自定义动画非常强大，通过参数的传递可以模拟以上所有动画，方法为：animate() ;</p>
+<p>​    语法规范如下:</p>
+<p><img src="images/animate.png"></p>
+<p><strong>代码演示</strong></p>
+<pre><code class="javascript">&lt;body&gt;
+    &lt;button&gt;动起来&lt;/button&gt;
+    &lt;div&gt;&lt;/div&gt;
+    &lt;script&gt;
+        $(function() &#123;
+            $(&quot;button&quot;).click(function() &#123;
+                $(&quot;div&quot;).animate(&#123;
+                    left: 500,
+                    top: 300,
+                    opacity: .4,
+                    width: 500
+                &#125;, 500);
+            &#125;)
+        &#125;)
+    &lt;/script&gt;
+&lt;/body&gt;
+</code></pre>
+<h3 id="1-5-5-停止动画排队"><a href="#1-5-5-停止动画排队" class="headerlink" title="1.5.5 停止动画排队"></a>1.5.5 停止动画排队</h3><p>​    动画或者效果一旦触发就会执行，如果多次触发，就造成多个动画或者效果排队执行。</p>
+<p>​    停止动画排队的方法为：stop() ; </p>
+<ul>
+<li>stop() 方法用于停止动画或效果。</li>
+<li>stop() 写到动画或者效果的前面， 相当于停止结束上一次的动画。</li>
+</ul>
+<p>​        总结: 每次使用动画之前，先调用 stop() ,在调用动画。</p>
+<h3 id="1-5-6-事件切换"><a href="#1-5-6-事件切换" class="headerlink" title="1.5.6. 事件切换"></a>1.5.6. 事件切换</h3><p>​    jQuery中为我们添加了一个新事件 hover() ; 功能类似 css 中的伪类 :hover 。介绍如下</p>
+<p><strong>语法</strong></p>
+<pre><code class="javascript">hover([over,]out)     // 其中over和out为两个函数
+</code></pre>
+<ul>
+<li>over:鼠标移到元素上要触发的函数（相当于mouseenter）</li>
+<li>out:鼠标移出元素要触发的函数（相当于mouseleave）</li>
+<li>如果只写一个函数，则鼠标经过和离开都会触发它</li>
+</ul>
+<p><strong>hover事件和停止动画排列案例</strong></p>
+<pre><code class="javascript">&lt;body&gt;
+    &lt;ul class=&quot;nav&quot;&gt;
+        &lt;li&gt;
+            &lt;a href=&quot;#&quot;&gt;微博&lt;/a&gt;
+            &lt;ul&gt;&lt;li&gt;&lt;a href=&quot;&quot;&gt;私信&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href=&quot;&quot;&gt;评论&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href=&quot;&quot;&gt;@我&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;
+        &lt;/li&gt;
+        &lt;li&gt;
+            &lt;a href=&quot;#&quot;&gt;微博&lt;/a&gt;
+            &lt;ul&gt;&lt;li&gt;&lt;a href=&quot;&quot;&gt;私信&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href=&quot;&quot;&gt;评论&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href=&quot;&quot;&gt;@我&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;
+        &lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;script&gt;
+        $(function() &#123;
+            // 鼠标经过
+            // $(&quot;.nav&gt;li&quot;).mouseover(function() &#123;
+            //     // $(this) jQuery 当前元素  this不要加引号
+            //     // show() 显示元素  hide() 隐藏元素
+            //     $(this).children(&quot;ul&quot;).slideDown(200);
+            // &#125;);
+            // // 鼠标离开
+            // $(&quot;.nav&gt;li&quot;).mouseout(function() &#123;
+            //     $(this).children(&quot;ul&quot;).slideUp(200);
+            // &#125;);
+            // 1. 事件切换 hover 就是鼠标经过和离开的复合写法
+            // $(&quot;.nav&gt;li&quot;).hover(function() &#123;
+            //     $(this).children(&quot;ul&quot;).slideDown(200);
+            // &#125;, function() &#123;
+            //     $(this).children(&quot;ul&quot;).slideUp(200);
+            // &#125;);
+            // 2. 事件切换 hover  如果只写一个函数，那么鼠标经过和鼠标离开都会触发这个函数
+            $(&quot;.nav&gt;li&quot;).hover(function() &#123;
+                // stop 方法必须写到动画的前面
+                $(this).children(&quot;ul&quot;).stop().slideToggle();
+            &#125;);
+        &#125;)
+    &lt;/script&gt;
+&lt;/body&gt;
+</code></pre>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>Jquery03</title>
+    <url>/2020/07/24/Jquery3/</url>
+    <content><![CDATA[<h2 id="1-1-jQuery-事件注册"><a href="#1-1-jQuery-事件注册" class="headerlink" title="1.1. jQuery 事件注册"></a>1.1. jQuery 事件注册</h2><p>​    jQuery 为我们提供了方便的事件注册机制，是开发人员抑郁操作优缺点如下：</p>
+<ul>
+<li>优点: 操作简单，且不用担心事件覆盖等问题。</li>
+<li>缺点: 普通的事件注册不能做事件委托，且无法实现事件解绑，需要借助其他方法。</li>
+</ul>
+<p><strong>语法</strong></p>
+<p><img src="images/register.png" alt="register"></p>
+<p><strong>演示代码</strong></p>
+<pre><code class="javascript">&lt;body&gt;
+    &lt;div&gt;&lt;/div&gt;
+    &lt;script&gt;
+        $(function() &#123;
+            // 1. 单个事件注册
+            $(&quot;div&quot;).click(function() &#123;
+                $(this).css(&quot;background&quot;, &quot;purple&quot;);
+            &#125;);
+            $(&quot;div&quot;).mouseenter(function() &#123;
+                $(this).css(&quot;background&quot;, &quot;skyblue&quot;);
+            &#125;);
+        &#125;)
+    &lt;/script&gt;
+&lt;/body&gt;
+</code></pre>
+<h2 id="1-2-jQuery-事件处理"><a href="#1-2-jQuery-事件处理" class="headerlink" title="1.2. jQuery 事件处理"></a>1.2. jQuery 事件处理</h2><p>​    因为普通注册事件方法的不足，jQuery又开发了多个处理方法</p>
+<ul>
+<li>on(): 用于事件绑定，目前最好用的事件绑定方法</li>
+<li>off(): 事件解绑</li>
+<li>trigger() / triggerHandler(): 事件触发</li>
+</ul>
+<h3 id="1-2-1-事件处理-on-绑定事件"><a href="#1-2-1-事件处理-on-绑定事件" class="headerlink" title="1.2.1 事件处理 on() 绑定事件"></a>1.2.1 事件处理 on() 绑定事件</h3><p>​    因为普通注册事件方法的不足，jQuery又创建了多个新的事件绑定方法bind() / live() / delegate() / on()等，其中最好用的是: on()</p>
+<p><strong>语法</strong></p>
+<p><img src="images/on1.png" alt="on1"></p>
+<p><img src="images/on2.png" alt="on2"></p>
+<p><img src="images/on3.png" alt="on3"></p>
+<p><strong>演示代码</strong></p>
+<pre><code class="javascript">&lt;body&gt;
+    &lt;div&gt;&lt;/div&gt;
+    &lt;ul&gt;
+        &lt;li&gt;我们都是好孩子&lt;/li&gt;
+        &lt;li&gt;我们都是好孩子&lt;/li&gt;
+        &lt;li&gt;我们都是好孩子&lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;ol&gt;&lt;/ol&gt;
+
+    &lt;script&gt;
+        $(function() &#123;
+            // (1) on可以绑定1个或者多个事件处理程序
+            // $(&quot;div&quot;).on(&#123;
+            //     mouseenter: function() &#123;
+            //         $(this).css(&quot;background&quot;, &quot;skyblue&quot;);
+            //     &#125;,
+            //     click: function() &#123;
+            //         $(this).css(&quot;background&quot;, &quot;purple&quot;);
+            //     &#125;
+            // &#125;);
+            $(&quot;div&quot;).on(&quot;mouseenter mouseleave&quot;, function() &#123;
+                $(this).toggleClass(&quot;current&quot;);
+            &#125;);
+  
+            // (2) on可以实现事件委托（委派）
+            // click 是绑定在ul 身上的，但是 触发的对象是 ul 里面的小li
+            // $(&quot;ul li&quot;).click();
+            $(&quot;ul&quot;).on(&quot;click&quot;, &quot;li&quot;, function() &#123;
+                alert(11);
+            &#125;);
+
+            // (3) on可以给未来动态创建的元素绑定事件
+            $(&quot;ol&quot;).on(&quot;click&quot;, &quot;li&quot;, function() &#123;
+                alert(11);
+            &#125;)
+            var li = $(&quot;&lt;li&gt;我是后来创建的&lt;/li&gt;&quot;);
+            $(&quot;ol&quot;).append(li);
+        &#125;)
+    &lt;/script&gt;
+&lt;/body&gt;
+</code></pre>
+<h3 id="1-2-2-事件处理-off-解绑事件"><a href="#1-2-2-事件处理-off-解绑事件" class="headerlink" title="1.2.2. 事件处理 off() 解绑事件"></a>1.2.2. 事件处理 off() 解绑事件</h3><p>​    当某个事件上面的逻辑，在特定需求下不需要的时候，可以把该事件上的逻辑移除，这个过程我们称为事件解绑。jQuery 为我们提供 了多种事件解绑方法：die() / undelegate() / off() 等</p>
+<p><strong>语法</strong></p>
+<p><img src="images/off.png" alt="off"></p>
+<p><strong>演示代码</strong></p>
+<pre><code class="javascript">&lt;body&gt;
+    &lt;div&gt;&lt;/div&gt;
+    &lt;ul&gt;
+        &lt;li&gt;我们都是好孩子&lt;/li&gt;
+        &lt;li&gt;我们都是好孩子&lt;/li&gt;
+        &lt;li&gt;我们都是好孩子&lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;p&gt;我是一个P标签&lt;/p&gt;
+    &lt;script&gt;
+        $(function() &#123;
+              // 事件绑定
+            $(&quot;div&quot;).on(&#123;
+                click: function() &#123;
+                    console.log(&quot;我点击了&quot;);
+                &#125;,
+                mouseover: function() &#123;
+                    console.log(&#39;我鼠标经过了&#39;);
+                &#125;
+            &#125;);
+            $(&quot;ul&quot;).on(&quot;click&quot;, &quot;li&quot;, function() &#123;
+                alert(11);
+            &#125;);
+  
+            // 1. 事件解绑 off 
+            // $(&quot;div&quot;).off();  // 这个是解除了div身上的所有事件
+            $(&quot;div&quot;).off(&quot;click&quot;); // 这个是解除了div身上的点击事件
+            $(&quot;ul&quot;).off(&quot;click&quot;, &quot;li&quot;);
+  
+            // 2. one() 但是它只能触发事件一次
+            $(&quot;p&quot;).one(&quot;click&quot;, function() &#123;
+                alert(11);
+            &#125;)
+        &#125;)
+    &lt;/script&gt;
+&lt;/body&gt;
+</code></pre>
+<h3 id="1-2-3-事件处理-trigger-自动触发事件"><a href="#1-2-3-事件处理-trigger-自动触发事件" class="headerlink" title="1.2.3. 事件处理 trigger() 自动触发事件"></a>1.2.3. 事件处理 trigger() 自动触发事件</h3><p>​    有些时候，在某些特定的条件下，我们希望某些事件能够自动触发, 比如轮播图自动播放功能跟点击右侧按钮一致。可以利用定时器自动触发右侧按钮点击事件，不必鼠标点击触发。由此 jQuery 为我们提供了两个自动触发事件 trigger() 和 triggerHandler() ; </p>
+<p><strong>语法</strong></p>
+<p><img src="images/t1.png" alt="t1"></p>
+<p><img src="images/t2.png" alt="t2"></p>
+<p><strong>演示代码</strong></p>
+<pre><code class="javascript">&lt;body&gt;
+    &lt;div&gt;&lt;/div&gt;
+    &lt;input type=&quot;text&quot;&gt;
+      
+    &lt;script&gt;
+    $(function() &#123;
+      // 绑定事件
+      $(&quot;div&quot;).on(&quot;click&quot;, function() &#123;
+        alert(11);
+      &#125;);
+
+      // 自动触发事件
+      // 1. 元素.事件()
+      // $(&quot;div&quot;).click();会触发元素的默认行为
+      
+      // 2. 元素.trigger(&quot;事件&quot;)
+      // $(&quot;div&quot;).trigger(&quot;click&quot;);会触发元素的默认行为
+      $(&quot;input&quot;).trigger(&quot;focus&quot;);
+      
+      // 3. 元素.triggerHandler(&quot;事件&quot;) 就是不会触发元素的默认行为
+      $(&quot;input&quot;).on(&quot;focus&quot;, function() &#123;
+        $(this).val(&quot;你好吗&quot;);
+      &#125;);
+      // 一个会获取焦点，一个不会
+      $(&quot;div&quot;).triggerHandler(&quot;click&quot;);
+      // $(&quot;input&quot;).triggerHandler(&quot;focus&quot;);
+    &#125;);
+    &lt;/script&gt;
+&lt;/body&gt;
+</code></pre>
+<h2 id="1-3-jQuery-事件对象"><a href="#1-3-jQuery-事件对象" class="headerlink" title="1.3. jQuery 事件对象"></a>1.3. jQuery 事件对象</h2><p>​    jQuery 对DOM中的事件对象 event 进行了封装，兼容性更好，获取更方便，使用变化不大。事件被触发，就会有事件对象的产生。</p>
+<p><strong>语法</strong></p>
+<p><img src="images/event.png" alt="event"></p>
+<p><strong>演示代码</strong></p>
+<pre><code class="javascript">&lt;body&gt;
+    &lt;div&gt;&lt;/div&gt;
+
+    &lt;script&gt;
+        $(function() &#123;
+            $(document).on(&quot;click&quot;, function() &#123;
+                console.log(&quot;点击了document&quot;);
+            &#125;)
+            $(&quot;div&quot;).on(&quot;click&quot;, function(event) &#123;
+                // console.log(event);
+                console.log(&quot;点击了div&quot;);
+                event.stopPropagation();
+            &#125;)
+        &#125;)
+    &lt;/script&gt;
+&lt;/body&gt;
+</code></pre>
+<p>注意：jQuery中的 event 对象使用，可以借鉴 API 和 DOM 中的 event 。</p>
+<h2 id="1-4-jQuery-拷贝对象"><a href="#1-4-jQuery-拷贝对象" class="headerlink" title="1.4.  jQuery 拷贝对象"></a>1.4.  jQuery 拷贝对象</h2><p>​    jQuery中分别为我们提供了两套快速获取和设置元素尺寸和位置的API，方便易用，内容如下。</p>
+<p><strong>语法</strong></p>
+<p><img src="images/extend.png" alt="extend"></p>
+<p><strong>演示代码</strong></p>
+<pre><code class="javascript"> &lt;script&gt;
+        $(function() &#123;
+               // 1.合并数据
+            var targetObj = &#123;&#125;;
+            var obj = &#123;
+                id: 1,
+                name: &quot;andy&quot;
+            &#125;;
+            // $.extend(target, obj);
+            $.extend(targetObj, obj);
+            console.log(targetObj);
+   
+               // 2. 会覆盖 targetObj 里面原来的数据
+            var targetObj = &#123;
+                id: 0
+            &#125;;
+            var obj = &#123;
+                id: 1,
+                name: &quot;andy&quot;
+            &#125;;
+            // $.extend(target, obj);
+            $.extend(targetObj, obj);
+            console.log(targetObj); 
+        &#125;)
+    &lt;/script&gt;
+</code></pre>
+<h2 id="1-5-jQuery-多库共存"><a href="#1-5-jQuery-多库共存" class="headerlink" title="1.5.  jQuery 多库共存"></a>1.5.  jQuery 多库共存</h2><p>​    实际开发中，很多项目连续开发十多年，jQuery版本不断更新，最初的 jQuery 版本无法满足需求，这时就需要保证在旧有版本正常运行的情况下，新的功能使用新的jQuery版本实现，这种情况被称为，jQuery 多库共存。</p>
+<p><strong>语法</strong></p>
+<p><img src="images/noconfig.png" alt="noconfig"></p>
+<p><strong>演示代码</strong></p>
+<pre><code class="javascript">&lt;script&gt;
+    $(function() &#123;
+          // 让jquery 释放对$ 控制权 让用自己决定
+          var suibian = jQuery.noConflict();
+          console.log(suibian(&quot;span&quot;));
+    &#125;)
+&lt;/script&gt;
+</code></pre>
+<h2 id="1-6-jQuery-插件"><a href="#1-6-jQuery-插件" class="headerlink" title="1.6.  jQuery 插件"></a>1.6.  jQuery 插件</h2><p>​    jQuery 功能比较有限，想要更复杂的特效效果，可以借助于 jQuery 插件完成。 这些插件也是依赖于jQuery来完成的，所以必须要先引入</p>
+<p>jQuery文件，因此也称为 jQuery 插件。</p>
+<p>​    jQuery 插件常用的网站：</p>
+<ol>
+<li> jQuery 插件库  <a href="http://www.jq22.com/">http://www.jq22.com/</a>     </li>
+<li> jQuery 之家   <a href="http://www.htmleaf.com/">http://www.htmleaf.com/</a> </li>
+</ol>
+<p>   jQuery 插件使用步骤：</p>
+<ol start="3">
+<li> 引入相关文件。（jQuery 文件 和 插件文件）    </li>
+<li> 复制相关html、css、js (调用插件)。</li>
+</ol>
+<h3 id="1-6-1-瀑布流插件"><a href="#1-6-1-瀑布流插件" class="headerlink" title="1.6.1.  瀑布流插件"></a>1.6.1.  瀑布流插件</h3><p><strong>下载位置</strong></p>
+<p><img src="images/water.png" alt="water"></p>
+<p><img src="images/download.png"></p>
+<p><strong>代码演示</strong></p>
+<p>​    插件的使用三点：   1. 引入css.           2.引入JS            3.引入html。 （有的简单插件只需引入html和js，甚至有的只需引入js）</p>
+<ul>
+<li>1.引入css.</li>
+</ul>
+<pre><code class="javascript">&lt;link rel=&quot;stylesheet&quot; href=&quot;css/normalize.css&quot;&gt;
+&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;css/default.css&quot;&gt;
+  
+&lt;!-- 下面的样式代码为页面布局，可以引入，也可以自己写，自己设计页面样式，一般为直接引入，方便 --&gt;
+&lt;style type=&quot;text/css&quot;&gt;
+  #gallery-wrapper &#123;
+    position: relative;
+    max-width: 75%;
+    width: 75%;
+    margin: 50px auto;
+  &#125;
+
+  img.thumb &#123;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+  &#125;
+
+  .white-panel &#123;
+    position: absolute;
+    background: white;
+    border-radius: 5px;
+    box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.3);
+    padding: 10px;
+  &#125;
+
+  .white-panel h1 &#123;
+    font-size: 1em;
+  &#125;
+
+  .white-panel h1 a &#123;
+    color: #A92733;
+  &#125;
+
+  .white-panel:hover &#123;
+    box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.5);
+    margin-top: -5px;
+    -webkit-transition: all 0.3s ease-in-out;
+    -moz-transition: all 0.3s ease-in-out;
+    -o-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+  &#125;
+&lt;/style&gt;
+</code></pre>
+<ul>
+<li>2.引入js.</li>
+</ul>
+<pre><code class="javascript">&lt;!-- 前两个必须引入 --&gt;
+&lt;script src=&quot;js/jquery-1.11.0.min.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;js/pinterest_grid.js&quot;&gt;&lt;/script&gt;
+&lt;!-- 下面的为启动瀑布流代码，参数可调节属性，具体功能可参考readme.html --&gt;
+&lt;script type=&quot;text/javascript&quot;&gt;
+    $(function() &#123;
+      $(&quot;#gallery-wrapper&quot;).pinterest_grid(&#123;
+          no_columns: 5,
+          padding_x: 15,
+          padding_y: 10,
+          margin_bottom: 50,
+          single_column_breakpoint: 700
+      &#125;);
+    &#125;);
+&lt;/script&gt;
+</code></pre>
+<ul>
+<li>3.引入html.</li>
+</ul>
+<pre><code class="javascript">    &lt;!-- html结构一般为事先写好，很难修改结构，但可以修改内容及图片的多少（article标签） --&gt;
+    &lt;section id=&quot;gallery-wrapper&quot;&gt;
+        &lt;article class=&quot;white-panel&quot;&gt;
+            &lt;img src=&quot;images/P_000.jpg&quot; class=&quot;thumb&quot;&gt;
+            &lt;h1&gt;&lt;a href=&quot;#&quot;&gt;我是轮播图片1&lt;/a&gt;&lt;/h1&gt;
+            &lt;p&gt;里面很精彩哦&lt;/p&gt;
+        &lt;/article&gt;
+        &lt;article class=&quot;white-panel&quot;&gt;
+            &lt;img src=&quot;images/P_005.jpg&quot; class=&quot;thumb&quot;&gt;
+            &lt;h1&gt;&lt;a href=&quot;#&quot;&gt;我是轮播图片1&lt;/a&gt;&lt;/h1&gt;
+            &lt;p&gt;里面很精彩哦&lt;/p&gt;
+        &lt;/article&gt;
+        &lt;article class=&quot;white-panel&quot;&gt;
+            &lt;img src=&quot;images/P_006.jpg&quot; class=&quot;thumb&quot;&gt;
+            &lt;h1&gt;&lt;a href=&quot;#&quot;&gt;我是轮播图片1&lt;/a&gt;&lt;/h1&gt;
+            &lt;p&gt;里面很精彩哦&lt;/p&gt;
+        &lt;/article&gt;
+        &lt;article class=&quot;white-panel&quot;&gt;
+            &lt;img src=&quot;images/P_007.jpg&quot; class=&quot;thumb&quot;&gt;
+            &lt;h1&gt;&lt;a href=&quot;#&quot;&gt;我是轮播图片1&lt;/a&gt;&lt;/h1&gt;
+            &lt;p&gt;里面很精彩哦&lt;/p&gt;
+        &lt;/article&gt;
+    &lt;/section&gt;
+</code></pre>
+<p>总结：jQuery插件就是引入别人写好的：html 、css、js  （有时也可以只引入一部分，读懂后也可以修改部分内容）</p>
+<h3 id="1-6-2-图片懒加载插件"><a href="#1-6-2-图片懒加载插件" class="headerlink" title="1.6.2. 图片懒加载插件"></a>1.6.2. 图片懒加载插件</h3><p>​    图片的懒加载就是：当页面滑动到有图片的位置，图片才进行加载，用以提升页面打开的速度及用户体验。</p>
+<p><strong>代码演示</strong></p>
+<p>​    懒加载只需引入html 和 js操作 即可，此插件不涉及css。</p>
+<ul>
+<li>1.引入js</li>
+</ul>
+<pre><code class="javascript">&lt;script src=&quot;js/EasyLazyload.min.js&quot;&gt;&lt;/script&gt;
+&lt;script&gt;
+       lazyLoadInit(&#123;
+           showTime: 1100,
+           onLoadBackEnd: function(i, e) &#123;
+             console.log(&quot;onLoadBackEnd:&quot; + i);
+           &#125;,
+           onLoadBackStart: function(i, e) &#123;
+             console.log(&quot;onLoadBackStart:&quot; + i);
+           &#125;
+     &#125;);
+&lt;/script&gt;
+</code></pre>
+<ul>
+<li>2.引入html</li>
+</ul>
+<pre><code class="javascript"> &lt;img data-lazy-src=&quot;upload/floor-1-3.png&quot; alt=&quot;&quot;&gt;
+</code></pre>
+<h3 id="1-6-3-全屏滚动插件"><a href="#1-6-3-全屏滚动插件" class="headerlink" title="1.6.3. 全屏滚动插件"></a>1.6.3. 全屏滚动插件</h3><p>​    全屏滚动插件比较大，所以，一般大型插件都会有帮助文档，或者网站。全屏滚动插件介绍比较详细的网站为：</p>
+<p><a href="http://www.dowebok.com/demo/2014/77/">http://www.dowebok.com/demo/2014/77/</a></p>
+<p><strong>代码演示</strong></p>
+<p>​    全屏滚动因为有多重形式，所以不一样的风格html和css也不一样，但是 js 变化不大。所以下面只演示js的引入，html和css引入根据自己实际</p>
+<p>项目需要使用哪种风格引入对应的HTML和CSS。</p>
+<pre><code class="javascript">&lt;script src=&quot;js/jquery.min.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;js/fullpage.min.js&quot;&gt;&lt;/script&gt;
+&lt;script&gt;
+      $(function() &#123;
+          $(&#39;#dowebok&#39;).fullpage(&#123;
+            sectionsColor: [&#39;pink&#39;, &#39;#4BBFC3&#39;, &#39;#7BAABE&#39;, &#39;#f90&#39;],
+            navigation: true
+          &#125;);
+    &#125;);
+&lt;/script&gt;
+</code></pre>
+<p>注意：实际开发，一般复制文件，然后在文件中进行修改和添加功能。</p>
+<h3 id="1-6-4-bootstrap组件"><a href="#1-6-4-bootstrap组件" class="headerlink" title="1.6.4. bootstrap组件"></a>1.6.4. bootstrap组件</h3><p><strong>代码演示</strong></p>
+<ol>
+<li>引入bootstrap相关css和js</li>
+</ol>
+<pre><code class="javascript">&lt;link rel=&quot;stylesheet&quot; href=&quot;bootstrap/css/bootstrap.min.css&quot;&gt;
+&lt;script src=&quot;bootstrap/js/jquery.min.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;bootstrap/js/bootstrap.min.js&quot;&gt;&lt;/script&gt;
+</code></pre>
+<ol start="2">
+<li>去官网复制html的功能模块</li>
+</ol>
+<pre><code class="javascript">    &lt;div class=&quot;container&quot;&gt;
+        &lt;!-- Single button --&gt;
+        &lt;div class=&quot;btn-group&quot;&gt;
+            &lt;button type=&quot;button&quot; class=&quot;btn btn-default dropdown-toggle&quot; data-toggle=&quot;dropdown&quot; aria-haspopup=&quot;true&quot; aria-expanded=&quot;false&quot;&gt;
+              Action &lt;span class=&quot;caret&quot;&gt;&lt;/span&gt;
+            &lt;/button&gt;
+            &lt;ul class=&quot;dropdown-menu&quot;&gt;
+                &lt;li&gt;&lt;a href=&quot;#&quot;&gt;Action&lt;/a&gt;&lt;/li&gt;
+                &lt;li&gt;&lt;a href=&quot;#&quot;&gt;Another action&lt;/a&gt;&lt;/li&gt;
+                &lt;li&gt;&lt;a href=&quot;#&quot;&gt;Something else here&lt;/a&gt;&lt;/li&gt;
+                &lt;li role=&quot;separator&quot; class=&quot;divider&quot;&gt;&lt;/li&gt;
+                &lt;li&gt;&lt;a href=&quot;#&quot;&gt;Separated link&lt;/a&gt;&lt;/li&gt;
+            &lt;/ul&gt;
+         &lt;/div&gt;
+    &lt;/div&gt;
+</code></pre>
+<h3 id="1-6-5-bootstrap插件（JS）"><a href="#1-6-5-bootstrap插件（JS）" class="headerlink" title="1.6.5. bootstrap插件（JS）"></a>1.6.5. bootstrap插件（JS）</h3><p>​    bootstrap中的js插件其实也是组件的一部分，只不过是需要js调用功能的组件，所以一般bootstrap的js插件一般会伴随着js代码（有的也可以</p>
+<p>省略js，用属性实现）。</p>
+<p>​    步骤： 1.引入bootstrap相关css和js        2.去官网复制html        3.复制js代码，启动js插件。</p>
+<p><strong>代码演示</strong></p>
+<ol>
+<li>引入bootstrap相关css和js</li>
+</ol>
+<pre><code class="javascript">&lt;link rel=&quot;stylesheet&quot; href=&quot;bootstrap/css/bootstrap.min.css&quot;&gt;
+&lt;script src=&quot;bootstrap/js/jquery.min.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;bootstrap/js/bootstrap.min.js&quot;&gt;&lt;/script&gt;
+</code></pre>
+<ol start="2">
+<li>去官网复制html的功能模块</li>
+</ol>
+<pre><code class="javascript">&lt;!-- 模态框 --&gt;
+&lt;!-- Large modal --&gt;
+&lt;button type=&quot;button&quot; class=&quot;btn btn-primary&quot; data-toggle=&quot;modal&quot; data-target=&quot;.bs-example-modal-lg&quot;&gt;Large modal&lt;/button&gt;
+&lt;div class=&quot;modal fade bs-example-modal-lg&quot; tabindex=&quot;-1&quot; role=&quot;dialog&quot; aria-labelledby=&quot;myLargeModalLabel&quot;&gt;
+    &lt;div class=&quot;modal-dialog modal-lg&quot; role=&quot;document&quot;&gt;
+        &lt;div class=&quot;modal-content&quot;&gt;
+            里面就是模态框
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<ol start="3">
+<li>复制js代码，启动js插件。</li>
+</ol>
+<pre><code class="javascript">&lt;script&gt;
+    // 当我们点击了自己定义的按钮，就弹出模态框
+    $(&quot;.myBtn&quot;).on(&quot;click&quot;, function() &#123;
+        // alert(11);
+        $(&#39;#btn&#39;).modal()
+    &#125;)
+&lt;/script&gt;
+</code></pre>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+  </entry>
+</search>

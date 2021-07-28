@@ -309,24 +309,26 @@
         
         <div class="entry-content">
           <h2 id="log4j2"><a href="#log4j2" class="headerlink" title="log4j2"></a>log4j2</h2><p>   <strong>首先resouse目录下创建log4j2.xml</strong><br>   <strong>application里面配置 logging.config = classpath:log4j2/log4j2.xml</strong></p>
-<pre><code>            &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
-            &lt;Configuration status=&quot;INFO&quot; monitorInterval=&quot;30&quot;&gt;
-                &lt;Appenders&gt;
-                    &lt;Console name=&quot;console&quot; target=&quot;SYSTEM_OUT&quot;&gt;
-                        &lt;PatternLayout pattern=&quot;%d&#123;yyyy-MM-dd HH:mm:ss.SSS&#125; [%t] [%-5p] &#123;%F:%L&#125; - %m%n&quot; /&gt;
-                    &lt;/Console&gt;
-                    &lt;!--使用redis启用下面配置--&gt;
-                    &lt;RedisAppender name=&quot;redisAppender&quot; appName=&quot;log&quot; redisHost=&quot;$&#123;ctx:redisurl&#125;&quot; &gt;
-                        &lt;PatternLayout pattern=&quot;%d&#123;yyyy-MM-dd HH:mm:ss.SSS&#125; [%t] [%-5p] &#123;%F:%L&#125; - %m%n&quot; /&gt;
-                    &lt;/RedisAppender&gt;
-                &lt;/Appenders&gt;
-                &lt;Loggers&gt;
-                    &lt;root level=&quot;info&quot;&gt;
-                        &lt;appender-ref ref=&quot;redisAppender&quot;/&gt;
-                        &lt;appender-ref ref=&quot;console&quot;/&gt;
-                    &lt;/root&gt;
-                &lt;/Loggers&gt;
-            &lt;/Configuration&gt;
+<p><img src="/images/pasted-39.png" alt="upload successful"></p>
+<p><img src="/images/pasted-40.png" alt="upload successful"></p>
+<pre><code>       &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
+       &lt;Configuration status=&quot;INFO&quot; monitorInterval=&quot;30&quot;&gt;
+       &lt;Appenders&gt;
+       &lt;Console name=&quot;console&quot; target=&quot;SYSTEM_OUT&quot;&gt;
+       &lt;PatternLayout pattern=&quot;%d&#123;yyyy-MM-dd HH:mm:ss.SSS&#125; [%t] [%-5p] &#123;%F:%L&#125; - %m%n&quot; /&gt;
+       &lt;/Console&gt;
+       &lt;!--使用redis启用下面配置--&gt;
+       &lt;RedisAppender name=&quot;redisAppender&quot; appName=&quot;log&quot; redisHost=&quot;$&#123;ctx:redisurl&#125;&quot; &gt;
+       &lt;PatternLayout pattern=&quot;%d&#123;yyyy-MM-dd HH:mm:ss.SSS&#125; [%t] [%-5p] &#123;%F:%L&#125; - %m%n&quot; /&gt;
+       &lt;/RedisAppender&gt;
+       &lt;/Appenders&gt;
+       &lt;Loggers&gt;
+       &lt;root level=&quot;info&quot;&gt;
+       &lt;appender-ref ref=&quot;redisAppender&quot;/&gt;
+       &lt;appender-ref ref=&quot;console&quot;/&gt;
+       &lt;/root&gt;
+       &lt;/Loggers&gt;
+       &lt;/Configuration&gt;
 </code></pre>
 <h2 id="Apollo"><a href="#Apollo" class="headerlink" title="Apollo"></a>Apollo</h2><p><strong>Apollo配置namespace</strong></p>
 <p><img src="/images/pasted-36.png" alt="upload successful"></p>

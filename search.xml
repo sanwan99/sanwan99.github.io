@@ -4,24 +4,26 @@
     <title>Apollo动态修改log4j2.xml</title>
     <url>/2021/07/28/21-7-28/</url>
     <content><![CDATA[<h2 id="log4j2"><a href="#log4j2" class="headerlink" title="log4j2"></a>log4j2</h2><p>   <strong>首先resouse目录下创建log4j2.xml</strong><br>   <strong>application里面配置 logging.config = classpath:log4j2/log4j2.xml</strong></p>
-<pre><code>            &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
-            &lt;Configuration status=&quot;INFO&quot; monitorInterval=&quot;30&quot;&gt;
-                &lt;Appenders&gt;
-                    &lt;Console name=&quot;console&quot; target=&quot;SYSTEM_OUT&quot;&gt;
-                        &lt;PatternLayout pattern=&quot;%d&#123;yyyy-MM-dd HH:mm:ss.SSS&#125; [%t] [%-5p] &#123;%F:%L&#125; - %m%n&quot; /&gt;
-                    &lt;/Console&gt;
-                    &lt;!--使用redis启用下面配置--&gt;
-                    &lt;RedisAppender name=&quot;redisAppender&quot; appName=&quot;log&quot; redisHost=&quot;$&#123;ctx:redisurl&#125;&quot; &gt;
-                        &lt;PatternLayout pattern=&quot;%d&#123;yyyy-MM-dd HH:mm:ss.SSS&#125; [%t] [%-5p] &#123;%F:%L&#125; - %m%n&quot; /&gt;
-                    &lt;/RedisAppender&gt;
-                &lt;/Appenders&gt;
-                &lt;Loggers&gt;
-                    &lt;root level=&quot;info&quot;&gt;
-                        &lt;appender-ref ref=&quot;redisAppender&quot;/&gt;
-                        &lt;appender-ref ref=&quot;console&quot;/&gt;
-                    &lt;/root&gt;
-                &lt;/Loggers&gt;
-            &lt;/Configuration&gt;
+<p><img src="/images/pasted-39.png" alt="upload successful"></p>
+<p><img src="/images/pasted-40.png" alt="upload successful"></p>
+<pre><code>       &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
+       &lt;Configuration status=&quot;INFO&quot; monitorInterval=&quot;30&quot;&gt;
+       &lt;Appenders&gt;
+       &lt;Console name=&quot;console&quot; target=&quot;SYSTEM_OUT&quot;&gt;
+       &lt;PatternLayout pattern=&quot;%d&#123;yyyy-MM-dd HH:mm:ss.SSS&#125; [%t] [%-5p] &#123;%F:%L&#125; - %m%n&quot; /&gt;
+       &lt;/Console&gt;
+       &lt;!--使用redis启用下面配置--&gt;
+       &lt;RedisAppender name=&quot;redisAppender&quot; appName=&quot;log&quot; redisHost=&quot;$&#123;ctx:redisurl&#125;&quot; &gt;
+       &lt;PatternLayout pattern=&quot;%d&#123;yyyy-MM-dd HH:mm:ss.SSS&#125; [%t] [%-5p] &#123;%F:%L&#125; - %m%n&quot; /&gt;
+       &lt;/RedisAppender&gt;
+       &lt;/Appenders&gt;
+       &lt;Loggers&gt;
+       &lt;root level=&quot;info&quot;&gt;
+       &lt;appender-ref ref=&quot;redisAppender&quot;/&gt;
+       &lt;appender-ref ref=&quot;console&quot;/&gt;
+       &lt;/root&gt;
+       &lt;/Loggers&gt;
+       &lt;/Configuration&gt;
 </code></pre>
 <h2 id="Apollo"><a href="#Apollo" class="headerlink" title="Apollo"></a>Apollo</h2><p><strong>Apollo配置namespace</strong></p>
 <p><img src="/images/pasted-36.png" alt="upload successful"></p>
@@ -371,6 +373,58 @@ protected Object doCreateBean(final String beanName, final RootBeanDefinition mb
       </categories>
   </entry>
   <entry>
+    <title>InnoDB和MyISAM的区别</title>
+    <url>/2020/05/12/InnoDB%E5%92%8CMyISAM%E7%9A%84%E5%8C%BA%E5%88%AB/</url>
+    <content><![CDATA[<ul>
+<li><p>1：InnoDB支持事务，而MyISAM不支持，因此MyISAM的查询效率比InnoDB高</p>
+<p>解决方法：可以取消自动提交事务功能  多条sql放在begin和commit之间组成一个事务</p>
+</li>
+</ul>
+<ul>
+<li><p>2：虽然多是B+树的结构，但是实现方式不同</p>
+<p>InnoDB是聚集索引，MyISAM是非聚集索引</p>
+<p>通过聚集索引可以查到需要的数据，而非聚集索引可以先查到对应的主键，再使用主键的值通过聚集索引定位到数据，总之，聚集索引是通往真实数据的唯一途径</p>
+</li>
+</ul>
+<ul>
+<li><p>3：InnoDB要求必须有主键，如果没有定义主键，那么该表的第一个唯一非空索引做为聚集索引</p>
+<p>如果全都没有，innodb内部会生成一个隐藏的主键作为聚集索引，且这个主键会自增，6字节</p>
+</li>
+</ul>
+<ul>
+<li><p>4：InnoDB支持行锁，MyISAM支持表锁</p>
+<p>行锁必须要有索引才能实现，否则会自动锁全表</p>
+</li>
+<li><p>5：如何选择？</p>
+<p>a.支持事务选择InnoDB</p>
+<p>b.增删改频繁InnoDB</p>
+<p>c.读多写少选MyISAM</p>
+</li>
+<li><p>6：InnoDB四大特性</p>
+<p>a.插入缓冲：提升插入性能</p>
+<p>条件：非聚类索引，非唯一索引</p>
+<p>先判断插入的非聚类索引页是否在缓冲池中，在就直接插入</p>
+<p>不在就先放到Insert Buffer，按照一定的频率进行合并，写回disk，目的是为了减少随机IO带来的性能损耗</p>
+<p>b.二次写</p>
+<p>c.自适应哈希索引</p>
+<p>d.预读</p>
+<p>使用两种预读算法提高I/O的性能：线性预读和随机预读</p>
+</li>
+</ul>
+<ul>
+<li><p>7：为什么InnoDB推荐使用自增ID作为主键？</p>
+<p>保证每次插入时B+树索引是从右边扩展的，避免B+树频繁合并和分裂，否则会使得数据随即插入，效率比较差</p>
+</li>
+<li><p>8：MyISAM支持查询和插入操作的并发进行</p>
+<p>通过设置concurrent-insert</p>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>数据库</category>
+      </categories>
+  </entry>
+  <entry>
     <title>@Configuration与@Bean注解的原理</title>
     <url>/2020/08/04/8-4/</url>
     <content><![CDATA[<h2 id="作用"><a href="#作用" class="headerlink" title="作用"></a>作用</h2><ul>
@@ -437,10 +491,10 @@ protected Object doCreateBean(final String beanName, final RootBeanDefinition mb
 <p>  注：在iBator 生成的文件UserExample.java中包含一个static 的内部类 Criteria ，在Criteria中有很多方法，主要是定义SQL 语句where后的查询条件。</p>
 </li>
 <li><p>③ insert()</p>
-<p>User user = new User();<br>user.setId(101);<br>user.setUsername(“test”);<br>user.setPassword(“123”)<br>user.setEmail(“<a href="mailto:&#x6a;&#x6f;&#x65;&#x40;&#x31;&#54;&#x33;&#46;&#99;&#x6f;&#x6d;">&#x6a;&#x6f;&#x65;&#x40;&#x31;&#54;&#x33;&#46;&#99;&#x6f;&#x6d;</a>“);<br>userDAO.insert(user);<br>相当于：insert into user(ID,username,password,email) values(101,’test’,’123’,‘joe@163.com’);</p>
+<p>User user = new User();<br>user.setId(101);<br>user.setUsername(“test”);<br>user.setPassword(“123”)<br>user.setEmail(“<a href="mailto:&#x6a;&#x6f;&#101;&#64;&#x31;&#54;&#x33;&#46;&#x63;&#x6f;&#x6d;">&#x6a;&#x6f;&#101;&#64;&#x31;&#54;&#x33;&#46;&#x63;&#x6f;&#x6d;</a>“);<br>userDAO.insert(user);<br>相当于：insert into user(ID,username,password,email) values(101,’test’,’123’,‘joe@163.com’);</p>
 </li>
 <li><p>④ updateByPrimaryKey() 和 updateByPrimaryKeySelective()</p>
-<p>User user =new User();<br>user.setId(101);<br>user.setUsername(“joe”);<br>user.setPassword(“joe”);<br>user.setEmail(“<a href="mailto:&#x6a;&#111;&#101;&#x40;&#x31;&#54;&#x33;&#x2e;&#99;&#x6f;&#x6d;">&#x6a;&#111;&#101;&#x40;&#x31;&#54;&#x33;&#x2e;&#99;&#x6f;&#x6d;</a>“);<br>userDAO.updateByPrimaryKey(user);<br>相当于：update user set username=’joe’,password=’joe’,email=’joe@163.com’ where id=101</p>
+<p>User user =new User();<br>user.setId(101);<br>user.setUsername(“joe”);<br>user.setPassword(“joe”);<br>user.setEmail(“<a href="mailto:&#106;&#111;&#101;&#64;&#49;&#x36;&#x33;&#46;&#99;&#111;&#109;">&#106;&#111;&#101;&#64;&#49;&#x36;&#x33;&#46;&#99;&#111;&#109;</a>“);<br>userDAO.updateByPrimaryKey(user);<br>相当于：update user set username=’joe’,password=’joe’,email=’joe@163.com’ where id=101</p>
 <p>User user = new User();<br>user.setId(101);<br>user.setPassword(“joe”);<br>userDAO.updateByPrimaryKeySelective(user);<br>相当于：update user set password=’joe’ where id=101</p>
 </li>
 <li><p>⑤ updateByExample() 和 updateByExampleSelective()</p>
@@ -460,58 +514,6 @@ protected Object doCreateBean(final String beanName, final RootBeanDefinition mb
 ]]></content>
       <categories>
         <category>技术</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>InnoDB和MyISAM的区别</title>
-    <url>/2020/05/12/InnoDB%E5%92%8CMyISAM%E7%9A%84%E5%8C%BA%E5%88%AB/</url>
-    <content><![CDATA[<ul>
-<li><p>1：InnoDB支持事务，而MyISAM不支持，因此MyISAM的查询效率比InnoDB高</p>
-<p>解决方法：可以取消自动提交事务功能  多条sql放在begin和commit之间组成一个事务</p>
-</li>
-</ul>
-<ul>
-<li><p>2：虽然多是B+树的结构，但是实现方式不同</p>
-<p>InnoDB是聚集索引，MyISAM是非聚集索引</p>
-<p>通过聚集索引可以查到需要的数据，而非聚集索引可以先查到对应的主键，再使用主键的值通过聚集索引定位到数据，总之，聚集索引是通往真实数据的唯一途径</p>
-</li>
-</ul>
-<ul>
-<li><p>3：InnoDB要求必须有主键，如果没有定义主键，那么该表的第一个唯一非空索引做为聚集索引</p>
-<p>如果全都没有，innodb内部会生成一个隐藏的主键作为聚集索引，且这个主键会自增，6字节</p>
-</li>
-</ul>
-<ul>
-<li><p>4：InnoDB支持行锁，MyISAM支持表锁</p>
-<p>行锁必须要有索引才能实现，否则会自动锁全表</p>
-</li>
-<li><p>5：如何选择？</p>
-<p>a.支持事务选择InnoDB</p>
-<p>b.增删改频繁InnoDB</p>
-<p>c.读多写少选MyISAM</p>
-</li>
-<li><p>6：InnoDB四大特性</p>
-<p>a.插入缓冲：提升插入性能</p>
-<p>条件：非聚类索引，非唯一索引</p>
-<p>先判断插入的非聚类索引页是否在缓冲池中，在就直接插入</p>
-<p>不在就先放到Insert Buffer，按照一定的频率进行合并，写回disk，目的是为了减少随机IO带来的性能损耗</p>
-<p>b.二次写</p>
-<p>c.自适应哈希索引</p>
-<p>d.预读</p>
-<p>使用两种预读算法提高I/O的性能：线性预读和随机预读</p>
-</li>
-</ul>
-<ul>
-<li><p>7：为什么InnoDB推荐使用自增ID作为主键？</p>
-<p>保证每次插入时B+树索引是从右边扩展的，避免B+树频繁合并和分裂，否则会使得数据随即插入，效率比较差</p>
-</li>
-<li><p>8：MyISAM支持查询和插入操作的并发进行</p>
-<p>通过设置concurrent-insert</p>
-</li>
-</ul>
-]]></content>
-      <categories>
-        <category>数据库</category>
       </categories>
   </entry>
   <entry>
@@ -832,6 +834,91 @@ protected Object doCreateBean(final String beanName, final RootBeanDefinition mb
       </categories>
   </entry>
   <entry>
+    <title>MySQL中的锁</title>
+    <url>/2020/05/12/MySQL%E4%B8%AD%E7%9A%84%E9%94%81/</url>
+    <content><![CDATA[<h2 id="事务及其ACID属性："><a href="#事务及其ACID属性：" class="headerlink" title="事务及其ACID属性："></a>事务及其ACID属性：</h2><p>   事务是由一组sql语句组成的逻辑处理单元，具有4个属性</p>
+<ul>
+<li><p>原子性：事务是一个原子操作单元，其对数据的修改，要么都执行，要么都不执行</p>
+</li>
+<li><p>一致性：事务开始和完成的时候，数据都必须保持一致。事物的修改必须保持数据的完整性，事务结束后所有的内部数据结构（B+树，双向链表）多必须是正确的</p>
+</li>
+<li><p>隔离性：数据库系统提供一定的隔离机制，保证事务在不受外界并发操作影响的环境中执行。意味着事务处理过程中的中间状态对外部是不可见的</p>
+</li>
+<li><p>持久性：事务完成之后，对数据的修改是永久性的</p>
+</li>
+</ul>
+<h2 id="并发事务处理带来的问题："><a href="#并发事务处理带来的问题：" class="headerlink" title="并发事务处理带来的问题："></a>并发事务处理带来的问题：</h2><ul>
+<li><p>更新丢失：两个或多个事务同时选择一行并更新该行的数据，最后的更新覆盖了由其他事务做的更新。</p>
+</li>
+<li><p>脏读：一个事务正在对一条记录进行修改，在这个事务提交之前，其他事务过来了读取了脏数据并进一步做了处理，就会产生未提交的数据依赖关系。  </p>
+</li>
+<li><p>不可重复读：一个数据在读取某些数据后的某个时间，再次读取以前读过的数据，会发现其读出的数据发生了变化或者被删除</p>
+</li>
+<li><p>幻读：一个事务按相同的查询条件重新读取以前检索过的数据，发现其他事务插入了满足其查询条件的新数据</p>
+</li>
+</ul>
+<h2 id="事务隔离级别："><a href="#事务隔离级别：" class="headerlink" title="事务隔离级别："></a>事务隔离级别：</h2><ul>
+<li><p>更新丢失问题通常是应该完全避免的，并不能只靠数据库的事务控制器解决，需要应用程序对要更新的数据加必要的锁来解决，防止更新丢失是应用的责任</p>
+</li>
+<li><p>脏读，不可重复读，幻读属于数据库读一致性问题，必须由数据库提供一定的事务隔离机制解决</p>
+</li>
+<li><p>1.在读取数据前加锁</p>
+</li>
+<li><p>2.不加锁，通过数据多版本并发控制</p>
+</li>
+</ul>
+<h2 id="四种事务隔离级别："><a href="#四种事务隔离级别：" class="headerlink" title="四种事务隔离级别："></a>四种事务隔离级别：</h2><p><img src="/images/pasted-3.png" alt="upload successful"></p>
+<h2 id="锁"><a href="#锁" class="headerlink" title="锁"></a>锁</h2><ul>
+<li><p>表锁：开销小，加锁快，不会出现死锁，并发度低，容易锁冲突</p>
+</li>
+<li><p>行锁：开销大，加锁慢，会出现死锁，并发度高，不容易锁冲突</p>
+</li>
+</ul>
+<h2 id="InnoDB使用两种类型的行锁："><a href="#InnoDB使用两种类型的行锁：" class="headerlink" title="InnoDB使用两种类型的行锁："></a>InnoDB使用两种类型的行锁：</h2><ul>
+<li><p>共享锁S（锁的是行）：称为读锁，就是说事务1对数据A加了S锁，事务1只能读不能修改A，其他事务也一样只能读不能写，只能加S锁不能加X锁，除非事务1释放S锁</p>
+</li>
+<li><p>排他锁X（du’de锁的是行）：称为写锁，事务1对数据加了X锁，能读能写，其他事务不能读和写，不能加任何锁</p>
+</li>
+<li><p>意向共享锁IS（锁的是表）：通知数据库要加什么表并对表进行加锁，如果需要对A进行加共享锁，先对该表加意向共享锁后再对A加共享锁</p>
+</li>
+<li><p>意向排他锁IX（锁的是表）：同上</p>
+</li>
+<li><p>意向共享锁和意向排他锁都是由数据库加的</p>
+</li>
+<li><p>InnoDB行锁是通过给索引加锁来实现的，只有通过索引条件检索数据才是使用行锁，否则使用表锁</p>
+</li>
+</ul>
+<ul>
+<li><p>间隙锁：</p>
+<p>当我们用范围t条件而不是相等条件检索数据时，并请求了共享锁或者排他锁，InnoDB会给符合条件的已有数据记录的索引项加锁，对于在范围但是不存在的记录，会加间隙锁</p>
+<p>目的：防止幻读，满足相关隔离级别的要求。因为有可能在读的过程其他事务插入了新的数据，就会产生幻读。</p>
+<p>但这会造成严重的锁等待，因此要尽量使用相等条件来访问更新数据，避免使用范围条件</p>
+</li>
+</ul>
+<h2 id="什么时候使用表锁："><a href="#什么时候使用表锁：" class="headerlink" title="什么时候使用表锁："></a>什么时候使用表锁：</h2><ul>
+<li><p>对于InnoDB表，在绝大部分情况下都应该使用行级锁，因为事务和行锁往往是我们之所以选择InnoDB表的理由。但在个别特殊事务中，也可以考虑使用表级锁。</p>
+</li>
+<li><p>第一种情况是：事务需要更新大部分或全部数据，表又比较大，如果使用默认的行锁，不仅这个事务执行效率低，而且可能造成其他事务长时间锁等待和锁冲突，这种情况下可以考虑使用表锁来提高该事务的执行速度。</p>
+</li>
+<li><p>第二种情况是：事务涉及多个表，比较复杂，很可能引起死锁，造成大量事务回滚。这种情况也可以考虑一次性锁定事务涉及的表，从而避免死锁、减少数据库因事务回滚带来的开销。</p>
+</li>
+<li><p>当然，应用中这两种事务不能太多，否则，就应该考虑使用MyISAM表了。</p>
+</li>
+</ul>
+<h2 id="避免死锁的方法："><a href="#避免死锁的方法：" class="headerlink" title="避免死锁的方法："></a>避免死锁的方法：</h2><ul>
+<li><p>（1）在应用中，如果不同的程序会并发存取多个表，应尽量约定以相同的顺序来访问表，这样可以大大降低产生死锁的机会。</p>
+</li>
+<li><p>（2）在程序以批量方式处理数据的时候，如果事先对数据排序，保证每个线程按固定的顺序来处理记录，也可以大大降低出现死锁的可能。</p>
+</li>
+<li><p>（3）在事务中，如果要更新记录，应该直接申请足够级别的锁，即排他锁，而不应先申请共享锁，更新时再申请排他锁，因为当用户申请排他锁时，其他事务可能又已经获得了相同记录的共享锁，从而造成锁冲突，甚至死锁。</p>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>数据库</category>
+      </categories>
+  </entry>
+  <entry>
     <title>String.trim()理解</title>
     <url>/2020/05/13/String-trim-%E7%90%86%E8%A7%A3/</url>
     <content><![CDATA[<h2 id="trim去掉的是什么字符？"><a href="#trim去掉的是什么字符？" class="headerlink" title="trim去掉的是什么字符？"></a>trim去掉的是什么字符？</h2><p> 《Java核心技术》书上说的trim主要是是“返回一个新的字符串。这个字符串将删除了原始字符串头部和尾部的空格。”<br> 但是，有些特殊字符是看不到的</p>
@@ -996,91 +1083,6 @@ protected Object doCreateBean(final String beanName, final RootBeanDefinition mb
       </categories>
   </entry>
   <entry>
-    <title>MySQL中的锁</title>
-    <url>/2020/05/12/MySQL%E4%B8%AD%E7%9A%84%E9%94%81/</url>
-    <content><![CDATA[<h2 id="事务及其ACID属性："><a href="#事务及其ACID属性：" class="headerlink" title="事务及其ACID属性："></a>事务及其ACID属性：</h2><p>   事务是由一组sql语句组成的逻辑处理单元，具有4个属性</p>
-<ul>
-<li><p>原子性：事务是一个原子操作单元，其对数据的修改，要么都执行，要么都不执行</p>
-</li>
-<li><p>一致性：事务开始和完成的时候，数据都必须保持一致。事物的修改必须保持数据的完整性，事务结束后所有的内部数据结构（B+树，双向链表）多必须是正确的</p>
-</li>
-<li><p>隔离性：数据库系统提供一定的隔离机制，保证事务在不受外界并发操作影响的环境中执行。意味着事务处理过程中的中间状态对外部是不可见的</p>
-</li>
-<li><p>持久性：事务完成之后，对数据的修改是永久性的</p>
-</li>
-</ul>
-<h2 id="并发事务处理带来的问题："><a href="#并发事务处理带来的问题：" class="headerlink" title="并发事务处理带来的问题："></a>并发事务处理带来的问题：</h2><ul>
-<li><p>更新丢失：两个或多个事务同时选择一行并更新该行的数据，最后的更新覆盖了由其他事务做的更新。</p>
-</li>
-<li><p>脏读：一个事务正在对一条记录进行修改，在这个事务提交之前，其他事务过来了读取了脏数据并进一步做了处理，就会产生未提交的数据依赖关系。  </p>
-</li>
-<li><p>不可重复读：一个数据在读取某些数据后的某个时间，再次读取以前读过的数据，会发现其读出的数据发生了变化或者被删除</p>
-</li>
-<li><p>幻读：一个事务按相同的查询条件重新读取以前检索过的数据，发现其他事务插入了满足其查询条件的新数据</p>
-</li>
-</ul>
-<h2 id="事务隔离级别："><a href="#事务隔离级别：" class="headerlink" title="事务隔离级别："></a>事务隔离级别：</h2><ul>
-<li><p>更新丢失问题通常是应该完全避免的，并不能只靠数据库的事务控制器解决，需要应用程序对要更新的数据加必要的锁来解决，防止更新丢失是应用的责任</p>
-</li>
-<li><p>脏读，不可重复读，幻读属于数据库读一致性问题，必须由数据库提供一定的事务隔离机制解决</p>
-</li>
-<li><p>1.在读取数据前加锁</p>
-</li>
-<li><p>2.不加锁，通过数据多版本并发控制</p>
-</li>
-</ul>
-<h2 id="四种事务隔离级别："><a href="#四种事务隔离级别：" class="headerlink" title="四种事务隔离级别："></a>四种事务隔离级别：</h2><p><img src="/images/pasted-3.png" alt="upload successful"></p>
-<h2 id="锁"><a href="#锁" class="headerlink" title="锁"></a>锁</h2><ul>
-<li><p>表锁：开销小，加锁快，不会出现死锁，并发度低，容易锁冲突</p>
-</li>
-<li><p>行锁：开销大，加锁慢，会出现死锁，并发度高，不容易锁冲突</p>
-</li>
-</ul>
-<h2 id="InnoDB使用两种类型的行锁："><a href="#InnoDB使用两种类型的行锁：" class="headerlink" title="InnoDB使用两种类型的行锁："></a>InnoDB使用两种类型的行锁：</h2><ul>
-<li><p>共享锁S（锁的是行）：称为读锁，就是说事务1对数据A加了S锁，事务1只能读不能修改A，其他事务也一样只能读不能写，只能加S锁不能加X锁，除非事务1释放S锁</p>
-</li>
-<li><p>排他锁X（du’de锁的是行）：称为写锁，事务1对数据加了X锁，能读能写，其他事务不能读和写，不能加任何锁</p>
-</li>
-<li><p>意向共享锁IS（锁的是表）：通知数据库要加什么表并对表进行加锁，如果需要对A进行加共享锁，先对该表加意向共享锁后再对A加共享锁</p>
-</li>
-<li><p>意向排他锁IX（锁的是表）：同上</p>
-</li>
-<li><p>意向共享锁和意向排他锁都是由数据库加的</p>
-</li>
-<li><p>InnoDB行锁是通过给索引加锁来实现的，只有通过索引条件检索数据才是使用行锁，否则使用表锁</p>
-</li>
-</ul>
-<ul>
-<li><p>间隙锁：</p>
-<p>当我们用范围t条件而不是相等条件检索数据时，并请求了共享锁或者排他锁，InnoDB会给符合条件的已有数据记录的索引项加锁，对于在范围但是不存在的记录，会加间隙锁</p>
-<p>目的：防止幻读，满足相关隔离级别的要求。因为有可能在读的过程其他事务插入了新的数据，就会产生幻读。</p>
-<p>但这会造成严重的锁等待，因此要尽量使用相等条件来访问更新数据，避免使用范围条件</p>
-</li>
-</ul>
-<h2 id="什么时候使用表锁："><a href="#什么时候使用表锁：" class="headerlink" title="什么时候使用表锁："></a>什么时候使用表锁：</h2><ul>
-<li><p>对于InnoDB表，在绝大部分情况下都应该使用行级锁，因为事务和行锁往往是我们之所以选择InnoDB表的理由。但在个别特殊事务中，也可以考虑使用表级锁。</p>
-</li>
-<li><p>第一种情况是：事务需要更新大部分或全部数据，表又比较大，如果使用默认的行锁，不仅这个事务执行效率低，而且可能造成其他事务长时间锁等待和锁冲突，这种情况下可以考虑使用表锁来提高该事务的执行速度。</p>
-</li>
-<li><p>第二种情况是：事务涉及多个表，比较复杂，很可能引起死锁，造成大量事务回滚。这种情况也可以考虑一次性锁定事务涉及的表，从而避免死锁、减少数据库因事务回滚带来的开销。</p>
-</li>
-<li><p>当然，应用中这两种事务不能太多，否则，就应该考虑使用MyISAM表了。</p>
-</li>
-</ul>
-<h2 id="避免死锁的方法："><a href="#避免死锁的方法：" class="headerlink" title="避免死锁的方法："></a>避免死锁的方法：</h2><ul>
-<li><p>（1）在应用中，如果不同的程序会并发存取多个表，应尽量约定以相同的顺序来访问表，这样可以大大降低产生死锁的机会。</p>
-</li>
-<li><p>（2）在程序以批量方式处理数据的时候，如果事先对数据排序，保证每个线程按固定的顺序来处理记录，也可以大大降低出现死锁的可能。</p>
-</li>
-<li><p>（3）在事务中，如果要更新记录，应该直接申请足够级别的锁，即排他锁，而不应先申请共享锁，更新时再申请排他锁，因为当用户申请排他锁时，其他事务可能又已经获得了相同记录的共享锁，从而造成锁冲突，甚至死锁。</p>
-</li>
-</ul>
-]]></content>
-      <categories>
-        <category>数据库</category>
-      </categories>
-  </entry>
-  <entry>
     <title>letcode 65 不用加减乘除做加法</title>
     <url>/2020/07/24/letcode-65-%E4%B8%8D%E7%94%A8%E5%8A%A0%E5%87%8F%E4%B9%98%E9%99%A4%E5%81%9A%E5%8A%A0%E6%B3%95/</url>
     <content><![CDATA[<h3 id="题目描述"><a href="#题目描述" class="headerlink" title="题目描述"></a>题目描述</h3><p>写一个函数，求两个整数之和，要求在函数体内不得使用 “+”、“-”、“*”、“/” 四则运算符号。</p>
@@ -1098,41 +1100,6 @@ protected Object doCreateBean(final String beanName, final RootBeanDefinition mb
 &#125;
 </code></pre>
 <p>感觉跟以前学的微机原理很像！</p>
-]]></content>
-      <categories>
-        <category>数据结构</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>letcode58反转单词顺序</title>
-    <url>/2020/05/13/letcode58/</url>
-    <content><![CDATA[<ul>
-<li>输入一个英文句子，翻转句子中单词的顺序，但单词内字符的顺序不变。为简单起见，标点符号和普通字母一样处理。例如输入字符串”I am a student. “，则输出”student. a am I”。</li>
-</ul>
-<p><img src="/images/pasted-14.png" alt="upload successful"></p>
-<h2 id="双指针"><a href="#双指针" class="headerlink" title="双指针"></a>双指针</h2><pre><code>class Solution &#123;
-    public String reverseWords(String s) &#123;
-        //去空格
-        s=s.trim();
-        //可变字符串
-        StringBuilder res=new StringBuilder();
-        int j=s.length()-1;
-        int i=j;
-        while(i&gt;=0)&#123;
-            //找到完整的单词    
-            while(i&gt;=0 &amp;&amp; s.charAt(i)!=&#39; &#39;) i--;
-            res.append(s.substring(i+1,j+1)+&#39; &#39;);
-            while(i&gt;=0 &amp;&amp; s.charAt(i)==&#39; &#39;) i--;
-            j=i;
-        &#125; 
-        return res.toString().trim();
-    &#125;
-&#125;
-</code></pre>
-<ul>
-<li>倒序遍历字符串，遇到空格则停下，即一个单词，j充当边界</li>
-<li>注意trim不是单纯的去掉空格，而是截取中间的非空白字符串，返回的是一个new出来的对象，这就联系到substring的源码，我的另一篇博客有写</li>
-</ul>
 ]]></content>
       <categories>
         <category>数据结构</category>
@@ -1340,12 +1307,51 @@ protected Object doCreateBean(final String beanName, final RootBeanDefinition mb
 pbcopy &lt; ~/.ssh/id_rsa.pub # 自动拷贝到粘贴板
 </code></pre>
 <ul>
-<li>如没有则按下述方法<br>生成： ssh-keygen -t rsa输入文件名的地方输入可以输入自定义文件名，默认是id_rsa，然后一路回车…… 注意如果自定义文件名的话，需要加一个config文件，下文有介绍。最后，输入ssh -T <a href="mailto:&#103;&#105;&#x74;&#x40;&#x67;&#x69;&#116;&#104;&#x75;&#x62;&#x2e;&#99;&#x6f;&#x6d;">&#103;&#105;&#x74;&#x40;&#x67;&#x69;&#116;&#104;&#x75;&#x62;&#x2e;&#99;&#x6f;&#x6d;</a>如果没有报错，再尝试输出就应该有了```<br>cat ~/.ssh/id_rsa.pub      # 控制台上输出内容<br>pbcopy &lt; ~/.ssh/id_rsa.pub # 自动拷贝到粘贴板</li>
+<li>如没有则按下述方法<br>生成： ssh-keygen -t rsa输入文件名的地方输入可以输入自定义文件名，默认是id_rsa，然后一路回车…… 注意如果自定义文件名的话，需要加一个config文件，下文有介绍。最后，输入ssh -T <a href="mailto:&#x67;&#x69;&#116;&#64;&#103;&#105;&#x74;&#104;&#x75;&#98;&#x2e;&#99;&#111;&#x6d;">&#x67;&#x69;&#116;&#64;&#103;&#105;&#x74;&#104;&#x75;&#98;&#x2e;&#99;&#111;&#x6d;</a>如果没有报错，再尝试输出就应该有了```<br>cat ~/.ssh/id_rsa.pub      # 控制台上输出内容<br>pbcopy &lt; ~/.ssh/id_rsa.pub # 自动拷贝到粘贴板</li>
 </ul>
 <p> ```</p>
 ]]></content>
       <categories>
         <category>技术</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>内部类</title>
+    <url>/2020/05/12/%E5%86%85%E9%83%A8%E7%B1%BB/</url>
+    <content><![CDATA[<h3 id="什么是内部类？"><a href="#什么是内部类？" class="headerlink" title="什么是内部类？###"></a>什么是内部类？###</h3><hr>
+<p>定义在其它类内部中的类叫做内部类。</p>
+<p>内部类成员可以直接访问外部类的私有数据，因为内部类是外部类的成员。</p>
+<p>编译过后会生成两个或者多个class文件（取决于内部类的数量，中间用￥符号隔开）</p>
+<hr>
+<h3 id="内部类分为"><a href="#内部类分为" class="headerlink" title="内部类分为?"></a>内部类分为?</h3><p>（成员内部类）非静态内部类，静态内部类：算是类成员</p>
+<p>局部内部类，匿名内部类。</p>
+<ul>
+<li>非静态内部类：</li>
+</ul>
+<p> 1.在其内部方法找一个变量，会先在该方法找，再去内部类找，最后再去外部类找</p>
+<p> 2.不允许外部类的静态成员调用非静态内部类，常识</p>
+<p> 3.非静态内部类中不能定义静态成员</p>
+<p> 4.非静态内部类普通初始化块的作用与外部类完全相同</p>
+<ul>
+<li>静态内部类：</li>
+</ul>
+<p> 1.这个内部类属于外部类本身，不属于外部类的对象</p>
+<p> 2.可以包含静态成员和非静态成员</p>
+<p> 3.外部类的上一级是包，所以不能用static修饰，内部类的上一级是外部类，用static修饰成<br> 为外部类相关</p>
+<ul>
+<li><p>局部内部类：</p>
+<p>把一个内部类放在方法内定义，就是局部内部类。不能用访问控制符和static</p>
+</li>
+</ul>
+<p>修饰。</p>
+<ul>
+<li><p>匿名内部类：</p>
+<p> 只需要使用一次的类。</p>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>Java</category>
       </categories>
   </entry>
   <entry>
@@ -1430,42 +1436,38 @@ pbcopy &lt; ~/.ssh/id_rsa.pub # 自动拷贝到粘贴板
       </categories>
   </entry>
   <entry>
-    <title>内部类</title>
-    <url>/2020/05/12/%E5%86%85%E9%83%A8%E7%B1%BB/</url>
-    <content><![CDATA[<h3 id="什么是内部类？"><a href="#什么是内部类？" class="headerlink" title="什么是内部类？###"></a>什么是内部类？###</h3><hr>
-<p>定义在其它类内部中的类叫做内部类。</p>
-<p>内部类成员可以直接访问外部类的私有数据，因为内部类是外部类的成员。</p>
-<p>编译过后会生成两个或者多个class文件（取决于内部类的数量，中间用￥符号隔开）</p>
-<hr>
-<h3 id="内部类分为"><a href="#内部类分为" class="headerlink" title="内部类分为?"></a>内部类分为?</h3><p>（成员内部类）非静态内部类，静态内部类：算是类成员</p>
-<p>局部内部类，匿名内部类。</p>
-<ul>
-<li>非静态内部类：</li>
+    <title>letcode58反转单词顺序</title>
+    <url>/2020/05/13/letcode58/</url>
+    <content><![CDATA[<ul>
+<li>输入一个英文句子，翻转句子中单词的顺序，但单词内字符的顺序不变。为简单起见，标点符号和普通字母一样处理。例如输入字符串”I am a student. “，则输出”student. a am I”。</li>
 </ul>
-<p> 1.在其内部方法找一个变量，会先在该方法找，再去内部类找，最后再去外部类找</p>
-<p> 2.不允许外部类的静态成员调用非静态内部类，常识</p>
-<p> 3.非静态内部类中不能定义静态成员</p>
-<p> 4.非静态内部类普通初始化块的作用与外部类完全相同</p>
+<p><img src="/images/pasted-14.png" alt="upload successful"></p>
+<h2 id="双指针"><a href="#双指针" class="headerlink" title="双指针"></a>双指针</h2><pre><code>class Solution &#123;
+    public String reverseWords(String s) &#123;
+        //去空格
+        s=s.trim();
+        //可变字符串
+        StringBuilder res=new StringBuilder();
+        int j=s.length()-1;
+        int i=j;
+        while(i&gt;=0)&#123;
+            //找到完整的单词    
+            while(i&gt;=0 &amp;&amp; s.charAt(i)!=&#39; &#39;) i--;
+            res.append(s.substring(i+1,j+1)+&#39; &#39;);
+            while(i&gt;=0 &amp;&amp; s.charAt(i)==&#39; &#39;) i--;
+            j=i;
+        &#125; 
+        return res.toString().trim();
+    &#125;
+&#125;
+</code></pre>
 <ul>
-<li>静态内部类：</li>
-</ul>
-<p> 1.这个内部类属于外部类本身，不属于外部类的对象</p>
-<p> 2.可以包含静态成员和非静态成员</p>
-<p> 3.外部类的上一级是包，所以不能用static修饰，内部类的上一级是外部类，用static修饰成<br> 为外部类相关</p>
-<ul>
-<li><p>局部内部类：</p>
-<p>把一个内部类放在方法内定义，就是局部内部类。不能用访问控制符和static</p>
-</li>
-</ul>
-<p>修饰。</p>
-<ul>
-<li><p>匿名内部类：</p>
-<p> 只需要使用一次的类。</p>
-</li>
+<li>倒序遍历字符串，遇到空格则停下，即一个单词，j充当边界</li>
+<li>注意trim不是单纯的去掉空格，而是截取中间的非空白字符串，返回的是一个new出来的对象，这就联系到substring的源码，我的另一篇博客有写</li>
 </ul>
 ]]></content>
       <categories>
-        <category>Java</category>
+        <category>数据结构</category>
       </categories>
   </entry>
   <entry>
@@ -1701,21 +1703,21 @@ public static void heapify(int[] tree, int n, int i) &#123;
       </categories>
   </entry>
   <entry>
-    <title>数据结构</title>
-    <url>/2020/05/11/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/</url>
-    <content><![CDATA[<p>秃头的数据结构</p>
-]]></content>
-      <categories>
-        <category>数据结构</category>
-      </categories>
-  </entry>
-  <entry>
     <title>测试类博客</title>
     <url>/2020/05/11/%E6%B5%8B%E8%AF%95%E7%B1%BB%E5%8D%9A%E5%AE%A2/</url>
     <content><![CDATA[<p>QAQ测试哦</p>
 ]]></content>
       <categories>
         <category>数据库</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>数据结构</title>
+    <url>/2020/05/11/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/</url>
+    <content><![CDATA[<p>秃头的数据结构</p>
+]]></content>
+      <categories>
+        <category>数据结构</category>
       </categories>
   </entry>
   <entry>
@@ -1740,6 +1742,15 @@ public static void heapify(int[] tree, int n, int i) &#123;
 ]]></content>
       <categories>
         <category>数据结构</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>测试背景图</title>
+    <url>/2020/05/11/%E6%B5%8B%E8%AF%95%E8%83%8C%E6%99%AF%E5%9B%BE/</url>
+    <content><![CDATA[<p>真让人无语呀</p>
+]]></content>
+      <categories>
+        <category>技术</category>
       </categories>
   </entry>
   <entry>
@@ -1792,15 +1803,6 @@ public static void heapify(int[] tree, int n, int i) &#123;
 ]]></content>
       <categories>
         <category>数据结构</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>测试背景图</title>
-    <url>/2020/05/11/%E6%B5%8B%E8%AF%95%E8%83%8C%E6%99%AF%E5%9B%BE/</url>
-    <content><![CDATA[<p>真让人无语呀</p>
-]]></content>
-      <categories>
-        <category>技术</category>
       </categories>
   </entry>
   <entry>
